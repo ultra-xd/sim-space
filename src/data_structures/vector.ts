@@ -21,10 +21,15 @@ export interface IVector2 {
  * 2D vector class for handling coordinate systems
  */
 export class Vector2 implements IVector2 {
+    /**
+     * creates new vector
+     * @param _x x component of vector
+     * @param _y y component of vector
+     */
     public constructor(
         private _x: number,
         private _y: number
-    ) {};
+    ) {}
 
     /**
      * gets x component of vector
