@@ -4,9 +4,9 @@ import { Canvas } from "./canvas.js";
 import { ArrayList } from "../data_structures/arraylist.js";
 import { Vector2 } from "../data_structures/vector.js";
 
-enum AppState {
-    InGame,
-    StartMenu
+export enum AppState {
+    IN_GAME,
+    START_MENU
 }
 
 export class App {
@@ -14,7 +14,7 @@ export class App {
     private readonly START_MENU: StartMenu = new StartMenu();
     private readonly _CANVAS: Canvas;
 
-    private appState: AppState = AppState.StartMenu;
+    private appState: AppState = AppState.START_MENU;
 
     private intervalLoop: number;
     private static readonly _TPS: number = 60;
