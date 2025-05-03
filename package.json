@@ -1,0 +1,24 @@
+{
+  "name": "simspace-assignment",
+  "version": "1.0.0",
+  "description": "sim city but fraudulent by yours truly chat gibbidy",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ultra-xd/sim-space.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ultra-xd/sim-space/issues"
+  },
+  "homepage": "https://github.com/ultra-xd/sim-space#readme",
+  "dependencies": {
+    "live-server": "^1.2.2",
+    "typescript": "^5.8.3"
+  }
+}
