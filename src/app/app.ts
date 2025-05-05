@@ -14,13 +14,16 @@ export class App {
     private readonly START_MENU: StartMenu = new StartMenu();
     private readonly _CANVAS: Canvas;
 
-    private appState: AppState = AppState.START_MENU;
+    private appState: AppState = AppState.IN_GAME;
 
     private intervalLoop: number;
     private static readonly _TPS: number = 60;
 
-    private readonly MOUSE_EVENTS: ArrayList<number> = new ArrayList<number>();
-    private readonly KEY_EVENTS: ArrayList<number> = new ArrayList<number>();
+    private readonly MOUSE_EVENTS: ArrayList<{pressed: boolean, code: number}> = new ArrayList<{pressed: boolean, code: number}>();
+    private readonly KEY_EVENTS: ArrayList<{pressed: boolean, code: number}> = new ArrayList<{pressed: boolean, code: number}>();
+
+    private currentMousePosition: Vector2 | null = null;
+    private previousMousePosition: Vector2 | null = null;
 
     public constructor(canvasId: string) {
         this._CANVAS = new Canvas(canvasId);
@@ -38,9 +41,15 @@ export class App {
                 return;
             }
 
-            // handle event
+            const CODE: number = event.button;
+            const EVENT: {pressed: boolean, code: number} = {
+                pressed: true,
+                code: CODE
+            };
 
-            event.preventDefault();
+            if (!this.MOUSE_EVENTS.contains(EVENT)) {
+                this.MOUSE_EVENTS.add(EVENT);
+            }
         });
 
         document.body.addEventListener("mouseup", (event) => {
@@ -48,9 +57,15 @@ export class App {
                 return;
             }
 
-            // handle event
+            const CODE: number = event.button;
+            const EVENT: {pressed: boolean, code: number} = {
+                pressed: false,
+                code: CODE
+            };
 
-            event.preventDefault();
+            if (!this.MOUSE_EVENTS.contains(EVENT)) {
+                this.MOUSE_EVENTS.add(EVENT);
+            }
         });
 
         document.body.addEventListener("mousemove", (event) => {
@@ -58,9 +73,13 @@ export class App {
                 return;
             }
 
-            // handle event
+            this.previousMousePosition = this.currentMousePosition;
 
-            event.preventDefault();
+            const RECT: DOMRect = document.body.getBoundingClientRect();
+            this.currentMousePosition = new Vector2(
+                event.clientX - RECT.left,
+                event.clientY - RECT.top
+            );
         });
 
         document.body.addEventListener("wheel", (event) => {
@@ -68,7 +87,7 @@ export class App {
                 return;
             }
 
-            // handle event
+            // temp
 
             event.preventDefault();
         });
@@ -78,9 +97,15 @@ export class App {
                 return;
             }
 
-            // handle event
+            const CODE: number = event.key.toLowerCase().charCodeAt(0);
+            const EVENT: {pressed: boolean, code: number} = {
+                pressed: true,
+                code: CODE
+            };
 
-            // event.preventDefault();
+            if (!this.KEY_EVENTS.contains(EVENT)) {
+                this.KEY_EVENTS.add(EVENT);
+            }
         });
 
         document.body.addEventListener("keyup", (event) => {
@@ -88,9 +113,15 @@ export class App {
                 return;
             }
 
-            // handle event
+            const CODE: number = event.key.toLowerCase().charCodeAt(0);
+            const EVENT: {pressed: boolean, code: number} = {
+                pressed: false,
+                code: CODE
+            };
 
-            // event.preventDefault();
+            if (!this.KEY_EVENTS.contains(EVENT)) {
+                this.KEY_EVENTS.add(EVENT);
+            }
         });
     }
 
@@ -110,10 +141,24 @@ export class App {
     }
 
     private tick(): void {
+        if (this.appState == AppState.IN_GAME) {
+            this.GAME.tick();
+        } else if (this.appState == AppState.START_MENU) {
+            this.START_MENU.tick();
+        }
+
+        this.KEY_EVENTS.clear();
+        this.MOUSE_EVENTS.clear();
+
         this.CANVAS.tick();
     }
 
     private draw(): void {
+        if (this.appState == AppState.IN_GAME) {
+            this.GAME.draw(this.CANVAS);
+        } else if (this.appState == AppState.START_MENU) {
+            this.START_MENU.draw(this.CANVAS);
+        }
 
         // for testing
         this.CANVAS.drawLine(
@@ -130,5 +175,13 @@ export class App {
 
     public get CANVAS(): Canvas {
         return this._CANVAS;
+    }
+
+    public get mouseEvents(): {pressed: boolean, code: number}[] {
+        return this.MOUSE_EVENTS.getArray();
+    }
+
+    public get keyEvents(): {pressed: boolean, code: number}[] {
+        return this.KEY_EVENTS.getArray();
     }
 }

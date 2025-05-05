@@ -58,7 +58,7 @@ export class ArrayList<T> implements IArrayList<T> {
         this.n++;
         return this.n - 1;
     }
-
+    
     /**
      * deletes an element at a specified index
      * @param index the index at which the element must be deleted
