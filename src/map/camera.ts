@@ -12,12 +12,10 @@ export class Camera {
     private static readonly MAX_PIXELS_PER_UNIT: number = 500;
 
     public constructor(private readonly game: Game) {
-        // this.center = new Vector2(
-        //     this.game.MAP.width / 2,
-        //     this.game.MAP.height / 2
-        // );
-
-        this.center = new Vector2(50, 50);
+        this.center = new Vector2(
+            this.game.MAP.width / 2,
+            this.game.MAP.height / 2
+        );
     }
 
     public tick(): void {
