@@ -44,6 +44,40 @@ export class Canvas {
         );
     }
 
+    public drawRect(
+        center: Vector2, 
+        width: number,
+        height: number,
+        colour: string,
+        lineWidth: number
+    ): void {
+        this.CANVAS_CTX.strokeStyle = colour;
+        this.CANVAS_CTX.lineWidth = lineWidth;
+        
+        this.CANVAS_CTX.strokeRect(
+            center.x - width / 2,
+            center.y - height / 2,
+            width,
+            height
+        )
+    }
+
+    public fillRect(
+        center: Vector2,
+        width: number,
+        height: number,
+        colour: string
+    ): void {
+        this.CANVAS_CTX.fillStyle = colour;
+
+        this.CANVAS_CTX.fillRect(
+            center.x - width / 2,
+            center.y - height / 2,
+            width,
+            height
+        );
+    }
+
     private update(): void {
         // chnage context so that lines drawn are not blurry
         const dpr = window.devicePixelRatio;
@@ -57,5 +91,13 @@ export class Canvas {
 
         this.CANVAS_ELEMENT.style.width = `100%`;
         this.CANVAS_ELEMENT.style.height = `100%`;
+    }
+
+    public get width(): number {
+        return this.CANVAS_ELEMENT.width;
+    }
+
+    public get height(): number {
+        return this.CANVAS_ELEMENT.height;
     }
 }

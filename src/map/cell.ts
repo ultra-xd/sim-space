@@ -1,6 +1,8 @@
 import { Facility, FacilitySector, FacilityType } from "../facility/facility.js";
 import { Game } from "../app/game.js";
 import { Vector2 } from "../data_structures/vector.js";
+import { Canvas } from "../app/canvas.js";
+import { Camera } from "./camera.js";
 
 export class Cell {
 
@@ -53,5 +55,13 @@ export class Cell {
 
     public destroy(facility: Facility): boolean {
         return true;
+    }
+
+    public tick(): void {
+
+    }
+
+    public draw(canvas: Canvas, camera: Camera): void {
+
     }
 }

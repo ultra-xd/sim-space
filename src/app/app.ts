@@ -10,28 +10,22 @@ export enum AppState {
 }
 
 export class App {
-    private GAME: Game = new Game();
-    private readonly START_MENU: StartMenu = new StartMenu();
-    private readonly _CANVAS: Canvas;
+    private static GAME: Game = new Game();
+    private static readonly START_MENU: StartMenu = new StartMenu();
+    private static readonly _CANVAS: Canvas = new Canvas("canvas");
 
-    private appState: AppState = AppState.IN_GAME;
+    private static appState: AppState = AppState.IN_GAME;
 
-    private intervalLoop: number;
+    private static intervalLoop: number;
     private static readonly _TPS: number = 60;
 
-    private readonly MOUSE_EVENTS: ArrayList<{pressed: boolean, code: number}> = new ArrayList<{pressed: boolean, code: number}>();
-    private readonly KEY_EVENTS: ArrayList<{pressed: boolean, code: number}> = new ArrayList<{pressed: boolean, code: number}>();
+    private static readonly MOUSE_EVENTS: ArrayList<{pressed: boolean, code: number}> = new ArrayList<{pressed: boolean, code: number}>();
+    private static readonly KEY_EVENTS: ArrayList<{pressed: boolean, code: number}> = new ArrayList<{pressed: boolean, code: number}>();
 
-    private currentMousePosition: Vector2 | null = null;
-    private previousMousePosition: Vector2 | null = null;
+    private static currentMousePosition: Vector2 | null = null;
+    private static previousMousePosition: Vector2 | null = null;
 
-    public constructor(canvasId: string) {
-        this._CANVAS = new Canvas(canvasId);
-        this.setup();
-        this.start();
-    }
-
-    public setup(): void {
+    public static setup(): void {
         document.body.addEventListener("contextmenu", (event) => {
             event.preventDefault();
         });
@@ -47,8 +41,8 @@ export class App {
                 code: CODE
             };
 
-            if (!this.MOUSE_EVENTS.contains(EVENT)) {
-                this.MOUSE_EVENTS.add(EVENT);
+            if (!App.MOUSE_EVENTS.contains(EVENT)) {
+                App.MOUSE_EVENTS.add(EVENT);
             }
         });
 
@@ -63,8 +57,8 @@ export class App {
                 code: CODE
             };
 
-            if (!this.MOUSE_EVENTS.contains(EVENT)) {
-                this.MOUSE_EVENTS.add(EVENT);
+            if (!App.MOUSE_EVENTS.contains(EVENT)) {
+                App.MOUSE_EVENTS.add(EVENT);
             }
         });
 
@@ -73,10 +67,10 @@ export class App {
                 return;
             }
 
-            this.previousMousePosition = this.currentMousePosition;
+            App.previousMousePosition = App.currentMousePosition;
 
             const RECT: DOMRect = document.body.getBoundingClientRect();
-            this.currentMousePosition = new Vector2(
+            App.currentMousePosition = new Vector2(
                 event.clientX - RECT.left,
                 event.clientY - RECT.top
             );
@@ -103,8 +97,8 @@ export class App {
                 code: CODE
             };
 
-            if (!this.KEY_EVENTS.contains(EVENT)) {
-                this.KEY_EVENTS.add(EVENT);
+            if (!App.KEY_EVENTS.contains(EVENT)) {
+                App.KEY_EVENTS.add(EVENT);
             }
         });
 
@@ -119,49 +113,51 @@ export class App {
                 code: CODE
             };
 
-            if (!this.KEY_EVENTS.contains(EVENT)) {
-                this.KEY_EVENTS.add(EVENT);
+            if (!App.KEY_EVENTS.contains(EVENT)) {
+                App.KEY_EVENTS.add(EVENT);
             }
         });
+
+        App.start();
     }
 
-    private start(): void {
-        this.intervalLoop = setInterval(() => {
-            this.mainloop();
+    public static start(): void {
+        App.intervalLoop = setInterval(() => {
+            App.mainloop();
         }, 1000 / App.TPS);
     }
 
-    private mainloop(): void {
-        this.tick();
-        this.draw();
+    public static mainloop(): void {
+        App.tick();
+        App.draw();
     }
 
-    public end(): void {
-        clearInterval(this.intervalLoop);
+    public static end(): void {
+        clearInterval(App.intervalLoop);
     }
 
-    private tick(): void {
-        if (this.appState == AppState.IN_GAME) {
-            this.GAME.tick();
-        } else if (this.appState == AppState.START_MENU) {
-            this.START_MENU.tick();
+    private static tick(): void {
+        if (App.appState == AppState.IN_GAME) {
+            App.GAME.tick();
+        } else if (App.appState == AppState.START_MENU) {
+            App.START_MENU.tick();
         }
 
-        this.KEY_EVENTS.clear();
-        this.MOUSE_EVENTS.clear();
+        App.KEY_EVENTS.clear();
+        App.MOUSE_EVENTS.clear();
 
-        this.CANVAS.tick();
+        App.CANVAS.tick();
     }
 
-    private draw(): void {
-        if (this.appState == AppState.IN_GAME) {
-            this.GAME.draw(this.CANVAS);
+    private static draw(): void {
+        if (App.appState == AppState.IN_GAME) {
+            App.GAME.draw(App.CANVAS);
         } else if (this.appState == AppState.START_MENU) {
-            this.START_MENU.draw(this.CANVAS);
+            App.START_MENU.draw(App.CANVAS);
         }
 
         // for testing
-        this.CANVAS.drawLine(
+        App.CANVAS.drawLine(
             new Vector2(0, 0),
             new Vector2(100, 100),
             "black",
@@ -173,15 +169,15 @@ export class App {
         return App._TPS;
     }
 
-    public get CANVAS(): Canvas {
-        return this._CANVAS;
+    public static get CANVAS(): Canvas {
+        return App._CANVAS;
     }
 
-    public get mouseEvents(): {pressed: boolean, code: number}[] {
-        return this.MOUSE_EVENTS.getArray();
+    public static get mouseEvents(): {pressed: boolean, code: number}[] {
+        return App.MOUSE_EVENTS.getArray();
     }
 
-    public get keyEvents(): {pressed: boolean, code: number}[] {
-        return this.KEY_EVENTS.getArray();
+    public static get keyEvents(): {pressed: boolean, code: number}[] {
+        return App.KEY_EVENTS.getArray();
     }
 }
