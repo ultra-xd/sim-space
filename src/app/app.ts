@@ -19,11 +19,13 @@ export class App {
     private static intervalLoop: number;
     private static readonly _TPS: number = 60;
 
-    private static readonly MOUSE_EVENTS: ArrayList<{pressed: boolean, code: number}> = new ArrayList<{pressed: boolean, code: number}>();
-    private static readonly KEY_EVENTS: ArrayList<{pressed: boolean, code: number}> = new ArrayList<{pressed: boolean, code: number}>();
+    private static readonly MOUSE_EVENTS: ArrayList<number> = new ArrayList<number>();
+    private static readonly KEY_EVENTS: ArrayList<string> = new ArrayList<string>();
 
-    private static currentMousePosition: Vector2 | null = null;
-    private static previousMousePosition: Vector2 | null = null;
+    private static _mouseScroll: number = 0;
+
+    private static _currentMousePosition: Vector2 | null = null;
+    private static _previousMousePosition: Vector2 | null = null;
 
     public static setup(): void {
         document.body.addEventListener("contextmenu", (event) => {
@@ -36,13 +38,9 @@ export class App {
             }
 
             const CODE: number = event.button;
-            const EVENT: {pressed: boolean, code: number} = {
-                pressed: true,
-                code: CODE
-            };
 
-            if (!App.MOUSE_EVENTS.contains(EVENT)) {
-                App.MOUSE_EVENTS.add(EVENT);
+            if (!App.MOUSE_EVENTS.contains(CODE)) {
+                App.MOUSE_EVENTS.add(CODE);
             }
         });
 
@@ -52,13 +50,12 @@ export class App {
             }
 
             const CODE: number = event.button;
-            const EVENT: {pressed: boolean, code: number} = {
-                pressed: false,
-                code: CODE
-            };
 
-            if (!App.MOUSE_EVENTS.contains(EVENT)) {
-                App.MOUSE_EVENTS.add(EVENT);
+            for (let i: number = 0; i < App.MOUSE_EVENTS.length; i++) {
+                let e: number = this.MOUSE_EVENTS.get(i);
+                if (e == CODE) {
+                    App.MOUSE_EVENTS.delete(i);
+                }
             }
         });
 
@@ -67,10 +64,8 @@ export class App {
                 return;
             }
 
-            App.previousMousePosition = App.currentMousePosition;
-
             const RECT: DOMRect = document.body.getBoundingClientRect();
-            App.currentMousePosition = new Vector2(
+            App._currentMousePosition = new Vector2(
                 event.clientX - RECT.left,
                 event.clientY - RECT.top
             );
@@ -81,7 +76,12 @@ export class App {
                 return;
             }
 
-            // temp
+            let scroll: number = event.deltaY;
+            if (scroll > 0) {
+                App._mouseScroll = 1;
+            } else if (scroll < 0) {
+                App._mouseScroll = -1;
+            }
 
             event.preventDefault();
         });
@@ -91,14 +91,10 @@ export class App {
                 return;
             }
 
-            const CODE: number = event.key.toLowerCase().charCodeAt(0);
-            const EVENT: {pressed: boolean, code: number} = {
-                pressed: true,
-                code: CODE
-            };
+            const CODE: string = event.key.toLowerCase();
 
-            if (!App.KEY_EVENTS.contains(EVENT)) {
-                App.KEY_EVENTS.add(EVENT);
+            if (!App.KEY_EVENTS.contains(CODE)) {
+                App.KEY_EVENTS.add(CODE);
             }
         });
 
@@ -107,14 +103,13 @@ export class App {
                 return;
             }
 
-            const CODE: number = event.key.toLowerCase().charCodeAt(0);
-            const EVENT: {pressed: boolean, code: number} = {
-                pressed: false,
-                code: CODE
-            };
+            const CODE: string = event.key.toLowerCase();
 
-            if (!App.KEY_EVENTS.contains(EVENT)) {
-                App.KEY_EVENTS.add(EVENT);
+            for (let i: number = 0; i < App.KEY_EVENTS.length; i++) {
+                let e: string = this.KEY_EVENTS.get(i);
+                if (e == CODE) {
+                    App.KEY_EVENTS.delete(i);
+                }
             }
         });
 
@@ -143,10 +138,10 @@ export class App {
             App.START_MENU.tick();
         }
 
-        App.KEY_EVENTS.clear();
-        App.MOUSE_EVENTS.clear();
-
         App.CANVAS.tick();
+
+        App._previousMousePosition = App._currentMousePosition;
+        App._mouseScroll = 0;
     }
 
     private static draw(): void {
@@ -155,14 +150,6 @@ export class App {
         } else if (this.appState == AppState.START_MENU) {
             App.START_MENU.draw(App.CANVAS);
         }
-
-        // for testing
-        App.CANVAS.drawLine(
-            new Vector2(0, 0),
-            new Vector2(100, 100),
-            "black",
-            1
-        );
     }
 
     public static get TPS(): number {
@@ -173,11 +160,23 @@ export class App {
         return App._CANVAS;
     }
 
-    public static get mouseEvents(): {pressed: boolean, code: number}[] {
-        return App.MOUSE_EVENTS.getArray();
+    public static get mouseEvents(): ArrayList<number> {
+        return App.MOUSE_EVENTS;
     }
 
-    public static get keyEvents(): {pressed: boolean, code: number}[] {
-        return App.KEY_EVENTS.getArray();
+    public static get mouseScroll(): number {
+        return this._mouseScroll;
+    }
+
+    public static get currentMousePosition(): Vector2 | null {
+        return this._currentMousePosition;
+    }
+
+    public static get previousMousePosition(): Vector2 | null {
+        return this._previousMousePosition;
+    }
+
+    public static get keyEvents(): ArrayList<string> {
+        return App.KEY_EVENTS;
     }
 }

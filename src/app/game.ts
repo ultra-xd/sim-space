@@ -15,6 +15,18 @@ export class Game {
     public constructor() {}
 
     public tick(): void {
+        if (
+            App.currentMousePosition != null &&
+            App.previousMousePosition != null &&
+            App.mouseEvents.contains(0)
+        ) {
+            const UNITS_CHANGE = this.CAMERA.pixelsToUnits(App.previousMousePosition).subtract(
+                this.CAMERA.pixelsToUnits(App.currentMousePosition)
+            );
+            
+            this.CAMERA.adjustCamera(UNITS_CHANGE);
+        }
+
         this._MAP.tick();
     }
 
@@ -26,9 +38,8 @@ export class Game {
             canvas.height,
             "rgb(0, 255, 0)",
         );
-        
-        this.MAP.draw(canvas, this.CAMERA);
 
+        this.MAP.draw(canvas, this.CAMERA);
     }
 
     public get MAP(): GameMap {

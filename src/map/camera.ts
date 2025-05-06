@@ -30,11 +30,8 @@ export class Camera {
         }
     }
 
-    public adjustCamera(pixelDifference: Vector2): void {
-        const UNIT_DIFFERENCE: Vector2 = pixelDifference.divide(this._pixelsPerUnits);
-        UNIT_DIFFERENCE.y = UNIT_DIFFERENCE.y * -1;
-
-        this.center = this.center.add(UNIT_DIFFERENCE);
+    public adjustCamera(difference: Vector2): void {
+        this.center = this.center.add(difference);
     }
 
     public pixelsToUnits(pixels: Vector2): Vector2 {
