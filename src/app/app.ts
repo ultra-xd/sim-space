@@ -82,8 +82,6 @@ export class App {
             } else if (scroll < 0) {
                 App._mouseScroll = -1;
             }
-
-            event.preventDefault();
         });
 
         document.body.addEventListener("keydown", (event) => {

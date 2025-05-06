@@ -34,6 +34,10 @@ export class Camera {
         this.center = this.center.add(difference);
     }
 
+    public adjustZoom(difference: number): void {
+        this._pixelsPerUnits *= (1 + difference);
+    }
+
     public pixelsToUnits(pixels: Vector2): Vector2 {
         const CENTER_PIXELS: Vector2 = new Vector2(
             App.CANVAS.width / 2,

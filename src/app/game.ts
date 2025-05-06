@@ -27,6 +27,13 @@ export class Game {
             this.CAMERA.adjustCamera(UNITS_CHANGE);
         }
 
+        let scroll: number = App.mouseScroll;
+        if (scroll > 0) {
+            this.CAMERA.adjustZoom(-0.05);
+        } else if (scroll < 0) {
+            this.CAMERA.adjustZoom(0.05);
+        }
+
         this._MAP.tick();
     }
 
