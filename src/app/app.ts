@@ -120,7 +120,7 @@ export class App {
         }, 1000 / App.TPS);
     }
 
-    public static mainloop(): void {
+    private static mainloop(): void {
         App.tick();
         App.draw();
     }

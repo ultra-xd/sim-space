@@ -61,6 +61,10 @@ export class Cell {
 
     }
 
+    public isEmpty(): boolean {
+        return this.facility == null;
+    }
+
     public draw(canvas: Canvas, camera: Camera): void {
 
     }
