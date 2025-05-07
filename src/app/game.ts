@@ -30,7 +30,9 @@ export class Game {
 
     private gameState: GameState = GameState.STANDARD;
 
-    public constructor() {}
+    public constructor() {
+        this.GAME_MENU.setup();
+    }
 
     public tick(): void {
         this.ticks++;
@@ -39,7 +41,7 @@ export class Game {
         if (
             App.currentMousePosition != null &&
             App.previousMousePosition != null &&
-            App.mouseEvents.contains(0)
+            App.mouseEvents.contains(2)
         ) {
             // get the amount of units changed from movement from last tick to current tick
             const UNITS_CHANGE = this.CAMERA.pixelsToUnits(App.previousMousePosition).subtract(
@@ -97,10 +99,21 @@ export class GameMenu {
     public static readonly STATS_POPULATION_PARAGRAPH: HTMLParagraphElement = document.getElementById("stats-population-display") as HTMLParagraphElement;
     public static readonly STATS_SCORE_PARAGRAPH: HTMLParagraphElement = document.getElementById("stats-score-display") as HTMLParagraphElement;
     public static readonly STATS_DIV: HTMLDivElement = document.getElementById("stats-display") as HTMLDivElement;
+    public static readonly CONSTRUCTION_DELETE_BUTTON: HTMLButtonElement = document.getElementById("construction-delete") as HTMLButtonElement;
+    public static readonly CONSTRUCTION_BUILD_BUTTON: HTMLButtonElement = document.getElementById("construction-build") as HTMLButtonElement;
+    public static readonly CONSTRUCTION_BUILDINGS_DISPLAY_DIV: HTMLDivElement = document.getElementById("buildings-display") as HTMLDivElement;
 
     public constructor(private readonly _game: Game) {};
 
     public setup(): void {
-
+        GameMenu.CONSTRUCTION_BUILD_BUTTON.onclick = () => {
+            if (!GameMenu.CONSTRUCTION_BUILDINGS_DISPLAY_DIV.classList.contains("show")) {
+                GameMenu.CONSTRUCTION_BUILDINGS_DISPLAY_DIV.classList.add("show");
+                GameMenu.CONSTRUCTION_BUILD_BUTTON.classList.add("active");
+            } else {
+                GameMenu.CONSTRUCTION_BUILDINGS_DISPLAY_DIV.classList.remove("show");
+                GameMenu.CONSTRUCTION_BUILD_BUTTON.classList.remove("active");
+            }
+        };
     }
 }
