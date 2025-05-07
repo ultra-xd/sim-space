@@ -21,6 +21,13 @@ export interface IVector2 {
  * 2D vector class for handling coordinate systems
  */
 export class Vector2 implements IVector2 {
+
+    public static I_UNIT: Vector2 = new Vector2(1, 0);
+    public static J_UNIT: Vector2 = new Vector2(0, 1);
+
+    public static ISO_I_UNIT: Vector2 = new Vector2(Math.cos(Math.PI / 6), Math.sin(Math.PI / 6));
+    public static ISO_J_UNIT: Vector2 = new Vector2(-Math.cos(Math.PI / 6), Math.sin(Math.PI / 6));
+
     /**
      * creates new vector
      * @param _x x component of vector

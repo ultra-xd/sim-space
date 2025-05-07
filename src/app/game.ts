@@ -4,6 +4,13 @@ import { Vector2 } from "../data_structures/vector.js";
 import { Camera } from "../map/camera.js";
 import { App } from "./app.js";
 
+export enum GameState {
+    STANDARD,
+    BUILD,
+    DESTROY,
+    VIEW
+}
+
 export class Game {
 
     private static readonly MAP_WIDTH: number = 50;
@@ -17,14 +24,17 @@ export class Game {
     private readonly GAME_MENU: GameMenu = new GameMenu(this);
 
     private population: number = 0;
-    private money: number = 5_000_000_000;
+    private _money: number = 5_000_000_000;
     private ticks: number = 0;
     private score: number = 0;
+
+    private gameState: GameState = GameState.STANDARD;
 
     public constructor() {}
 
     public tick(): void {
         this.ticks++;
+        
         // shift map position if mouse moved and dragged
         if (
             App.currentMousePosition != null &&
@@ -52,7 +62,7 @@ export class Game {
     }
 
     public draw(canvas: Canvas): void {
-        // testing
+        // fill bg with green
         canvas.fillRect(
             new Vector2(canvas.width / 2, canvas.height / 2),
             canvas.width,
@@ -67,16 +77,26 @@ export class Game {
         return this.ticks % Game.TICKS_PER_MONTH == 0;
     }
 
+    public changeMoney(change: number): void {
+        this._money += change;
+    }
+
     public get MAP(): GameMap {
         return this._MAP;
+    }
+
+    public get money(): number {
+        return this._money;
     }
 }
 
 export class GameMenu {
+    public static readonly GAME_MENU_DIV: HTMLDivElement = document.getElementById("game-menu") as HTMLDivElement;
     public static readonly STATS_MONEY_PARAGRAPH: HTMLParagraphElement = document.getElementById("stats-money-display") as HTMLParagraphElement;
     public static readonly STATS_DATE_PARAGRAPH: HTMLParagraphElement = document.getElementById("stats-date-display") as HTMLParagraphElement;
     public static readonly STATS_POPULATION_PARAGRAPH: HTMLParagraphElement = document.getElementById("stats-population-display") as HTMLParagraphElement;
     public static readonly STATS_SCORE_PARAGRAPH: HTMLParagraphElement = document.getElementById("stats-score-display") as HTMLParagraphElement;
+    public static readonly STATS_DIV: HTMLDivElement = document.getElementById("stats-display") as HTMLDivElement;
 
     public constructor(private readonly _game: Game) {};
 

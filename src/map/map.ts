@@ -41,46 +41,67 @@ export class GameMap {
     }
 
     public draw(canvas: Canvas, camera: Camera): void {
-        const PIXELS_BOTTOM_LEFT: Vector2 = camera.unitsToPixels(
-            new Vector2(0, 0)
-        );
-
-        const PIXELS_TOP_RIGHT: Vector2 = camera.unitsToPixels(
-            new Vector2(this.width, this.height)
-        );
-
-        const PIXELS_PER_UNIT: number = camera.pixelsPerUnit;
-
         // draw vertical lines
         for (let i: number = 0; i <= this.width; i++) {
-            const PIXELS_X: number = PIXELS_BOTTOM_LEFT.x + (i * PIXELS_PER_UNIT);
             canvas.drawLine(
-                new Vector2(PIXELS_X, PIXELS_BOTTOM_LEFT.y),
-                new Vector2(PIXELS_X, PIXELS_TOP_RIGHT.y),
-                "white",
-                4
+                camera.unitsToPixels(new Vector2(i, 0)),
+                camera.unitsToPixels(new Vector2(i, this.height)),
+                "rgb(54, 54, 54)",
+                0.05 * camera.pixelsPerUnit
             );
         }
 
         // draw horizontal lines
         for (let i: number = 0; i <= this.height; i++) {
-            const PIXELS_Y: number = PIXELS_BOTTOM_LEFT.y - (i * PIXELS_PER_UNIT);
             canvas.drawLine(
-                new Vector2(PIXELS_BOTTOM_LEFT.x, PIXELS_Y),
-                new Vector2(PIXELS_TOP_RIGHT.x, PIXELS_Y),
-                "white",
-                4
+                camera.unitsToPixels(new Vector2(0, i)),
+                camera.unitsToPixels(new Vector2(this.width, i)),
+                "rgb(54, 54, 54)",
+                0.05 * camera.pixelsPerUnit
+            );
+        }
+
+                // draw vertical lines
+        for (let i: number = 0; i <= this.width; i++) {
+            canvas.drawLine(
+                camera.unitsToPixels(new Vector2(i, 0)),
+                camera.unitsToPixels(new Vector2(i, this.height)),
+                "rgb(54, 54, 54)",
+                0.1 * camera.pixelsPerUnit
+            );
+        }
+
+        // draw horizontal lines
+        for (let i: number = 0; i <= this.height; i++) {
+            canvas.drawLine(
+                camera.unitsToPixels(new Vector2(0, i)),
+                camera.unitsToPixels(new Vector2(this.width, i)),
+                "rgb(54, 54, 54)",
+                0.1 * camera.pixelsPerUnit
+            );
+        }
+
+        // draw vertical lines
+        for (let i: number = 0; i <= this.width; i++) {
+            canvas.drawLine(
+                camera.unitsToPixels(new Vector2(i, 0)),
+                camera.unitsToPixels(new Vector2(i, this.height)),
+                "rgb(208, 255, 0)",
+                0.005 * camera.pixelsPerUnit
+            );
+        }
+
+        // draw horizontal lines
+        for (let i: number = 0; i <= this.height; i++) {
+            canvas.drawLine(
+                camera.unitsToPixels(new Vector2(0, i)),
+                camera.unitsToPixels(new Vector2(this.width, i)),
+                "rgb(208, 255, 0)",
+                0.005 * camera.pixelsPerUnit
             );
         }
 
         // draw large rectangle around map
-        canvas.drawRect(
-            camera.unitsToPixels(new Vector2(this.width / 2, this.height / 2)),
-            this.width * PIXELS_PER_UNIT,
-            this.height * PIXELS_PER_UNIT,
-            "black",
-            8
-        );
 
         for (let i: number = 0; i < this.cells.length; i++) {
             const CELL_ROW: Cell[] = this.cells[i];

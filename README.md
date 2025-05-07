@@ -1,9 +1,9 @@
 # sim-space
-sim city but fraudulent by yours truly chat gibbidy
+sim city but fraudulent. readme is by yours truly chat jibbidy
 
 # 🌍 SimSpace
 
-**SimSpace** is a 2D simulation strategy game inspired by *SimCity* — but for an entire planet! Built with HTML, JavaScript, and Object-Oriented Programming principles, SimSpace challenges players to manage budgets, population growth, and planetary disasters while maintaining a thriving civilization.
+**SimSpace** is a 2D simulation strategy game inspired by *SimCity* — but for an entire planet! Built with HTML, TypeScript, and Object-Oriented Programming principles, SimSpace challenges players to manage budgets, population growth, and planetary disasters while maintaining a thriving civilization.
 
 ## 👨‍💻 Project Overview
 

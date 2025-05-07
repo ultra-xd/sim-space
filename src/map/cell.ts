@@ -3,6 +3,7 @@ import { Game } from "../app/game.js";
 import { Vector2 } from "../data_structures/vector.js";
 import { Canvas } from "../app/canvas.js";
 import { Camera } from "./camera.js";
+import { LuxuryHome } from "../facility/facility_types/residential.js";
 
 export class Cell {
 
@@ -15,6 +16,7 @@ export class Cell {
         private _facility: Facility | null
     ) {
         this._coordinates = new Vector2(x, y);
+        this._facility = new LuxuryHome();
     }
 
     public get facilityType(): FacilityType | null {
