@@ -15,3 +15,9 @@ export function degreesToRadians(degrees: number): number {
 export function radiansToDegrees(radians: number): number {
     return radians * 180 / Math.PI;
 }
+
+export function ease(t: number, min: number, max: number) {
+    let a: number = (t - min) / (max - min);
+
+    return (max - min) * (6 * (a ** 5) - 15 * (a ** 4) + 10 * (a ** 3));
+}
