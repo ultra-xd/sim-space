@@ -124,6 +124,8 @@ export class GameMenu {
     public static readonly MAP_ZOOM_IN_BUTTON: HTMLButtonElement = document.getElementById("map-zoom-in") as HTMLButtonElement;
     public static readonly MAP_ZOOM_OUT_BUTTON: HTMLButtonElement = document.getElementById("map-zoom-out") as HTMLButtonElement;
     public static readonly MAP_RESET_BUTTON: HTMLButtonElement = document.getElementById("map-reset") as HTMLButtonElement;
+    public static readonly MAP_VIEW_CHANGE_BUTTON: HTMLButtonElement = document.getElementById("map-view-change") as HTMLButtonElement;
+    public static readonly MAP_VIEW_CHANGE_BUTTON_IMG: HTMLImageElement = document.getElementById("map-view-change-icon") as HTMLImageElement;
 
     public constructor(private readonly game: Game) {};
 
@@ -161,6 +163,16 @@ export class GameMenu {
                 this.game.CAMERA.DEFAULT_CENTER,
                 this.game.CAMERA.DEFAULT_PIXELS_PER_UNIT
             );
-        })
+        });
+
+        GameMenu.MAP_VIEW_CHANGE_BUTTON.addEventListener("click", () => {
+            this.game.CAMERA.switchView();
+            if (this.game.CAMERA.isIsometric()) {
+                GameMenu.MAP_VIEW_CHANGE_BUTTON_IMG.src = "res/assets/icons/straight-icon.png";
+            } else {
+                console.log('e')
+                GameMenu.MAP_VIEW_CHANGE_BUTTON_IMG.src = "res/assets/icons/isometric-icon.png";
+            }
+        });
     }
 }

@@ -81,7 +81,7 @@ export class Cell {
             );
         } else {
             canvas.drawImage(
-                Canvas.ImageLoader.getImage(`res/assets/map/straight.png`),
+                Canvas.ImageLoader.getImage(`res/assets/map/grass_straight.png`),
                 camera.unitsToPixels(this.coordinates.add(new Vector2(0.5, 0.5))),
                 camera.pixelsPerUnit * (1 - GameMap.ROAD_WIDTH),
                 camera.pixelsPerUnit * (1 - GameMap.ROAD_WIDTH)
@@ -102,8 +102,8 @@ export class Cell {
                 canvas.drawImage(
                     this._facility.getSprite(false),
                     camera.unitsToPixels(this.coordinates.add(new Vector2(0.5, 0.5))),
-                    camera.pixelsPerUnit,
-                    camera.pixelsPerUnit
+                    camera.pixelsPerUnit * (1 - GameMap.ROAD_WIDTH),
+                    camera.pixelsPerUnit * (1 - GameMap.ROAD_WIDTH)
                 )
             }
         }
