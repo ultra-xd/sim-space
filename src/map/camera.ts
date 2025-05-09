@@ -6,14 +6,14 @@ import { App } from "../app/app.js";
 export class Camera {
 
     private _center: Vector2;
-    public readonly _DEFAULT_PIXELS_PER_UNIT: number = 200;
+    public readonly _DEFAULT_PIXELS_PER_UNIT: number = 100;
     private _pixelsPerUnits: number = this._DEFAULT_PIXELS_PER_UNIT;
 
     private static readonly MIN_PIXELS_PER_UNIT: number = 20;
     private static readonly MAX_PIXELS_PER_UNIT: number = 500;
 
-    private zoomAnimation: ZoomAnimation | null = null;
-    private moveAnimation: MoveAnimation | null = null;
+    private zoomAnimation: InstanceType<typeof Camera.ZoomAnimation> | null = null;
+    private moveAnimation: InstanceType<typeof Camera.MoveAnimation> | null = null;
     private static readonly ZOOM_ANIMATION_LENGTH: number = 0.5;
     private static readonly MOVE_ANIMATION_LENGTH: number = 2;
 
@@ -104,7 +104,7 @@ export class Camera {
     public createZoomAnimation(nextScale: number): void {
         if (this.zoomAnimation != null || this.moveAnimation != null) return;
 
-        this.zoomAnimation = new ZoomAnimation(
+        this.zoomAnimation = new Camera.ZoomAnimation(
             this.pixelsPerUnit,
             nextScale,
             Camera.ZOOM_ANIMATION_LENGTH,
@@ -127,7 +127,7 @@ export class Camera {
     public createMoveAnimation(nextCenter: Vector2, nextScale: number): void {
         if (this.zoomAnimation != null || this.moveAnimation != null) return;
 
-        this.moveAnimation = new MoveAnimation(
+        this.moveAnimation = new Camera.MoveAnimation(
             this._center,
             nextCenter,
             this.pixelsPerUnit,
@@ -154,6 +154,14 @@ export class Camera {
         return this._pixelsPerUnits;
     }
 
+    public get isometricUnitWidth(): number {
+        return this.pixelsPerUnit * Math.cos(Math.PI / 6) * 2;
+    }
+
+    public get isometricUnitHeight(): number {
+        return this.pixelsPerUnit * Math.sin(Math.PI / 6) * 2;
+    }
+
     public isIsometric(): boolean {
         return this.isometric;
     }
@@ -177,102 +185,101 @@ export class Camera {
     public get DEFAULT_PIXELS_PER_UNIT(): number {
         return this._DEFAULT_PIXELS_PER_UNIT;
     }
-}
 
-class ZoomAnimation {
+    private static ZoomAnimation = class {
+        private completed: boolean = false;
+        private readonly TOTAL_ANIMATED_TICKS: number;
+        private readonly FINAL_TICK: number;
+        private currentTick: number = 0;
 
-    private completed: boolean = false;
-    private readonly TOTAL_ANIMATED_TICKS: number;
-    private readonly FINAL_TICK: number;
-    private currentTick: number = 0;
-
-    public constructor(
-        private readonly CURRENT_SCALE: number,
-        private readonly NEXT_SCALE: number,
-        duration: number = 1,
-        TPS: number = 60
-    ) {
-        this.TOTAL_ANIMATED_TICKS = duration * TPS;
-        this.FINAL_TICK = Math.floor(this.TOTAL_ANIMATED_TICKS + 1);
-    }
-
-    public next(): number {
-        if (this.completed) {
-            throw new Error("animation already completed");
+        public constructor(
+            private readonly CURRENT_SCALE: number,
+            private readonly NEXT_SCALE: number,
+            duration: number = 1,
+            TPS: number = 60
+        ) {
+            this.TOTAL_ANIMATED_TICKS = duration * TPS;
+            this.FINAL_TICK = Math.floor(this.TOTAL_ANIMATED_TICKS + 1);
         }
 
-        this.currentTick++;
-        if (this.currentTick == this.FINAL_TICK) {
-            this.completed = true;
-            return this.NEXT_SCALE;
+        public next(): number {
+            if (this.completed) {
+                throw new Error("animation already completed");
+            }
+
+            this.currentTick++;
+            if (this.currentTick == this.FINAL_TICK) {
+                this.completed = true;
+                return this.NEXT_SCALE;
+            }
+
+            const a: number = (this.NEXT_SCALE - this.CURRENT_SCALE) / this.TOTAL_ANIMATED_TICKS;
+            const c: number = this.CURRENT_SCALE;
+
+            return a * ease(this.currentTick, 0, this.TOTAL_ANIMATED_TICKS) + c;
         }
 
-        const a: number = (this.NEXT_SCALE - this.CURRENT_SCALE) / this.TOTAL_ANIMATED_TICKS;
-        const c: number = this.CURRENT_SCALE;
-
-        return a * ease(this.currentTick, 0, this.TOTAL_ANIMATED_TICKS) + c;
+        public isCompleted(): boolean {
+            return this.completed;
+        }
     }
 
-    public isCompleted(): boolean {
-        return this.completed;
-    }
-}
+    private static MoveAnimation = class {
+        private readonly ZOOM_ANIMATION: InstanceType<typeof Camera.ZoomAnimation>;
 
-class MoveAnimation {
-    private readonly ZOOM_ANIMATION: ZoomAnimation;
+        private currentTick: number = 0;
+        private readonly TOTAL_ANIMATED_TICKS: number;
+        private readonly FINAL_TICK: number;
+        private completed: boolean = false;
 
-    private currentTick: number = 0;
-    private readonly TOTAL_ANIMATED_TICKS: number;
-    private readonly FINAL_TICK: number;
-    private completed: boolean = false;
+        public constructor(
+            private readonly CURRENT_CENTER: Vector2,
+            private readonly NEXT_CENTER: Vector2,
+            private readonly CURRENT_SCALE: number,
+            private readonly NEXT_SCALE: number,
+            duration: number = 1,
+            TPS: number = 60
+        ) {
+            this.ZOOM_ANIMATION = new Camera.ZoomAnimation(
+                this.CURRENT_SCALE,
+                this.NEXT_SCALE,
+                duration,
+                TPS
+            );
 
-    public constructor(
-        private readonly CURRENT_CENTER: Vector2,
-        private readonly NEXT_CENTER: Vector2,
-        private readonly CURRENT_SCALE: number,
-        private readonly NEXT_SCALE: number,
-        duration: number = 1,
-        TPS: number = 60
-    ) {
-        this.ZOOM_ANIMATION = new ZoomAnimation(
-            this.CURRENT_SCALE,
-            this.NEXT_SCALE,
-            duration,
-            TPS
-        );
-
-        this.TOTAL_ANIMATED_TICKS = duration * TPS;
-        this.FINAL_TICK = Math.floor(this.TOTAL_ANIMATED_TICKS + 1);
-    }
-
-    public nextZoom(): number {
-        return this.ZOOM_ANIMATION.next();
-    }
-
-    public nextPosition(): Vector2 {
-        if (this.completed) {
-            throw new Error("animation already completed");
+            this.TOTAL_ANIMATED_TICKS = duration * TPS;
+            this.FINAL_TICK = Math.floor(this.TOTAL_ANIMATED_TICKS + 1);
         }
 
-        this.currentTick++;
-        if (this.currentTick == this.FINAL_TICK) {
-            this.completed = true;
-            return this.NEXT_CENTER;
+        public nextZoom(): number {
+            return this.ZOOM_ANIMATION.next();
         }
 
-        const ax: number = (this.NEXT_CENTER.x - this.CURRENT_CENTER.x) / this.TOTAL_ANIMATED_TICKS;
-        const cx: number = this.CURRENT_CENTER.x;
+        public nextPosition(): Vector2 {
+            if (this.completed) {
+                throw new Error("animation already completed");
+            }
 
-        const ay: number = (this.NEXT_CENTER.y - this.CURRENT_CENTER.y) / this.TOTAL_ANIMATED_TICKS;
-        const cy: number = this.CURRENT_CENTER.y;
+            this.currentTick++;
+            if (this.currentTick == this.FINAL_TICK) {
+                this.completed = true;
+                return this.NEXT_CENTER;
+            }
 
-        return new Vector2(
-            ax * ease(this.currentTick, 0, this.TOTAL_ANIMATED_TICKS) + cx,
-            ay * ease(this.currentTick, 0, this.TOTAL_ANIMATED_TICKS) + cy
-        );
-    }
+            const ax: number = (this.NEXT_CENTER.x - this.CURRENT_CENTER.x) / this.TOTAL_ANIMATED_TICKS;
+            const cx: number = this.CURRENT_CENTER.x;
 
-    public isCompleted(): boolean {
-        return this.completed;
+            const ay: number = (this.NEXT_CENTER.y - this.CURRENT_CENTER.y) / this.TOTAL_ANIMATED_TICKS;
+            const cy: number = this.CURRENT_CENTER.y;
+
+            return new Vector2(
+                ax * ease(this.currentTick, 0, this.TOTAL_ANIMATED_TICKS) + cx,
+                ay * ease(this.currentTick, 0, this.TOTAL_ANIMATED_TICKS) + cy
+            );
+        }
+
+        public isCompleted(): boolean {
+            return this.completed;
+        }
     }
 }

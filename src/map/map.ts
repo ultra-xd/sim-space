@@ -7,6 +7,8 @@ import { Camera } from "./camera.js";
 
 export class GameMap {
     private readonly cells: Cell[][];
+    private static readonly _ROAD_WIDTH: number = 0.2;
+    private static readonly _ROAD_DASH_WIDTH: number = 0.005;
 
     public constructor(
         private _game: Game, 
@@ -34,6 +36,10 @@ export class GameMap {
 
     public get game(): Game {
         return this._game;
+    }
+
+    public static get ROAD_WIDTH(): number {
+        return GameMap._ROAD_WIDTH;
     }
 
     public build(facility: Facility): void {
@@ -67,7 +73,7 @@ export class GameMap {
                 camera.unitsToPixels(new Vector2(i, 0)),
                 camera.unitsToPixels(new Vector2(i, this.height)),
                 "rgb(54, 54, 54)",
-                0.1 * camera.pixelsPerUnit
+                GameMap._ROAD_WIDTH * camera.pixelsPerUnit
             );
         }
 
@@ -77,7 +83,7 @@ export class GameMap {
                 camera.unitsToPixels(new Vector2(0, i)),
                 camera.unitsToPixels(new Vector2(this.width, i)),
                 "rgb(54, 54, 54)",
-                0.1 * camera.pixelsPerUnit
+                GameMap._ROAD_WIDTH * camera.pixelsPerUnit
             );
         }
 
@@ -87,7 +93,7 @@ export class GameMap {
                 camera.unitsToPixels(new Vector2(i, 0)),
                 camera.unitsToPixels(new Vector2(i, this.height)),
                 "rgb(208, 255, 0)",
-                0.005 * camera.pixelsPerUnit
+                GameMap._ROAD_DASH_WIDTH * camera.pixelsPerUnit
             );
         }
 
@@ -97,16 +103,21 @@ export class GameMap {
                 camera.unitsToPixels(new Vector2(0, i)),
                 camera.unitsToPixels(new Vector2(this.width, i)),
                 "rgb(208, 255, 0)",
-                0.005 * camera.pixelsPerUnit
+                GameMap._ROAD_DASH_WIDTH * camera.pixelsPerUnit
             );
         }
-
-        // draw large rectangle around map
 
         for (let i: number = 0; i < this.cells.length; i++) {
             const CELL_ROW: Cell[] = this.cells[i];
             for (let j: number = 0; j < CELL_ROW.length; j++) {
-                CELL_ROW[j].draw(canvas, camera);
+                CELL_ROW[j].drawGround(canvas, camera);
+            }
+        }
+
+        for (let i: number = 0; i < this.cells.length; i++) {
+            const CELL_ROW: Cell[] = this.cells[i];
+            for (let j: number = 0; j < CELL_ROW.length; j++) {
+                CELL_ROW[j].drawFacility(canvas, camera);
             }
         }
     }

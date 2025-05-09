@@ -58,8 +58,8 @@ export class Canvas {
     ): void {
         this.CANVAS_CTX.drawImage(
             image,
-            center.x + width / 2,
-            center.y + height / 2,
+            center.x - width / 2,
+            center.y - height / 2,
             width,
             height
         );
@@ -120,5 +120,21 @@ export class Canvas {
 
     public get height(): number {
         return this.CANVAS_ELEMENT.height;
+    }
+
+    public static readonly ImageLoader = class {
+        private static IMAGES: {[src: string]: HTMLImageElement} = {};
+
+        public static getImage(src: string): HTMLImageElement {
+            if (Canvas.ImageLoader.IMAGES[src]) {
+                return Canvas.ImageLoader.IMAGES[src];
+            }
+
+            const IMAGE: HTMLImageElement = new Image();
+            IMAGE.src = src;
+            Canvas.ImageLoader.IMAGES[src] = IMAGE;
+            
+            return IMAGE;
+        }
     }
 }

@@ -8,7 +8,9 @@ export enum GameState {
     STANDARD,
     BUILD,
     DESTROY,
-    VIEW
+    VIEW,
+    PAUSED,
+    GAME_OVER
 }
 
 export class Game {
@@ -23,10 +25,10 @@ export class Game {
 
     private readonly GAME_MENU: GameMenu = new GameMenu(this);
 
-    private population: number = 0;
+    private _population: number = 0;
     private _money: number = 5_000_000_000;
-    private ticks: number = 0;
-    private score: number = 0;
+    private _ticks: number = 0;
+    private _score: number = 0;
 
     private gameState: GameState = GameState.STANDARD;
 
@@ -35,7 +37,7 @@ export class Game {
     }
 
     public tick(): void {
-        this.ticks++;
+        this._ticks++;
 
         // shift map position if mouse moved and dragged
         if (
@@ -77,7 +79,7 @@ export class Game {
     }
 
     public monthEnded(): boolean {
-        return this.ticks % Game.TICKS_PER_MONTH == 0;
+        return this._ticks % Game.TICKS_PER_MONTH == 0;
     }
 
     public changeMoney(change: number): void {
@@ -90,6 +92,18 @@ export class Game {
 
     public get money(): number {
         return this._money;
+    }
+
+    public get population(): number {
+        return this._population;
+    }
+
+    public get ticks(): number {
+        return this._ticks;
+    }
+
+    public get score(): number {
+        return 0;
     }
 
     public get CAMERA(): Camera {

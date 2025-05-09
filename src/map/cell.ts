@@ -3,7 +3,11 @@ import { Game } from "../app/game.js";
 import { Vector2 } from "../data_structures/vector.js";
 import { Canvas } from "../app/canvas.js";
 import { Camera } from "./camera.js";
-import { LuxuryHome } from "../facility/facility_types/residential.js";
+import { ComfortableHome, LuxuryHome, ResidentialFacility } from "../facility/facility_types/residential.js";
+import { Government } from "../facility/facility_types/essential.js";
+import { Restaurant, Store } from "../facility/facility_types/commercial.js";
+import { Factory } from "../facility/facility_types/industrial.js";
+import { GameMap } from "./map.js";
 
 export class Cell {
 
@@ -16,7 +20,7 @@ export class Cell {
         private _facility: Facility | null
     ) {
         this._coordinates = new Vector2(x, y);
-        this._facility = new LuxuryHome();
+        this._facility = new LuxuryHome(this.game);
     }
 
     public get facilityType(): FacilityType | null {
@@ -67,7 +71,41 @@ export class Cell {
         return this.facility == null;
     }
 
-    public draw(canvas: Canvas, camera: Camera): void {
+    public drawGround(canvas: Canvas, camera: Camera): void {
+        if (camera.isIsometric()) {
+            canvas.drawImage(
+                Canvas.ImageLoader.getImage(`res/assets/map/grass_isometric.png`),
+                camera.unitsToPixels(this.coordinates.add(new Vector2(0.5, 0.5))),
+                camera.isometricUnitWidth * (1 - GameMap.ROAD_WIDTH),
+                camera.isometricUnitHeight * (1 - GameMap.ROAD_WIDTH)
+            );
+        } else {
+            canvas.drawImage(
+                Canvas.ImageLoader.getImage(`res/assets/map/straight.png`),
+                camera.unitsToPixels(this.coordinates.add(new Vector2(0.5, 0.5))),
+                camera.pixelsPerUnit * (1 - GameMap.ROAD_WIDTH),
+                camera.pixelsPerUnit * (1 - GameMap.ROAD_WIDTH)
+            );
+        }
+    }
 
+    public drawFacility(canvas: Canvas, camera: Camera): void {
+        if (this._facility != null) {
+            if (camera.isIsometric()) {
+                canvas.drawImage(
+                    this._facility.getSprite(true),
+                    camera.unitsToPixels(this.coordinates.add(new Vector2(0.7, 0.7))),
+                    camera.isometricUnitWidth / 2,
+                    camera.isometricUnitWidth / 2
+                )
+            } else {
+                canvas.drawImage(
+                    this._facility.getSprite(false),
+                    camera.unitsToPixels(this.coordinates.add(new Vector2(0.5, 0.5))),
+                    camera.pixelsPerUnit,
+                    camera.pixelsPerUnit
+                )
+            }
+        }
     }
 }
