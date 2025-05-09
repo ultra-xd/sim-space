@@ -72,7 +72,7 @@ export class Game {
             new Vector2(canvas.width / 2, canvas.height / 2),
             canvas.width,
             canvas.height,
-            "rgb(0, 255, 0)",
+            "rgb(0, 96, 175)",
         );
 
         this.MAP.draw(canvas, this._CAMERA);

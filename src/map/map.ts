@@ -7,7 +7,7 @@ import { Camera } from "./camera.js";
 
 export class GameMap {
     private readonly cells: Cell[][];
-    private static readonly _ROAD_WIDTH: number = 0.2;
+    private static readonly _ROAD_WIDTH: number = 0.3;
     private static readonly _ROAD_DASH_WIDTH: number = 0.005;
 
     public constructor(
@@ -47,48 +47,62 @@ export class GameMap {
     }
 
     public draw(canvas: Canvas, camera: Camera): void {
+
+        const TOP_LEFT_COORDS: Vector2 = camera.pixelsToUnits(new Vector2(0, 0));
+        const TOP_RIGHT_COORDS: Vector2 = camera.pixelsToUnits(new Vector2(canvas.width, 0));
+        const BOTTOM_LEFT_COORDS: Vector2 = camera.pixelsToUnits(new Vector2(0, canvas.height));
+        const BOTTOM_RIGHT_COORDS: Vector2 = camera.pixelsToUnits(new Vector2(canvas.width, canvas.height));
+
+        const MIN_X: number = Math.floor(Math.min(
+            TOP_LEFT_COORDS.x,
+            TOP_RIGHT_COORDS.x,
+            BOTTOM_LEFT_COORDS.x,
+            BOTTOM_RIGHT_COORDS.x
+        ));
+
+        const MAX_X: number = Math.ceil(Math.max(
+            TOP_LEFT_COORDS.x,
+            TOP_RIGHT_COORDS.x,
+            BOTTOM_LEFT_COORDS.x,
+            BOTTOM_RIGHT_COORDS.x
+        ));
+
+        const MIN_Y: number = Math.floor(Math.min(
+            TOP_LEFT_COORDS.y,
+            TOP_RIGHT_COORDS.y,
+            BOTTOM_LEFT_COORDS.y,
+            BOTTOM_RIGHT_COORDS.y
+        ))
+
+        const MAX_Y: number = Math.ceil(Math.max(
+            TOP_LEFT_COORDS.y,
+            TOP_RIGHT_COORDS.y,
+            BOTTOM_LEFT_COORDS.y,
+            BOTTOM_RIGHT_COORDS.y
+        ));
+
         // draw vertical lines
-        for (let i: number = 0; i <= this.width; i++) {
+        for (let i: number = Math.max(0, MIN_X); i <= Math.min(MAX_X, this.width); i++) {
             canvas.drawLine(
                 camera.unitsToPixels(new Vector2(i, 0)),
                 camera.unitsToPixels(new Vector2(i, this.height)),
                 "rgb(54, 54, 54)",
-                0.05 * camera.pixelsPerUnit
+                GameMap.ROAD_WIDTH * camera.pixelsPerUnit
             );
         }
 
         // draw horizontal lines
-        for (let i: number = 0; i <= this.height; i++) {
+        for (let i: number = Math.max(0, MIN_Y); i <= Math.min(MAX_Y, this.height); i++) {
             canvas.drawLine(
                 camera.unitsToPixels(new Vector2(0, i)),
                 camera.unitsToPixels(new Vector2(this.width, i)),
                 "rgb(54, 54, 54)",
-                0.05 * camera.pixelsPerUnit
-            );
-        }
-
-                // draw vertical lines
-        for (let i: number = 0; i <= this.width; i++) {
-            canvas.drawLine(
-                camera.unitsToPixels(new Vector2(i, 0)),
-                camera.unitsToPixels(new Vector2(i, this.height)),
-                "rgb(54, 54, 54)",
-                GameMap._ROAD_WIDTH * camera.pixelsPerUnit
-            );
-        }
-
-        // draw horizontal lines
-        for (let i: number = 0; i <= this.height; i++) {
-            canvas.drawLine(
-                camera.unitsToPixels(new Vector2(0, i)),
-                camera.unitsToPixels(new Vector2(this.width, i)),
-                "rgb(54, 54, 54)",
-                GameMap._ROAD_WIDTH * camera.pixelsPerUnit
+                GameMap.ROAD_WIDTH * camera.pixelsPerUnit
             );
         }
 
         // draw vertical lines
-        for (let i: number = 0; i <= this.width; i++) {
+        for (let i: number = Math.max(0, MIN_X); i <= (Math.min(MAX_X, this.width)); i++) {
             canvas.drawLine(
                 camera.unitsToPixels(new Vector2(i, 0)),
                 camera.unitsToPixels(new Vector2(i, this.height)),
@@ -98,7 +112,7 @@ export class GameMap {
         }
 
         // draw horizontal lines
-        for (let i: number = 0; i <= this.height; i++) {
+        for (let i: number = Math.max(0, MIN_Y); i <= (Math.min(MAX_Y, this.height)); i++) {
             canvas.drawLine(
                 camera.unitsToPixels(new Vector2(0, i)),
                 camera.unitsToPixels(new Vector2(this.width, i)),
@@ -107,16 +121,16 @@ export class GameMap {
             );
         }
 
-        for (let i: number = 0; i < this.cells.length; i++) {
+        for (let i: number = Math.max(0, MIN_Y); i <= (Math.min(MAX_Y, this.width - 1)); i++) {
             const CELL_ROW: Cell[] = this.cells[i];
-            for (let j: number = 0; j < CELL_ROW.length; j++) {
+            for (let j: number = Math.max(0, MIN_X); j <= (Math.min(MAX_X, this.height - 1)); j++) {
                 CELL_ROW[j].drawGround(canvas, camera);
             }
         }
 
-        for (let i: number = 0; i < this.cells.length; i++) {
+        for (let i: number = Math.max(0, MIN_Y); i <= (Math.min(MAX_Y, this.width - 1)); i++) {
             const CELL_ROW: Cell[] = this.cells[i];
-            for (let j: number = 0; j < CELL_ROW.length; j++) {
+            for (let j: number = Math.max(0, MIN_X); j <= (Math.min(MAX_X, this.height - 1)); j++) {
                 CELL_ROW[j].drawFacility(canvas, camera);
             }
         }

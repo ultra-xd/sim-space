@@ -6,7 +6,7 @@ import { Camera } from "./camera.js";
 import { ComfortableHome, LuxuryHome, ResidentialFacility } from "../facility/facility_types/residential.js";
 import { Government } from "../facility/facility_types/essential.js";
 import { Restaurant, Store } from "../facility/facility_types/commercial.js";
-import { Factory } from "../facility/facility_types/industrial.js";
+import { EnvironmentalFacility, Factory } from "../facility/facility_types/industrial.js";
 import { GameMap } from "./map.js";
 
 export class Cell {
@@ -20,7 +20,7 @@ export class Cell {
         private _facility: Facility | null
     ) {
         this._coordinates = new Vector2(x, y);
-        this._facility = new LuxuryHome(this.game);
+        this._facility = new EnvironmentalFacility(this.game);
     }
 
     public get facilityType(): FacilityType | null {
