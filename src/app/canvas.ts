@@ -50,6 +50,24 @@ export class Canvas {
         this.CANVAS_CTX.stroke();
     }
 
+    public fillPolygon(
+        points: Vector2[],
+        colour: string,
+    ): void {
+        assert (points.length >= 3, "too little points");
+        this.CANVAS_CTX.beginPath();
+        this.CANVAS_CTX.moveTo(points[0].x, points[0].y);
+
+        for (let i: number = 1; i < points.length; i++) {
+            this.CANVAS_CTX.lineTo(points[i].x, points[i].y);
+        }
+
+        this.CANVAS_CTX.closePath();
+        this.CANVAS_CTX.fillStyle = colour;
+
+        this.CANVAS_CTX.fill();
+    }
+
     public drawImage(
         image: HTMLImageElement,
         center: Vector2,

@@ -3,7 +3,7 @@ import { Game } from "../app/game.js";
 import { Vector2 } from "../data_structures/vector.js";
 import { Canvas } from "../app/canvas.js";
 import { Camera } from "./camera.js";
-import { ComfortableHome, LuxuryHome, ResidentialFacility } from "../facility/facility_types/residential.js";
+import { AffordableHome, ComfortableHome, LuxuryHome, ResidentialFacility } from "../facility/facility_types/residential.js";
 import { Government } from "../facility/facility_types/essential.js";
 import { Restaurant, Store } from "../facility/facility_types/commercial.js";
 import { EnvironmentalFacility, Factory } from "../facility/facility_types/industrial.js";
@@ -20,7 +20,7 @@ export class Cell {
         private _facility: Facility | null
     ) {
         this._coordinates = new Vector2(x, y);
-        this._facility = new EnvironmentalFacility(this.game);
+        this._facility = new ComfortableHome(this.game);
     }
 
     public get facilityType(): FacilityType | null {

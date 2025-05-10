@@ -30,6 +30,11 @@ export class Game {
     private _ticks: number = 0;
     private _score: number = 0;
 
+    private highlightedCell: Vector2 | null = null;
+    private highlightAnimationTicks: number = 0;
+    private static readonly HIGHLIGHT_ANIMATION_DURATION: number = 2;
+    private static readonly HIGHLIGHT_ANIMATION_TICK_DURATION: number = this.HIGHLIGHT_ANIMATION_DURATION * 60;
+
     private gameState: GameState = GameState.STANDARD;
 
     public constructor() {
@@ -42,15 +47,45 @@ export class Game {
         // shift map position if mouse moved and dragged
         if (
             App.currentMousePosition != null &&
-            App.previousMousePosition != null &&
-            App.mouseEvents.contains(2)
+            App.previousMousePosition != null
         ) {
-            // get the amount of units changed from movement from last tick to current tick
-            const UNITS_CHANGE = this._CAMERA.pixelsToUnits(App.previousMousePosition).subtract(
-                this._CAMERA.pixelsToUnits(App.currentMousePosition)
-            );
+            this.highlightAnimationTicks++;
+            if (this.highlightAnimationTicks > Game.HIGHLIGHT_ANIMATION_TICK_DURATION) {
+                this.highlightAnimationTicks = Game.HIGHLIGHT_ANIMATION_TICK_DURATION;
+            }
+
+            if (App.mouseEvents.contains(2)) {
+                // get the amount of units changed from movement from last tick to current tick
+                const UNITS_CHANGE = this._CAMERA.pixelsToUnits(App.previousMousePosition).subtract(
+                    this._CAMERA.pixelsToUnits(App.currentMousePosition)
+                );
             
-            this._CAMERA.adjustCamera(UNITS_CHANGE);
+                this._CAMERA.adjustCamera(UNITS_CHANGE);
+            }
+
+            const MOUSE_POS_UNITS: Vector2 = this._CAMERA.pixelsToUnits(App.currentMousePosition);
+            const HIGHLIGHT: Vector2 = new Vector2(
+                Math.floor(MOUSE_POS_UNITS.x),
+                Math.floor(MOUSE_POS_UNITS.y)
+            );
+
+            if (this.highlightedCell != null) {
+                if (!this.highlightedCell.equals(HIGHLIGHT)) {
+                    this.highlightAnimationTicks = 0;
+                    this.highlightedCell = HIGHLIGHT;
+                }
+            } else {
+                this.highlightedCell = HIGHLIGHT;
+            }
+            
+            if (
+                HIGHLIGHT.x < 0 ||
+                HIGHLIGHT.x >= Game.MAP_WIDTH ||
+                HIGHLIGHT.y < 0 ||
+                HIGHLIGHT.y >= Game.MAP_HEIGHT
+            ) {
+                this.highlightedCell = null;
+            }
         }
 
         // zoom in/out if scrolled mouse wheel
@@ -76,6 +111,18 @@ export class Game {
         );
 
         this.MAP.draw(canvas, this._CAMERA);
+
+        if (this.highlightedCell != null) {
+            canvas.fillPolygon(
+                [
+                    this._CAMERA.unitsToPixels(this.highlightedCell),
+                    this._CAMERA.unitsToPixels(this.highlightedCell.add(Vector2.I_UNIT)),
+                    this._CAMERA.unitsToPixels(this.highlightedCell.add(Vector2.I_UNIT).add(Vector2.J_UNIT)),
+                    this._CAMERA.unitsToPixels(this.highlightedCell.add(Vector2.J_UNIT))
+                ],
+                `rgba(255, 255, 255, ${this.highlightAnimationTicks / Game.HIGHLIGHT_ANIMATION_TICK_DURATION / 4})`
+            );
+        }
     }
 
     public monthEnded(): boolean {
@@ -170,7 +217,6 @@ export class GameMenu {
             if (this.game.CAMERA.isIsometric()) {
                 GameMenu.MAP_VIEW_CHANGE_BUTTON_IMG.src = "res/assets/icons/straight-icon.png";
             } else {
-                console.log('e')
                 GameMenu.MAP_VIEW_CHANGE_BUTTON_IMG.src = "res/assets/icons/isometric-icon.png";
             }
         });
