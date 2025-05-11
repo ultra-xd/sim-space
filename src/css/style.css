@@ -47,6 +47,14 @@ div#game-menu {
     transition: 0.5s;
 }
 
+button.facility-button {
+    min-width: 10%;
+    text-align: center;
+    white-space: normal;
+    word-wrap: break-word;
+    display: block;
+}
+
 button.general:hover, button.icon:hover, button.facility-button:hover {
     cursor: pointer;
     color: rgb(56, 123, 190);

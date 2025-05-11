@@ -4,6 +4,8 @@ import { Game } from "../app/game.js";
 import { Canvas } from "../app/canvas.js";
 import { Vector2 } from "../data_structures/vector.js";
 import { Camera } from "./camera.js";
+import { LuxuryHome } from "../facility/facility_types/residential.js";
+import { EmergencyBuilding } from "../facility/facility_types/essential.js";
 
 export class GameMap {
     private readonly cells: Cell[][];
@@ -19,7 +21,7 @@ export class GameMap {
         for (let y: number = 0; y < this.height; y++) {
             const CELL_ROW: Cell[] = new Array<Cell>(this.width);
             for (let x: number = 0; x < CELL_ROW.length; x++) {
-                CELL_ROW[x] = new Cell(this.game, x, y, null);
+                CELL_ROW[x] = new Cell(this.game, x, y, new EmergencyBuilding(this.game));
             }
 
             this.cells[y] = CELL_ROW;
