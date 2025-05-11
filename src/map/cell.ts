@@ -28,7 +28,7 @@ export class Cell {
             return null;
         }
 
-        return this.facility.FACILITY_TYPE;
+        return (this.facility.constructor as typeof Facility).FACILITY_TYPE;
     }
 
     public get facilitySector(): FacilitySector | null {
@@ -36,7 +36,7 @@ export class Cell {
             return null;
         }
 
-        return this.facility.FACILITY_SECTOR;
+        return (this.facility.constructor as typeof Facility).FACILITY_SECTOR;
     }
 
     public set facility(facility: Facility | null) {

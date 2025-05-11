@@ -16,54 +16,57 @@
         </div>
 
         <div id="game-menu">
-            <div class="general" id="stats-display">
-                <p> Money: <span id="stats-money-display">$5,000,000,000</span></p>
-                <p id="stats-date-display"> DATES!!! </p>
-                <p> Population: <span id="stats-population-display">1000</span></p>
-                <p> Score: <span id="stats-score-display">15254</span></p>
+            <div id="game-standard">
+                <div class="general" id="stats-display">
+                    <p> Money: <span id="stats-money-display">$5,000,000,000</span></p>
+                    <p id="stats-date-display"> DATES!!! </p>
+                    <p> Population: <span id="stats-population-display">1000</span></p>
+                    <p> Score: <span id="stats-score-display">15254</span></p>
+                </div>
+
+                <div id="construction-buttons">
+                    <button class="icon" id="construction-delete">
+                        <img src="res/assets/icons/delete-icon.png">
+                    </button>
+
+                    <button class="icon dropdown-button" id="construction-build">
+                        <img src="res/assets/icons/dropdown-icon.png">
+                    </button>
+                </div>
+
+                <div id="map-control-buttons">
+                    <button class="icon" id="map-zoom-in">
+                        <img src="res/assets/icons/zoom-in-icon.png">
+                    </button>
+
+                    <button class="icon" id="map-zoom-out">
+                        <img src="res/assets/icons/zoom-out-icon.png">
+                    </button>
+
+                    <button class="icon" id="map-reset">
+                        <img src="res/assets/icons/reset-icon.png">
+                    </button>
+
+                    <button class="icon" id="map-view-change">
+                        <img src="res/assets/icons/straight-icon.png" id="map-view-change-icon">
+                    </button>
+                </div>
+                
+                <div class="general dropdown" id="buildings-display"></div>
             </div>
 
-            <div id="construction-buttons">
-                <button class="icon" id="construction-delete">
-                    <img src="res/assets/icons/delete-icon.png">
-                </button>
-
-                <button class="icon dropdown-button" id="construction-build">
-                    <img src="res/assets/icons/dropdown-icon.png">
+            <div id="game-construction" hidden>
+                <button class="icon" id="view-cancel">
+                    <img src="res/assets/icons/cancel-icon.png">
                 </button>
             </div>
 
-            <div id="map-control-buttons">
-                <button class="icon" id="map-zoom-in">
-                    <img src="res/assets/icons/zoom-in-icon.png">
-                </button>
+            <div id="game-paused" hidden>
 
-                <button class="icon" id="map-zoom-out">
-                    <img src="res/assets/icons/zoom-out-icon.png">
-                </button>
-
-                <button class="icon" id="map-reset">
-                    <img src="res/assets/icons/reset-icon.png">
-                </button>
-
-                <button class="icon" id="map-view-change">
-                    <img src="res/assets/icons/straight-icon.png" id="map-view-change-icon">
-                </button>
             </div>
-            
-            <div class="general dropdown" id="buildings-display">
-                <button> i love eating steak </button>
-                <button> i love eating steak </button>
-                <button> i love eating steak </button>
-                <button> i love eating steak </button>
-                <button> i love eating steak </button>
-                <button> i love eating steak </button>
-                <button> i love eating steak </button>
-                <button> i love eating steak </button>
-                <button> i love eating steak </button>
-                <button> i love eating steak </button>
-                <button> i love eating steak </button>
-                <button> i love eating steak </button>
+
+            <div id="game-end" hidden>
+
             </div>
         </div>
 

@@ -3,14 +3,19 @@ import { Canvas } from "./canvas.js";
 import { Vector2 } from "../data_structures/vector.js";
 import { Camera } from "../map/camera.js";
 import { App } from "./app.js";
+import { Facility } from "../facility/facility.js";
+import { LuxuryHome, ComfortableHome, AffordableHome } from "../facility/facility_types/residential.js";
+import { DefenseFacility } from "../facility/facility_types/defense.js";
+import { EmergencyBuilding, EducationCentre, MedicalCentre, Government, PowerPlant } from "../facility/facility_types/essential.js";
+import { Restaurant, Store, Office } from "../facility/facility_types/commercial.js";
+import { EnvironmentalFacility, Factory, Warehouse } from "../facility/facility_types/industrial.js";
 
 export enum GameState {
     STANDARD,
     BUILD,
     DESTROY,
-    VIEW,
     PAUSED,
-    GAME_OVER
+    END
 }
 
 export class Game {
@@ -160,6 +165,9 @@ export class Game {
 
 export class GameMenu {
     public static readonly GAME_MENU_DIV: HTMLDivElement = document.getElementById("game-menu") as HTMLDivElement;
+    public static readonly GAME_CONSTRUCTION_DIV: HTMLDivElement = document.getElementById("game-construction") as HTMLDivElement;
+    public static readonly GAME_PAUSED_DIV: HTMLDivElement = document.getElementById("game-paused") as HTMLDivElement;
+    public static readonly GAME_END_DIV: HTMLDivElement = document.getElementById("game-end") as HTMLDivElement;
     public static readonly STATS_MONEY_PARAGRAPH: HTMLParagraphElement = document.getElementById("stats-money-display") as HTMLParagraphElement;
     public static readonly STATS_DATE_PARAGRAPH: HTMLParagraphElement = document.getElementById("stats-date-display") as HTMLParagraphElement;
     public static readonly STATS_POPULATION_PARAGRAPH: HTMLParagraphElement = document.getElementById("stats-population-display") as HTMLParagraphElement;
@@ -220,5 +228,93 @@ export class GameMenu {
                 GameMenu.MAP_VIEW_CHANGE_BUTTON_IMG.src = "res/assets/icons/isometric-icon.png";
             }
         });
+
+        GameMenu.createFacilityButtons();
+    }
+
+    public static switchGameState(gameState: GameState): void {
+        switch (gameState) {
+            case GameState.STANDARD:
+                this.GAME_MENU_DIV.hidden = false;
+                this.GAME_CONSTRUCTION_DIV.hidden = true;
+                this.GAME_PAUSED_DIV.hidden = true;
+                this.GAME_END_DIV.hidden = true;
+                break;
+            case GameState.BUILD, GameState.DESTROY:
+                this.GAME_MENU_DIV.hidden = true;
+                this.GAME_CONSTRUCTION_DIV.hidden = false;
+                this.GAME_PAUSED_DIV.hidden = true;
+                this.GAME_END_DIV.hidden = true;
+                break;
+            case GameState.PAUSED:
+                this.GAME_MENU_DIV.hidden = true;
+                this.GAME_CONSTRUCTION_DIV.hidden = true;
+                this.GAME_PAUSED_DIV.hidden = false;
+                this.GAME_END_DIV.hidden = true;
+                break;
+            case GameState.END:
+                this.GAME_MENU_DIV.hidden = true;
+                this.GAME_CONSTRUCTION_DIV.hidden = true;
+                this.GAME_PAUSED_DIV.hidden = true;
+                this.GAME_END_DIV.hidden = false;
+                break;
+        }
+    }
+
+    private static createFacilityButton<T extends {
+        new (GAME: Game): Facility; 
+        getSprite: (isometric: boolean) => HTMLImageElement; 
+        NAME: string
+    }>(FacilityClass: T): HTMLButtonElement {
+        const BUTTON: HTMLButtonElement = document.createElement("button");
+        BUTTON.type = "button";
+        BUTTON.className = "facility-button";
+        
+        const ICON: HTMLImageElement = FacilityClass.getSprite(true).cloneNode() as HTMLImageElement;
+        ICON.className = "facility-icon";
+
+        BUTTON.appendChild(ICON);
+
+        const TITLE: HTMLParagraphElement = document.createElement("p");
+        const TITLE_TEXT: Text = document.createTextNode(FacilityClass.NAME);
+        TITLE.appendChild(TITLE_TEXT);
+        BUTTON.appendChild(TITLE);
+
+        BUTTON.addEventListener("click", () => {
+            GameMenu.CONSTRUCTION_BUILDINGS_DISPLAY_DIV.classList.remove("show");
+            GameMenu.CONSTRUCTION_BUILD_BUTTON.classList.remove("active");
+        });
+
+        return BUTTON;
+    }
+
+    private static createFacilityButtons(): void {
+        const FACILITIES: ({
+            new (GAME: Game): Facility; 
+            getSprite: (isometric: boolean) => HTMLImageElement; 
+            NAME: string
+        })[] = [
+            EmergencyBuilding,
+            EducationCentre,
+            MedicalCentre,
+            Government,
+            PowerPlant,
+            LuxuryHome,
+            ComfortableHome,
+            AffordableHome,
+            Restaurant,
+            Store,
+            Office,
+            EnvironmentalFacility,
+            Factory,
+            Warehouse,
+            DefenseFacility
+        ];
+
+        for (let i: number = 0; i < FACILITIES.length; i++) {
+            GameMenu.CONSTRUCTION_BUILDINGS_DISPLAY_DIV.appendChild(
+                GameMenu.createFacilityButton(FACILITIES[i])
+            );
+        }
     }
 }

@@ -28,22 +28,32 @@ export enum FacilityType {
 }
 
 export abstract class Facility {
-    protected abstract readonly _FACILITY_SECTOR: FacilitySector;
-    protected abstract readonly _FACILITY_TYPE: FacilityType;
+    protected static readonly _FACILITY_SECTOR: FacilitySector;
+    protected static readonly _FACILITY_TYPE: FacilityType;
+    protected static readonly _NAME: string;
 
     public constructor(protected readonly GAME: Game) {
         
     }
 
-    public get FACILITY_SECTOR(): FacilitySector {
+    public static get FACILITY_SECTOR(): FacilitySector {
         return this._FACILITY_SECTOR;
     }
 
-    public get FACILITY_TYPE(): FacilityType {
+    public static get FACILITY_TYPE(): FacilityType {
         return this._FACILITY_TYPE;
     }
 
+    public static get NAME(): string {
+        return this._NAME;
+    }
+
     public getSprite(isometric: boolean): HTMLImageElement {
+        let directory: string = `res/assets/buildings/${isometric ? "isometric": "straight"}/${(this.constructor as typeof Facility).FACILITY_TYPE}.png`;
+        return Canvas.ImageLoader.getImage(directory);
+    }
+    
+    public static getSprite(isometric: boolean): HTMLImageElement {
         let directory: string = `res/assets/buildings/${isometric ? "isometric": "straight"}/${this.FACILITY_TYPE}.png`;
         return Canvas.ImageLoader.getImage(directory);
     }

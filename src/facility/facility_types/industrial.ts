@@ -1,17 +1,20 @@
 import { Facility, FacilitySector, FacilityType } from "../facility.js";
-import { Canvas } from "../../app/canvas.js";
+
 export abstract class IndustrialFacility extends Facility {
-    protected _FACILITY_SECTOR: FacilitySector = FacilitySector.INDUSTRIAL;
+    protected static readonly _FACILITY_SECTOR = FacilitySector.INDUSTRIAL;
 }
 
 export class Factory extends IndustrialFacility {
-    protected _FACILITY_TYPE: FacilityType = FacilityType.FACTORY;
+    protected static readonly _FACILITY_TYPE = FacilityType.FACTORY;
+    protected static readonly _NAME = "Factory";
 }
 
 export class Warehouse extends IndustrialFacility {
-    protected _FACILITY_TYPE: FacilityType = FacilityType.WAREHOUSE;
+    protected static readonly _FACILITY_TYPE = FacilityType.WAREHOUSE;
+    protected static readonly _NAME = "Warehouse";
 }
 
 export class EnvironmentalFacility extends IndustrialFacility {
-    protected _FACILITY_TYPE: FacilityType = FacilityType.ENVIRONMENT;
+    protected static readonly _FACILITY_TYPE = FacilityType.ENVIRONMENT;
+    protected static readonly _NAME = "Environmental Facility";
 }
