@@ -72,10 +72,6 @@ export class App {
         });
 
         document.body.addEventListener("wheel", (event) => {
-            if (event.defaultPrevented) {
-                return;
-            }
-
             let scroll: number = event.deltaY;
             if (scroll > 0) {
                 App._mouseScroll = 1;

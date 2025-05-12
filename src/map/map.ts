@@ -145,16 +145,16 @@ export class GameMap {
             );
         }
 
-        for (let i: number = Math.max(0, MIN_Y); i <= (Math.min(MAX_Y, this.width - 1)); i++) {
+        for (let i: number = Math.max(0, MIN_Y); i <= (Math.min(MAX_Y, this.height - 1)); i++) {
             const CELL_ROW: Cell[] = this.cells[i];
-            for (let j: number = Math.max(0, MIN_X); j <= (Math.min(MAX_X, this.height - 1)); j++) {
+            for (let j: number = Math.max(0, MIN_X); j <= (Math.min(MAX_X, this.width - 1)); j++) {
                 CELL_ROW[j].drawGround(canvas, camera);
             }
         }
 
-        for (let i: number = Math.max(0, MIN_Y); i <= (Math.min(MAX_Y, this.width - 1)); i++) {
+        for (let i: number = Math.max(0, MIN_Y); i <= (Math.min(MAX_Y, this.height - 1)); i++) {
             const CELL_ROW: Cell[] = this.cells[i];
-            for (let j: number = Math.max(0, MIN_X); j <= (Math.min(MAX_X, this.height - 1)); j++) {
+            for (let j: number = Math.max(0, MIN_X); j <= (Math.min(MAX_X, this.width - 1)); j++) {
                 CELL_ROW[j].drawFacility(canvas, camera);
             }
         }

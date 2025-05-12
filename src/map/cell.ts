@@ -101,14 +101,10 @@ export class Cell {
     }
 
     public canBuild(facilityType: FacilityType) : boolean {
-        return true; //placeholder
+        return this.isEmpty();
     }
 
     public canDestroy(): boolean {
-        if (this.isEmpty()) {
-            return false;
-        }
-
-        return true;
+        return !this.isEmpty();
     }
 }
