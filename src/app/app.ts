@@ -32,7 +32,7 @@ export class App {
             event.preventDefault();
         });
 
-        document.body.addEventListener("mousedown", (event) => {
+        this.CANVAS.HTMLElement.addEventListener("mousedown", (event) => {
             if (event.defaultPrevented) {
                 return;
             }
@@ -44,7 +44,7 @@ export class App {
             }
         });
 
-        document.body.addEventListener("mouseup", (event) => {
+        this.CANVAS.HTMLElement.addEventListener("mouseup", (event) => {
             if (event.defaultPrevented) {
                 return;
             }

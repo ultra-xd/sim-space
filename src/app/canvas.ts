@@ -140,6 +140,10 @@ export class Canvas {
         return this.CANVAS_ELEMENT.height;
     }
 
+    public get HTMLElement(): HTMLCanvasElement {
+        return this.CANVAS_ELEMENT;
+    }
+
     public static readonly ImageLoader = class {
         private static IMAGES: {[src: string]: HTMLImageElement} = {};
 
