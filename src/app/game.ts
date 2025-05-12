@@ -47,6 +47,7 @@ export class Game {
     private _gameState: GameState = GameState.STANDARD;
 
     private clicked: boolean = false;
+    private holding: boolean = false;
 
     public constructor() {
         this.GAME_MENU.setup();
@@ -54,7 +55,20 @@ export class Game {
 
     public tick(): void {
         this._ticks++;
-        this.clicked = (!this.clicked && App.mouseEvents.contains(0));
+
+        if (this.clicked && this.holding) {
+            this.clicked = false;
+        }
+
+        if (App.mouseEvents.contains(0)) {
+            if (!this.holding) {
+                this.clicked = true;
+                this.holding = true;           
+            }
+        } else {
+            this.clicked = false;
+            this.holding = false;
+        }
 
         // shift map position if mouse moved and dragged
         if (
@@ -110,8 +124,13 @@ export class Game {
                     if (this._MAP.build(this._selectedFacility, this.highlightedCell)) {
                         this.gameState = GameState.STANDARD;
                     }
+
                     break;
                 case GameState.DESTROY:
+                    if (this._MAP.destroy(this.highlightedCell)) {
+                        this.gameState = GameState.STANDARD;
+                    }
+
                     break;
             }
         }

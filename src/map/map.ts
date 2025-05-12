@@ -60,6 +60,16 @@ export class GameMap {
         return false;
     }
 
+    public destroy(coordinates: Vector2): boolean {
+        const CELL: Cell = this.cells[coordinates.y][coordinates.x];
+        if (CELL.canDestroy()) {
+            CELL.facility = null;
+            return true;
+        }
+
+        return false;
+    }
+
     public draw(canvas: Canvas, camera: Camera): void {
 
         const TOP_LEFT_COORDS: Vector2 = camera.pixelsToUnits(new Vector2(0, 0));

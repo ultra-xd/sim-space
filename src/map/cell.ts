@@ -23,19 +23,19 @@ export class Cell {
     }
 
     public get facilityType(): FacilityType | null {
-        if (this.facility == null) {
+        if (this._facility == null) {
             return null;
         }
 
-        return (this.facility.constructor as typeof Facility).FACILITY_TYPE;
+        return (this._facility.constructor as typeof Facility).FACILITY_TYPE;
     }
 
     public get facilitySector(): FacilitySector | null {
-        if (this.facility == null) {
+        if (this._facility == null) {
             return null;
         }
 
-        return (this.facility.constructor as typeof Facility).FACILITY_SECTOR;
+        return (this._facility.constructor as typeof Facility).FACILITY_SECTOR;
     }
 
     public set facility(facility: Facility | null) {
@@ -54,20 +54,12 @@ export class Cell {
         return this._coordinates;
     }
 
-    public build(facility: Facility): boolean {
-        return true;
-    }
-
-    public destroy(facility: Facility): boolean {
-        return true;
-    }
-
     public tick(): void {
 
     }
 
     public isEmpty(): boolean {
-        return this.facility == null;
+        return this._facility == null;
     }
 
     public drawGround(canvas: Canvas, camera: Camera): void {
@@ -110,5 +102,13 @@ export class Cell {
 
     public canBuild(facilityType: FacilityType) : boolean {
         return true; //placeholder
+    }
+
+    public canDestroy(): boolean {
+        if (this.isEmpty()) {
+            return false;
+        }
+
+        return true;
     }
 }
