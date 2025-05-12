@@ -32,6 +32,13 @@ export abstract class Facility {
     protected static readonly _FACILITY_TYPE: FacilityType;
     protected static readonly _NAME: string;
 
+    protected abstract _buildcost : number;
+    protected abstract _maintenanceCost : number ;
+    protected abstract _taxRevenue : number;
+    protected abstract _powerUnits : number;
+    protected abstract _pollution : number;
+    protected abstract _name : string;
+
     public constructor(protected readonly GAME: Game) {
         
     }
@@ -57,4 +64,24 @@ export abstract class Facility {
         let directory: string = `res/assets/buildings/${isometric ? "isometric": "straight"}/${this.FACILITY_TYPE}.png`;
         return Canvas.ImageLoader.getImage(directory);
     }
+
+    public get buildCost(): number {
+        return this._buildcost;
+    }
+    public get maintenanceCost(): number {
+        return this._maintenanceCost;
+    }
+    public get taxRevenue(): number {
+        return this._taxRevenue;
+    }
+    public get powerUnits(): number {
+        return this._powerUnits;
+    }
+    public get pollution(): number {
+        return this._pollution;
+    }
+    public get name(): string {
+        return this._name;
+    }
 }
+

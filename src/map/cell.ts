@@ -11,7 +11,6 @@ import { GameMap } from "./map.js";
 import { DefenseFacility } from "../facility/facility_types/defense.js";
 
 export class Cell {
-
     private _coordinates: Vector2;
 
     public constructor(
@@ -107,5 +106,9 @@ export class Cell {
                 )
             }
         }
+    }
+
+    public canBuild() : boolean {
+        return true; //placeholder
     }
 }
