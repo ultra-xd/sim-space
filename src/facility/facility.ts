@@ -32,12 +32,11 @@ export abstract class Facility {
     protected static readonly _FACILITY_TYPE: FacilityType;
     protected static readonly _NAME: string;
 
-    protected abstract _buildcost : number;
-    protected abstract _maintenanceCost : number ;
-    protected abstract _taxRevenue : number;
-    protected abstract _powerUnits : number;
-    protected abstract _pollution : number;
-    protected abstract _name : string;
+    protected abstract _buildcost: number;
+    protected abstract _maintenanceCost: number;
+    protected abstract _taxRevenue: number;
+    protected abstract _powerUnits: number;
+    protected abstract _pollution: number;
 
     public constructor(protected readonly GAME: Game) {
         
@@ -79,9 +78,6 @@ export abstract class Facility {
     }
     public get pollution(): number {
         return this._pollution;
-    }
-    public get name(): string {
-        return this._name;
     }
 }
 

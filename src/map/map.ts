@@ -17,11 +17,11 @@ export class GameMap {
         private _width: number, 
         private _height: number
     ) {
-        this.cells = new Array<Array<Cell>>(this.height);
+        this.cells = new Array<Cell[]>(this.height);
         for (let y: number = 0; y < this.height; y++) {
             const CELL_ROW: Cell[] = new Array<Cell>(this.width);
             for (let x: number = 0; x < CELL_ROW.length; x++) {
-                CELL_ROW[x] = new Cell(this.game, x, y, new EmergencyBuilding(this.game));
+                CELL_ROW[x] = new Cell(this.game, x, y, new LuxuryHome(this.game));
             }
 
             this.cells[y] = CELL_ROW;

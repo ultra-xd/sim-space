@@ -33,20 +33,20 @@ export class LuxuryHome extends ResidentialFacility {
     protected _maintenanceCostUnits: number;
     protected _pollutionUnits: number;
     protected _basePollution: number;
-    protected readonly _FACILITY_TYPE: FacilityType.LUXURY_HOME;
+    protected static readonly _FACILITY_TYPE: FacilityType = FacilityType.LUXURY_HOME;
 
-    _buildcost = 1000000000
-    _maintenanceCost = 10000000;
-    _taxRevenue = 15000000;
-    _powerUnits = 100;
-    _pollution = 500;
-    _name = "Luxury Home";
+    protected _buildcost: number = 1000000000
+    protected _maintenanceCost: number = 10000000;
+    protected _taxRevenue: number = 15000000;
+    protected _powerUnits: number = 100;
+    protected _pollution: number = 500;
+    protected static readonly _NAME: string = "Luxury Home";
 
-    _curPopulation = 0;
-    _maxPopulation = 10000;
-    _happyPopulation = 0;
-    _contentPopulation = 0;
-    _happinessRatio = 0;
+    protected _curPopulation: number = 0;
+    protected _maxPopulation: number = 10000;
+    protected _happyPopulation: number = 0;
+    protected _contentPopulation: number = 0;
+    protected _happinessRatio: number = 0;
     
 
 
@@ -71,7 +71,7 @@ export class ComfortableHome extends ResidentialFacility {
     protected _pollution: number;
     protected _name: string;
     protected static readonly _FACILITY_TYPE: FacilityType = FacilityType.COMFORTABLE_HOME;
-    protected static readonly _NAME = "Comfortable Home";
+    protected static readonly _NAME: string = "Comfortable Home";
 }
 
 export class AffordableHome extends ResidentialFacility {
@@ -93,5 +93,5 @@ export class AffordableHome extends ResidentialFacility {
     protected _pollution: number;
     protected _name: string;
     protected static readonly _FACILITY_TYPE: FacilityType = FacilityType.AFFORDABLE_HOME;
-    protected static readonly _NAME = "Affordable Home";
+    protected static readonly _NAME: string = "Affordable Home";
 }
