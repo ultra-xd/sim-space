@@ -29,9 +29,18 @@ canvas#canvas:active {
 
 div#game-menu {
     position: fixed;
+    display: block;
     left: 0px;
     top: 0px;
     z-index: 2;
+    width: 100%;
+    height: 100%;
+}
+
+div#game-standard, div#game-construction, div#game-paused, div#game-end {
+    position: absolute;
+    left: 0px;
+    top: 0px;
     width: 100%;
     height: 100%;
 }
@@ -114,7 +123,7 @@ span#stats-score-display {
 
 .dropdown {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(-300px);
     transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
@@ -142,6 +151,12 @@ span#stats-score-display {
 }
 
 div#map-control-buttons {
+    position: absolute;
+    left: 1%;
+    bottom: 1%;
+}
+
+button#view-cancel {
     position: absolute;
     left: 1%;
     bottom: 1%;

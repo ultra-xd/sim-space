@@ -40,7 +40,7 @@ export class Game {
     private static readonly HIGHLIGHT_ANIMATION_DURATION: number = 2;
     private static readonly HIGHLIGHT_ANIMATION_TICK_DURATION: number = this.HIGHLIGHT_ANIMATION_DURATION * 60;
 
-    private gameState: GameState = GameState.STANDARD;
+    private _gameState: GameState = GameState.STANDARD;
 
     public constructor() {
         this.GAME_MENU.setup();
@@ -117,6 +117,20 @@ export class Game {
 
         this.MAP.draw(canvas, this._CAMERA);
 
+        let colour: string;
+
+        switch (this._gameState) {
+            case GameState.BUILD:
+                colour = "0, 255, 0";
+                break;
+            case GameState.DESTROY:
+                colour = "255, 0, 0";
+                break;
+            default:
+                colour = "255, 255, 255";
+                break;
+        }
+        
         if (this.highlightedCell != null) {
             canvas.fillPolygon(
                 [
@@ -125,7 +139,7 @@ export class Game {
                     this._CAMERA.unitsToPixels(this.highlightedCell.add(Vector2.I_UNIT).add(Vector2.J_UNIT)),
                     this._CAMERA.unitsToPixels(this.highlightedCell.add(Vector2.J_UNIT))
                 ],
-                `rgba(255, 255, 255, ${this.highlightAnimationTicks / Game.HIGHLIGHT_ANIMATION_TICK_DURATION / 4})`
+                `rgba(${colour}, ${this.highlightAnimationTicks / Game.HIGHLIGHT_ANIMATION_TICK_DURATION / 4})`
             );
         }
     }
@@ -161,10 +175,20 @@ export class Game {
     public get CAMERA(): Camera {
         return this._CAMERA;
     }
+
+    public get gameState(): GameState {
+        return this._gameState;
+    }
+
+    public set gameState(gameState: GameState) {
+        this._gameState = gameState;
+        this.GAME_MENU.switchUI(gameState);
+    }
 }
 
 export class GameMenu {
     public static readonly GAME_MENU_DIV: HTMLDivElement = document.getElementById("game-menu") as HTMLDivElement;
+    public static readonly GAME_STANDARD_DIV: HTMLDivElement = document.getElementById("game-standard") as HTMLDivElement;
     public static readonly GAME_CONSTRUCTION_DIV: HTMLDivElement = document.getElementById("game-construction") as HTMLDivElement;
     public static readonly GAME_PAUSED_DIV: HTMLDivElement = document.getElementById("game-paused") as HTMLDivElement;
     public static readonly GAME_END_DIV: HTMLDivElement = document.getElementById("game-end") as HTMLDivElement;
@@ -181,6 +205,7 @@ export class GameMenu {
     public static readonly MAP_RESET_BUTTON: HTMLButtonElement = document.getElementById("map-reset") as HTMLButtonElement;
     public static readonly MAP_VIEW_CHANGE_BUTTON: HTMLButtonElement = document.getElementById("map-view-change") as HTMLButtonElement;
     public static readonly MAP_VIEW_CHANGE_BUTTON_IMG: HTMLImageElement = document.getElementById("map-view-change-icon") as HTMLImageElement;
+    public static readonly CONSTRUCTION_CANCEL_BUTTON: HTMLButtonElement = document.getElementById("view-cancel") as HTMLButtonElement;
 
     public constructor(private readonly game: Game) {};
 
@@ -229,39 +254,48 @@ export class GameMenu {
             }
         });
 
-        GameMenu.createFacilityButtons();
+        GameMenu.CONSTRUCTION_CANCEL_BUTTON.addEventListener("click", () => {
+            this.game.gameState = GameState.STANDARD;
+        });
+
+        GameMenu.CONSTRUCTION_DELETE_BUTTON.addEventListener("click", () => {
+            this.game.gameState = GameState.DESTROY;
+        });
+
+        this.createFacilityButtons();
     }
 
-    public static switchGameState(gameState: GameState): void {
+    public switchUI(gameState: GameState): void {
         switch (gameState) {
             case GameState.STANDARD:
-                this.GAME_MENU_DIV.hidden = false;
-                this.GAME_CONSTRUCTION_DIV.hidden = true;
-                this.GAME_PAUSED_DIV.hidden = true;
-                this.GAME_END_DIV.hidden = true;
+                GameMenu.GAME_STANDARD_DIV.hidden = false;
+                GameMenu.GAME_CONSTRUCTION_DIV.hidden = true;
+                GameMenu.GAME_PAUSED_DIV.hidden = true;
+                GameMenu.GAME_END_DIV.hidden = true;
                 break;
-            case GameState.BUILD, GameState.DESTROY:
-                this.GAME_MENU_DIV.hidden = true;
-                this.GAME_CONSTRUCTION_DIV.hidden = false;
-                this.GAME_PAUSED_DIV.hidden = true;
-                this.GAME_END_DIV.hidden = true;
+            case GameState.BUILD:
+            case GameState.DESTROY:
+                GameMenu.GAME_STANDARD_DIV.hidden = true;
+                GameMenu.GAME_CONSTRUCTION_DIV.hidden = false;
+                GameMenu.GAME_PAUSED_DIV.hidden = true;
+                GameMenu.GAME_END_DIV.hidden = true;
                 break;
             case GameState.PAUSED:
-                this.GAME_MENU_DIV.hidden = true;
-                this.GAME_CONSTRUCTION_DIV.hidden = true;
-                this.GAME_PAUSED_DIV.hidden = false;
-                this.GAME_END_DIV.hidden = true;
+                GameMenu.GAME_STANDARD_DIV.hidden = true;
+                GameMenu.GAME_CONSTRUCTION_DIV.hidden = true;
+                GameMenu.GAME_PAUSED_DIV.hidden = false;
+                GameMenu.GAME_END_DIV.hidden = true;
                 break;
             case GameState.END:
-                this.GAME_MENU_DIV.hidden = true;
-                this.GAME_CONSTRUCTION_DIV.hidden = true;
-                this.GAME_PAUSED_DIV.hidden = true;
-                this.GAME_END_DIV.hidden = false;
+                GameMenu.GAME_STANDARD_DIV.hidden = true;
+                GameMenu.GAME_CONSTRUCTION_DIV.hidden = true;
+                GameMenu.GAME_PAUSED_DIV.hidden = true;
+                GameMenu.GAME_END_DIV.hidden = false;
                 break;
         }
     }
 
-    private static createFacilityButton<T extends {
+    private createFacilityButton<T extends {
         new (GAME: Game): Facility; 
         getSprite: (isometric: boolean) => HTMLImageElement; 
         NAME: string
@@ -283,12 +317,13 @@ export class GameMenu {
         BUTTON.addEventListener("click", () => {
             GameMenu.CONSTRUCTION_BUILDINGS_DISPLAY_DIV.classList.remove("show");
             GameMenu.CONSTRUCTION_BUILD_BUTTON.classList.remove("active");
+            this.game.gameState = GameState.BUILD;
         });
 
         return BUTTON;
     }
 
-    private static createFacilityButtons(): void {
+    private createFacilityButtons(): void {
         const FACILITIES: ({
             new (GAME: Game): Facility; 
             getSprite: (isometric: boolean) => HTMLImageElement; 
@@ -313,7 +348,7 @@ export class GameMenu {
 
         for (let i: number = 0; i < FACILITIES.length; i++) {
             GameMenu.CONSTRUCTION_BUILDINGS_DISPLAY_DIV.appendChild(
-                GameMenu.createFacilityButton(FACILITIES[i])
+                this.createFacilityButton(FACILITIES[i])
             );
         }
     }
