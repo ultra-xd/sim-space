@@ -108,7 +108,7 @@ export class Cell {
         }
     }
 
-    public canBuild() : boolean {
+    public canBuild(facilityType: FacilityType) : boolean {
         return true; //placeholder
     }
 }

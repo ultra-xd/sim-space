@@ -9,6 +9,7 @@ import { DefenseFacility } from "../facility/facility_types/defense.js";
 import { EmergencyBuilding, EducationCentre, MedicalCentre, Government, PowerPlant } from "../facility/facility_types/essential.js";
 import { Restaurant, Store, Office } from "../facility/facility_types/commercial.js";
 import { EnvironmentalFacility, Factory, Warehouse } from "../facility/facility_types/industrial.js";
+import { assert } from "../util/util.js";
 
 export enum GameState {
     STANDARD,
@@ -40,7 +41,16 @@ export class Game {
     private static readonly HIGHLIGHT_ANIMATION_DURATION: number = 2;
     private static readonly HIGHLIGHT_ANIMATION_TICK_DURATION: number = this.HIGHLIGHT_ANIMATION_DURATION * 60;
 
+    // build mode: get class of facility to build
+    private _selectedFacility: {
+        new (GAME: Game): Facility;
+        getSprite: (isometric: boolean) => HTMLImageElement; 
+        NAME: string
+    } | null = null;
+
     private _gameState: GameState = GameState.STANDARD;
+
+    private clicked: boolean = false;
 
     public constructor() {
         this.GAME_MENU.setup();
@@ -48,6 +58,7 @@ export class Game {
 
     public tick(): void {
         this._ticks++;
+        this.clicked = (!this.clicked && App.mouseEvents.contains(0));
 
         // shift map position if mouse moved and dragged
         if (
@@ -90,6 +101,22 @@ export class Game {
                 HIGHLIGHT.y >= Game.MAP_HEIGHT
             ) {
                 this.highlightedCell = null;
+            }
+        }
+
+        if (this.clicked && this.highlightedCell != null) {
+            switch (this._gameState) {
+                case GameState.STANDARD:
+                    break;
+                case GameState.BUILD:
+                    assert (this._selectedFacility != null);
+
+                    if (this._MAP.build(this._selectedFacility, this.highlightedCell)) {
+                        this.gameState = GameState.STANDARD;
+                    }
+                    break;
+                case GameState.DESTROY:
+                    break;
             }
         }
 
@@ -183,6 +210,22 @@ export class Game {
     public set gameState(gameState: GameState) {
         this._gameState = gameState;
         this.GAME_MENU.switchUI(gameState);
+    }
+
+    public setSelectedFacility<T extends {
+        new (GAME: Game): Facility; 
+        getSprite: (isometric: boolean) => HTMLImageElement; 
+        NAME: string
+    }>(FacilityClass: T | null): void {
+        this._selectedFacility = FacilityClass;
+    }
+
+    public get selectedFacility(): {
+        new (GAME: Game): Facility; 
+        getSprite: (isometric: boolean) => HTMLImageElement; 
+        NAME: string
+    } | null {
+        return this._selectedFacility;
     }
 }
 
@@ -318,6 +361,7 @@ export class GameMenu {
             GameMenu.CONSTRUCTION_BUILDINGS_DISPLAY_DIV.classList.remove("show");
             GameMenu.CONSTRUCTION_BUILD_BUTTON.classList.remove("active");
             this.game.gameState = GameState.BUILD;
+            this.game.setSelectedFacility(FacilityClass);
         });
 
         return BUTTON;

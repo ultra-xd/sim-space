@@ -21,7 +21,7 @@ export class GameMap {
         for (let y: number = 0; y < this.height; y++) {
             const CELL_ROW: Cell[] = new Array<Cell>(this.width);
             for (let x: number = 0; x < CELL_ROW.length; x++) {
-                CELL_ROW[x] = new Cell(this.game, x, y, new LuxuryHome(this.game));
+                CELL_ROW[x] = new Cell(this.game, x, y, null);
             }
 
             this.cells[y] = CELL_ROW;
@@ -44,8 +44,20 @@ export class GameMap {
         return GameMap._ROAD_WIDTH;
     }
 
-    public build(facility: Facility): void {
+    public build<T extends {
+        new (GAME: Game): Facility; 
+        getSprite: (isometric: boolean) => HTMLImageElement; 
+        NAME: string
+    }>(FacilityClass: T, coordinates: Vector2): boolean {
+        const FACILITY: Facility = new FacilityClass(this.game);
+        const CELL: Cell = this.cells[coordinates.y][coordinates.x];
 
+        if (CELL.canBuild((FACILITY.constructor as typeof Facility).FACILITY_TYPE)) {
+            CELL.facility = FACILITY;
+            return true;
+        }
+
+        return false;
     }
 
     public draw(canvas: Canvas, camera: Camera): void {
