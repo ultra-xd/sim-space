@@ -1,97 +1,99 @@
+import { Vector2 } from "../../data_structures/vector.js";
 import { Facility } from "../facility.js";
 import { FacilitySector } from "../facility.js";
 import { FacilityType } from "../facility.js";
-
 export abstract class ResidentialFacility extends Facility {
     protected readonly _FACILITY_SECTOR = FacilitySector.RESIDENTIAL;
-    protected abstract _curPopulation : number;
-    protected abstract _maxPopulation : number;
-    protected _GROWTH_RATE : number = 0.1;
 
-    protected abstract _happyPopulation : number;
-    protected abstract _contentPopulation : number;
-    protected abstract _happinessRatio : number;
-  
+    protected static readonly _MAX_POPULATION: number;
+    protected static readonly _HAPPINESS_RATIO: number; 
+    protected static readonly _TAX_REVENUE_PER_UNIT: number;
+    protected static readonly _MAINTENANCE_COST_PER_UNIT: number;
+    protected static readonly _BASE_MAINTENANCE_COST: number;
+    protected static readonly _POLLUTION_PER_UNIT: number;
+    protected static readonly _BUILD_COST: number;
+    protected static readonly _POWER_COST: number;
+    protected static readonly _GROWTH_RATE: number = 0.1;
+    protected _population: number;
 
-    protected abstract _baseTaxRevenue : number;
-    protected abstract _taxRevenueUnits : number;
+    protected updateTaxRevenue() : void {
 
-    protected abstract _baseMaintenanceCost : number;
-    protected abstract _maintenanceCostUnits : number;
+    }
+    protected updateMaintenanceCost() : void {
 
-    protected abstract _pollutionUnits : number;
-    protected abstract _basePollution : number;
+    }
+    protected updatePollution() : void {
 
+    }
+    public override tick(): void {
 
+    }
+    protected get population(): number {
+        return this._population;
+    }
+    protected happyPopulation(): number {
+        return this._population * ResidentialFacility._HAPPINESS_RATIO;
+    }
+    protected contentPopulation(): number {
+        return this._population - (this._population * ResidentialFacility._HAPPINESS_RATIO);
+    }
 
 }
 
 export class LuxuryHome extends ResidentialFacility {
-    protected _baseTaxRevenue: number;
-    protected _taxRevenueUnits: number;
-    protected _baseMaintenanceCost: number;
-    protected _maintenanceCostUnits: number;
-    protected _pollutionUnits: number;
-    protected _basePollution: number;
     protected static readonly _FACILITY_TYPE: FacilityType = FacilityType.LUXURY_HOME;
+    protected static readonly _NAME:  string  = "Luxury Home";
 
-    protected _buildcost: number = 1000000000
-    protected _maintenanceCost: number = 10000000;
-    protected _taxRevenue: number = 15000000;
-    protected _powerUnits: number = 100;
-    protected _pollution: number = 500;
-    protected static readonly _NAME: string = "Luxury Home";
-
-    protected _curPopulation: number = 0;
-    protected _maxPopulation: number = 10000;
-    protected _happyPopulation: number = 0;
-    protected _contentPopulation: number = 0;
-    protected _happinessRatio: number = 0;
+    protected static readonly _MAX_POPULATION: number = 10000;
+    private static readonly _MAX_UNIDEAL_POPULATION: number = 5000;
+    protected static readonly _HAPPINESS_RATIO: number = 0.5;
+    protected static readonly _TAX_REVENUE_PER_UNIT: number = 15000000;
+    protected static readonly _MAINTENANCE_COST_PER_UNIT: number = 1000000;
+    protected static readonly _BASE_MAINTENANCE_COST: number = 10000000;
+    protected static readonly _POLLUTION_PER_UNIT: number = 500;
+    protected static readonly _BUILD_COST: number= 1000000000;
+    protected static readonly _POWER_COST: number = 100;
     
+    public facilityCheck(coordinates : Vector2): boolean {
+        return true;
+    }
+    public override tick(): void {
 
+    }
 
 }
 
 export class ComfortableHome extends ResidentialFacility {
-    protected _curPopulation: number;
-    protected _maxPopulation: number;
-    protected _happyPopulation: number;
-    protected _contentPopulation: number;
-    protected _happinessRatio: number;
-    protected _baseTaxRevenue: number;
-    protected _taxRevenueUnits: number;
-    protected _baseMaintenanceCost: number;
-    protected _maintenanceCostUnits: number;
-    protected _pollutionUnits: number;
-    protected _basePollution: number;
-    protected _buildcost: number;
-    protected _maintenanceCost: number;
-    protected _taxRevenue: number;
-    protected _powerUnits: number;
-    protected _pollution: number;
-    protected _name: string;
+
     protected static readonly _FACILITY_TYPE: FacilityType = FacilityType.COMFORTABLE_HOME;
     protected static readonly _NAME: string = "Comfortable Home";
+
+    protected static readonly _MAX_POPULATION: number = 15000;
+    protected static readonly _HAPPINESS_RATIO: number = 0.25;
+    protected static readonly _TAX_REVENUE_PER_UNIT: number = 1000000;
+    protected static readonly _MAINTENANCE_COST_PER_UNIT: number = 50000;
+    protected static readonly _BASE_MAINTENANCE_COST: number = 40000;
+    protected static readonly _POLLUTION_PER_UNIT: number = 50;
+    protected static readonly _BUILD_COST: number= 500000000;
+    protected static readonly _POWER_COST: number = 50;
 }
 
 export class AffordableHome extends ResidentialFacility {
-    protected _curPopulation: number;
-    protected _maxPopulation: number;
-    protected _happyPopulation: number;
-    protected _contentPopulation: number;
-    protected _happinessRatio: number;
-    protected _baseTaxRevenue: number;
-    protected _taxRevenueUnits: number;
-    protected _baseMaintenanceCost: number;
-    protected _maintenanceCostUnits: number;
-    protected _pollutionUnits: number;
-    protected _basePollution: number;
-    protected _buildcost: number;
-    protected _maintenanceCost: number;
-    protected _taxRevenue: number;
-    protected _powerUnits: number;
-    protected _pollution: number;
-    protected _name: string;
+
     protected static readonly _FACILITY_TYPE: FacilityType = FacilityType.AFFORDABLE_HOME;
     protected static readonly _NAME: string = "Affordable Home";
+
+    protected static readonly _MAX_POPULATION: number = 25000;
+    protected static readonly _HAPPINESS_RATIO: number = 0.1;
+    protected static readonly _TAX_REVENUE_PER_UNIT: number = 10000;
+    protected static readonly _MAINTENANCE_COST_PER_UNIT: number = 2000;
+    protected static readonly _BASE_MAINTENANCE_COST: number = 8000;
+    protected static readonly _POLLUTION_PER_UNIT: number = 10;
+    protected static readonly _BUILD_COST: number= 50000000;
+    protected static readonly _POWER_COST: number = 25;
+
+    public override updatePollution(): void {
+        
+    }
+
 }
