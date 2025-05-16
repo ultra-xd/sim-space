@@ -123,15 +123,25 @@ span#stats-score-display {
     color: rgb(231, 197, 0);
 }
 
-.dropdown {
+#game-standard .dropdown {
     opacity: 0;
-    transform: translateY(-300px);
+    pointer-events: none;
+    transform: translateY(-30px);
     transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
-.dropdown.show {
+#game-standard .dropdown * {
+    pointer-events: none;
+}
+
+#game-standard .dropdown.show {
+    pointer-events: auto;
     opacity: 1;
     transform: translateY(0);
+}
+
+#game-standard .dropdown.show * {
+    pointer-events: auto;
 }
 
 .icon img {
@@ -140,8 +150,7 @@ span#stats-score-display {
 }
 
 .facility-button img {
-    width: 80px;
-    height: 80px;
+    width: 100%;
 }
 
 .dropdown-button img {
