@@ -1,6 +1,4 @@
-import { Facility } from "../facility.js";
-import { FacilitySector } from "../facility.js";
-import { FacilityType } from "../facility.js";
+import { Facility, FacilitySector, FacilityType } from "../facility.js";
 
 export abstract class CommercialFacility extends Facility {
     protected static readonly _FACILITY_SECTOR = FacilitySector.COMMERCIAL;
@@ -11,7 +9,7 @@ export class Store extends CommercialFacility {
     protected static readonly _FACILITY_TYPE = FacilityType.STORE;
     protected static readonly _NAME = "Store";
 
-    protected _buildcost: number = 2000000
+    protected _buildcost: number = 2000000;
     protected _maintenanceCost: number = 50000;
     protected _taxRevenue: number = 200000;
     protected _powerUnits: number = 5;

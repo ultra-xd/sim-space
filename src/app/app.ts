@@ -1,8 +1,10 @@
 import { Game } from "./game.js";
 import { StartMenu } from "./start_menu.js";
+import { GameMenu } from "./game_menu.js";
 import { Canvas } from "./canvas.js";
 import { ArrayList } from "../data_structures/arraylist.js";
 import { Vector2 } from "../data_structures/vector.js";
+import { assert } from "../util/util.js";
 
 export enum AppState {
     IN_GAME,
@@ -10,11 +12,10 @@ export enum AppState {
 }
 
 export class App {
-    private static GAME: Game = new Game();
-    private static readonly START_MENU: StartMenu = new StartMenu();
+    private static GAME: Game | null = null;
     private static readonly _CANVAS: Canvas = new Canvas("canvas");
 
-    private static appState: AppState = AppState.IN_GAME;
+    private static appState: AppState = AppState.START_MENU;
 
     private static intervalLoop: number;
     private static readonly _TPS: number = 60;
@@ -107,6 +108,8 @@ export class App {
             }
         });
 
+        StartMenu.setup();
+
         App.start();
     }
 
@@ -126,10 +129,10 @@ export class App {
     }
 
     private static tick(): void {
-        if (App.appState == AppState.IN_GAME) {
+        if (App.appState == AppState.IN_GAME && App.GAME != null) {
             App.GAME.tick();
         } else if (App.appState == AppState.START_MENU) {
-            App.START_MENU.tick();
+            StartMenu.tick();
         }
 
         App.CANVAS.tick();
@@ -139,10 +142,10 @@ export class App {
     }
 
     private static draw(): void {
-        if (App.appState == AppState.IN_GAME) {
+        if (App.appState == AppState.IN_GAME && App.GAME != null) {
             App.GAME.draw(App.CANVAS);
         } else if (this.appState == AppState.START_MENU) {
-            App.START_MENU.draw(App.CANVAS);
+            StartMenu.draw(App.CANVAS);
         }
     }
 
@@ -172,5 +175,26 @@ export class App {
 
     public static get keyEvents(): ArrayList<string> {
         return App.KEY_EVENTS;
+    }
+
+    public static changeAppState(state: AppState): void {
+        App.appState = state;
+
+        if (state == AppState.IN_GAME) {
+            StartMenu.hide();
+            GameMenu.show();
+        } else if (state == AppState.START_MENU) {
+            StartMenu.show();
+            GameMenu.hide();
+        }
+    }
+
+    public static createNewGame(): void {
+        App.GAME = new Game();
+    }
+
+    public static deleteGame(): void {
+        App.GAME = null;
+        App.changeAppState(AppState.START_MENU);
     }
 }

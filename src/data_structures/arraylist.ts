@@ -1,5 +1,5 @@
 /**
- * ADT for arraylist
+ * ADT for ArrayList
  */
 export interface IArrayList<T> {
     add(arg: T): number;
@@ -26,16 +26,16 @@ export interface IArrayList<T> {
 }
 
 /**
- * arraylist data structure: can add, delete, find elements in array, etc, dynamic resizing
+ * ArrayList data structure: can add, delete, find elements in array, etc. Features dynamic resizing
  */
 export class ArrayList<T> implements IArrayList<T> {
-    private n: number = 0; // store size of arraylist
-    private max: number; // store size of array
+    private n: number = 0; // Store size of arraylist
+    private max: number; // Store size of array
     private array: T[]; // store array
 
     /**
-     * initializes an arraylist
-     * @param max the current maximum size of the array
+     * Initializes an ArrayList.
+     * @param max The current maximum size of the array.
      */
     public constructor(max: number = 1) {
         this.max = max;
@@ -43,26 +43,26 @@ export class ArrayList<T> implements IArrayList<T> {
     }
     
     /**
-     * adds a new element to the end of the arraylist
-     * @param arg element to be added
-     * @returns index which the element was added
+     * Adds a new element to the end of the arraylist.
+     * @param arg Element to be added.
+     * @returns Index which the element was added.
      */
     public add(arg: T): number {
-        // resize array to double length when too long
+        // Resize array to double length when too long
         if (this.n == this.max) {
             this.resize(this.max * 2);
         }
 
-        // add element & update size
+        // Add element & update size
         this.array[this.n] = arg;
         this.n++;
         return this.n - 1;
     }
     
     /**
-     * deletes an element at a specified index
-     * @param index the index at which the element must be deleted
-     * @returns the element that is deleted
+     * Deletes an element at a specified index.
+     * @param index The index at which the element must be deleted.
+     * @returns The element that is deleted.
      */
     public delete(index: number): T {
         // return undefined if index is out of bounds
@@ -93,9 +93,9 @@ export class ArrayList<T> implements IArrayList<T> {
     }
 
     /**
-     * inserts an element at any index
-     * @param arg element to be inserted
-     * @param index index in array at which the element should be inserted
+     * Inserts an element into the ArrayList at any index.
+     * @param arg Element to be inserted.
+     * @param index Index in array at which the element should be inserted.
      */
     public insert(arg: T, index: number): void {
         // return undefined if index is out of bounds
@@ -117,9 +117,9 @@ export class ArrayList<T> implements IArrayList<T> {
     }
 
     /**
-     * gets element at specific index
-     * @param index index for element to be gotten
-     * @returns element at index
+     * Gets element at specific index.
+     * @param index Index of element to be gotten.
+     * @returns Element at hte specified index.
      */
     public get(index: number): T {
         // return undefined if index is out of bounds
@@ -131,9 +131,9 @@ export class ArrayList<T> implements IArrayList<T> {
     }
     
     /**
-     * performs linear search to check if an element is in the arraylist
-     * @param arg element to be searched
-     * @returns true if element is in array, false otherwise
+     * Performs linear search to check if an element is in the ArrayList.
+     * @param arg Element to be searched for.
+     * @returns True if element is in array, false otherwise.
      */
     public contains(arg: T): boolean {
         // linear search through all elements and return true if match found
@@ -145,8 +145,8 @@ export class ArrayList<T> implements IArrayList<T> {
     }
 
     /**
-     * resizes array by making a deep copy of subarray
-     * @param size new size of array
+     * Resizes array by making a deep copy of subarray.
+     * @param size New size of array.
      */
     private resize(size: number) {
         // create new array
@@ -162,25 +162,24 @@ export class ArrayList<T> implements IArrayList<T> {
     }
 
     /**
-     * gets the number of elements in arraylist
-     * @returns the number of elements in arraylist
+     * The number of elements in the ArrayList.
      */
     public get length(): number {
         return this.n;
     }
 
     /**
-     * gets array in string format
-     * @returns array in string format
+     * Gets ArrayList in string format.
+     * @returns ArrayList in string format.
      */
     public toString(): string {
         return this.array.slice(0, this.n).toString();
     }
 
     /**
-     * sets array element at index to another element
-     * @param arg new element
-     * @param index index to replace
+     * Sets array element at index to another element.
+     * @param arg The new element.
+     * @param index Index of element to replace.
      */
     public set(arg: T, index: number): void {
         if (index < 0 || index >= this.n) {
@@ -191,15 +190,15 @@ export class ArrayList<T> implements IArrayList<T> {
     }
 
     /**
-     * checks if array is empty
-     * @returns true if array is empty, false otherwise
+     * Checks if array is empty.
+     * @returns True if array is empty, false otherwise.
      */
     public isEmpty(): boolean {
         return this.n == 0;
     }  
 
     /**
-     * clears the whole arraylist to empty
+     * Clears the whole arraylist to empty.
      */
     public clear(): void {
         this.n = 0;
@@ -208,10 +207,10 @@ export class ArrayList<T> implements IArrayList<T> {
     }
 
     /**
-     * creates a new array that is a subarray of the array
-     * @param begin the first element to be included in subarray, inclusive
-     * @param end the last element, exclusive
-     * @returns new array that is a subarray of the array from begin (inclusive) to end (exclusive)
+     * Creates a new ArrayList that is a subarray of the array.
+     * @param begin The first element in the subarray, inclusive.
+     * @param end The last element, exclusive.
+     * @returns A new array that is a subarray of the array from begin (inclusive) to end (exclusive).
      */
     public slice(begin: number, end: number): ArrayList<T> {
         // create new array of size of subarray
@@ -226,8 +225,8 @@ export class ArrayList<T> implements IArrayList<T> {
     }
 
     /**
-     * creates arraylist using an array, shallow copying the array
-     * @param array array to be turned into arraylist
+     * Creates ArrayList using an array, shallow copying the array
+     * @param array Array to be turned into ArrayList.
      */
     public setArray(array: T[]): void {
         this.array = array;
@@ -236,8 +235,8 @@ export class ArrayList<T> implements IArrayList<T> {
     }
 
     /**
-     * turns arraylist to array
-     * @returns array that the arraylist contained
+     * turns the ArrayList into an array.
+     * @returns Array that the ArrayList contained.
      */
     public getArray(): T[] {
         let newArr: T[] = new Array<T>(this.n);
