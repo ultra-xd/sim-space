@@ -36,13 +36,15 @@ export abstract class Facility {
 
     protected static readonly _BUILD_COST: number;
 
-    protected _maintenanceCost: number;
+    protected abstract _maintenanceCost: number;
 
-    protected _pollution: number;
+    protected abstract _pollution: number;
 
-    protected _taxRevenue: number;
+    protected abstract _taxRevenue: number;
 
-    protected _age: number;
+    protected abstract _age: number;
+
+    protected _powerAvailable : number = 0;
 
     public constructor(protected readonly GAME: Game) {
         
@@ -72,6 +74,7 @@ export abstract class Facility {
 
     public get BUILD_COST(): number {
         return Facility._BUILD_COST;
+        //cell will get the buildcost and suubstract muney
     }
     public get maintenanceCost(): number {
         return this._maintenanceCost;
@@ -83,10 +86,15 @@ export abstract class Facility {
         return Facility._POWER_COST;
     }
     public get pollution(): number {
-        return this._pollution
+        return this._pollution;
     }
     public tick(): void {
-
+        this._age++;
+        //tax revenue subtracts from money in game through setter
+        //Set money to subtract mainternance cost
+        //Update pollution units using what subclasses provide
+        //
+        
     }
 }
 

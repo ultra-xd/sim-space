@@ -59,8 +59,12 @@ export class PowerPlant extends EssentialServicesFacility {
     protected static readonly _BUILD_COST: number = 500000000;
     protected _maintenanceCost: number = 2000000;
     protected static readonly _POWER_COST: number = 0;
+    private _powerSurplus: number = 0;
 
     public override tick(): void {
         
+    }
+    public get powerSurplus(): number {
+        return this._powerSurplus;
     }
 }
