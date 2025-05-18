@@ -6,6 +6,7 @@ import { App } from "./app.js";
 import { Facility } from "../facility/facility.js";
 import { GameMenu } from "./game_menu.js";
 import { assert } from "../util/util.js";
+import { KeyEvent, MouseEvent, Controller } from "./controller.js";
 
 /**
  * Enum representing the different game states.
@@ -59,10 +60,6 @@ export class Game {
     // State of game (standard view mode, build, destroy, etc.)
     private _gameState: GameState = GameState.STANDARD;
 
-    // Handle mouse events
-    private clicked: boolean = false;
-    private holding: boolean = false;
-
     /**
      * Creates a new Game.
      */
@@ -77,25 +74,10 @@ export class Game {
         // Update number of ticks passed
         this._ticks++;
 
-        // Differentiate between holding and clicking (clicking is the FIRST mouse event while holding)
-        if (this.clicked && this.holding) {
-            this.clicked = false;
-        }
-
-        if (App.mouseEvents.contains(0)) {
-            if (!this.holding) {
-                this.clicked = true;
-                this.holding = true;           
-            }
-        } else {
-            this.clicked = false;
-            this.holding = false;
-        }
-
         // Check for mouse movement events
         if (
-            App.currentMousePosition != null &&
-            App.previousMousePosition != null
+            App.CONTROLLER.currentMousePosition != null &&
+            App.CONTROLLER.previousMousePosition != null
         ) {
             // Update highlight animation progress
             this.highlightAnimationTicks++;
@@ -106,17 +88,21 @@ export class Game {
             }
 
             // Drag using right mouse button and adjust camera position accordingly
-            if (App.mouseEvents.contains(2)) {
+            if (App.CONTROLLER.mouseToggled(MouseEvent.RMB)) {
                 // get the amount of units changed from movement from last tick to current tick
-                const UNITS_CHANGE = this._CAMERA.pixelsToUnits(App.previousMousePosition).subtract(
-                    this._CAMERA.pixelsToUnits(App.currentMousePosition)
+                const UNITS_CHANGE = this._CAMERA.pixelsToUnits(
+                    App.CONTROLLER.previousMousePosition
+                ).subtract(
+                    this._CAMERA.pixelsToUnits(
+                        App.CONTROLLER.currentMousePosition
+                    )
                 );
             
                 this._CAMERA.adjustCamera(UNITS_CHANGE);
             }
 
             // Find cell the mouse is currently over
-            const MOUSE_POS_UNITS: Vector2 = this._CAMERA.pixelsToUnits(App.currentMousePosition);
+            const MOUSE_POS_UNITS: Vector2 = this._CAMERA.pixelsToUnits(App.CONTROLLER.currentMousePosition);
             const HIGHLIGHT: Vector2 = new Vector2(
                 Math.floor(MOUSE_POS_UNITS.x),
                 Math.floor(MOUSE_POS_UNITS.y)
@@ -144,7 +130,7 @@ export class Game {
         }
 
         // Handle left click mouse events on map
-        if (this.clicked && this._highlightedCell != null) {
+        if (App.CONTROLLER.mouseClickToggled(MouseEvent.LMB) && this._highlightedCell != null) {
             switch (this._gameState) {
                 case GameState.STANDARD:
                     break;
@@ -167,13 +153,22 @@ export class Game {
             }
         }
 
+        if (
+            App.CONTROLLER.keyPressToggled(KeyEvent.ESC) &&
+            this.gameState != GameState.STANDARD
+        ) {
+            this.gameState = GameState.STANDARD;
+        }
         // Zoom in/out if scrolled mouse wheel
-        let scroll: number = App.mouseScroll;
-
-        if (scroll > 0) { // zoom in if scroll up
-            this._CAMERA.adjustZoom(-0.05);
-        } else if (scroll < 0) { // zoom out if scroll down
+    
+        // zoom in if scroll up
+        if (App.CONTROLLER.mouseToggled(MouseEvent.MOUSE_SCROLL_UP)) {
             this._CAMERA.adjustZoom(0.05);
+        } 
+        
+        // zoom out if scroll down
+        else if (App.CONTROLLER.mouseToggled(MouseEvent.MOUSE_SCROLL_DOWN)) { 
+            this._CAMERA.adjustZoom(-0.05);
         }
 
         // Update map and camera

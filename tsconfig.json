@@ -1,8 +1,7 @@
-//HTML
 {
     "compilerOptions": {
-        "target": "ES2020",
-        "outDir": "dist", //optionally use “” to not use an output folder
+        "target": "ES6",
+        "outDir": "dist",
         "sourceMap": true,
         "strict": true,
         "strictPropertyInitialization": false,

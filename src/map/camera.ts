@@ -58,7 +58,7 @@ export class Camera {
         );
 
         const differencePixels: Vector2 = pixels.subtract(CENTER_PIXELS);
-        differencePixels.y = differencePixels.y * -1; // account for canvas starting from top left corner
+        differencePixels.y *= -1; // account for canvas starting from top left corner
         let differenceUnits: Vector2;
 
         if (this.isometric) {
@@ -96,7 +96,7 @@ export class Camera {
             differencePixels = DIFFERENCE_UNITS.multiply(this._pixelsPerUnits);
         }
 
-        differencePixels.y = differencePixels.y * -1;
+        differencePixels.y *= -1;
 
         return CENTER_PIXELS.add(differencePixels);
     }
