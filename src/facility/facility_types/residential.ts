@@ -1,7 +1,6 @@
 import { Vector2 } from "../../data_structures/vector.js";
-import { Facility } from "../facility.js";
-import { FacilitySector } from "../facility.js";
-import { FacilityType } from "../facility.js";
+import { Facility, FacilityType, FacilitySector } from "../facility.js";
+
 export abstract class ResidentialFacility extends Facility {
     protected readonly _FACILITY_SECTOR = FacilitySector.RESIDENTIAL;
 
@@ -14,7 +13,7 @@ export abstract class ResidentialFacility extends Facility {
     protected static readonly _BUILD_COST: number;
     protected static readonly _POWER_COST: number;
     protected static readonly _GROWTH_RATE: number = 0.1;
-    protected _population: number;
+    protected _population: number = 0;
 
     protected updateTaxRevenue() : void {
 
@@ -53,6 +52,10 @@ export class LuxuryHome extends ResidentialFacility {
     protected static readonly _POLLUTION_PER_UNIT: number = 500;
     protected static readonly _BUILD_COST: number= 1000000000;
     protected static readonly _POWER_COST: number = 100;
+
+    protected _maintenanceCost: number;
+    protected _pollution: number;
+    protected _taxRevenue: number;
     
     public facilityCheck(coordinates : Vector2): boolean {
         return true;
@@ -64,7 +67,6 @@ export class LuxuryHome extends ResidentialFacility {
 }
 
 export class ComfortableHome extends ResidentialFacility {
-
     protected static readonly _FACILITY_TYPE: FacilityType = FacilityType.COMFORTABLE_HOME;
     protected static readonly _NAME: string = "Comfortable Home";
 
@@ -76,10 +78,13 @@ export class ComfortableHome extends ResidentialFacility {
     protected static readonly _POLLUTION_PER_UNIT: number = 50;
     protected static readonly _BUILD_COST: number= 500000000;
     protected static readonly _POWER_COST: number = 50;
+
+    protected _maintenanceCost: number;
+    protected _pollution: number;
+    protected _taxRevenue: number;
 }
 
 export class AffordableHome extends ResidentialFacility {
-
     protected static readonly _FACILITY_TYPE: FacilityType = FacilityType.AFFORDABLE_HOME;
     protected static readonly _NAME: string = "Affordable Home";
 
@@ -91,6 +96,10 @@ export class AffordableHome extends ResidentialFacility {
     protected static readonly _POLLUTION_PER_UNIT: number = 10;
     protected static readonly _BUILD_COST: number= 50000000;
     protected static readonly _POWER_COST: number = 25;
+
+    protected _maintenanceCost: number;
+    protected _pollution: number;
+    protected _taxRevenue: number;
 
     public override updatePollution(): void {
         

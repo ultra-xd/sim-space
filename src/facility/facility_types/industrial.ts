@@ -40,6 +40,10 @@ export class Factory extends IndustrialFacility {
 export class Warehouse extends IndustrialFacility {
     protected static readonly _FACILITY_TYPE = FacilityType.WAREHOUSE;
     protected static readonly _NAME = "Warehouse";
+
+    protected _maintenanceCost: number;
+    protected _pollution: number;
+    protected _taxRevenue: number;
 }
 
 export class EnvironmentalFacility extends IndustrialFacility {
@@ -47,17 +51,14 @@ export class EnvironmentalFacility extends IndustrialFacility {
     protected static readonly _NAME = "Environmental Facility";
 
 
-    protected static readonly _BUILD_COST: number = 200000000
+    protected static readonly _BUILD_COST: number = 200000000;
+    protected _taxRevenue: number = 0;
+    protected _maintenanceCost: number = 3000000;
+    protected static readonly _POWER_COST: number = 75;
+    private static readonly _MAX_POLLUTION_REDUCTION: number = 30000;
+    private static readonly _POLLUTION_REDUCTION_RADIUS: number = 10;
 
-    protected _taxRevenue: number = 0
-
-    protected _maintenanceCost: number = 3000000
-
-    protected static readonly _POWER_COST: number = 75
-
-    private static readonly _MAX_POLLUTION_REDUCTION: number = 30000
-
-    private static readonly _POLLUTION_REDUCTION_RADIUS: number = 10
+    protected _pollution: number;
 
     public reducePollution(coordinates : Vector2): void {
 

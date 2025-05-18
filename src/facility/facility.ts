@@ -42,7 +42,7 @@ export abstract class Facility {
 
     protected abstract _taxRevenue: number;
 
-    protected abstract _age: number;
+    protected _age: number = 0;
 
     protected _powerAvailable : number = 0;
 
