@@ -15,6 +15,7 @@ import { DefenseFacility } from "../facility/facility_types/defense.js";
  */
 export class Cell {
     private _coordinates: Vector2;
+    private _pollution: number;
 
     /**
      * Creates a new cell with the specified coordinates and facility.
@@ -93,6 +94,21 @@ export class Cell {
      */
     public tick(): void {
 
+    }
+
+    public get pollution(): number {
+        return this._pollution;
+    }
+    public set pollution(pollution: number) {
+        this._pollution = pollution;
+    }
+
+    public build(facility: Facility): boolean {
+        return true;
+    }
+
+    public destroy(facility: Facility): boolean {
+        return true;
     }
 
     /**

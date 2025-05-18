@@ -32,11 +32,19 @@ export abstract class Facility {
     protected static readonly _FACILITY_TYPE: FacilityType;
     protected static readonly _NAME: string;
 
-    protected abstract _buildcost: number;
+    protected static readonly _POWER_COST: number;
+
+    protected static readonly _BUILD_COST: number;
+
     protected abstract _maintenanceCost: number;
-    protected abstract _taxRevenue: number;
-    protected abstract _powerUnits: number;
+
     protected abstract _pollution: number;
+
+    protected abstract _taxRevenue: number;
+
+    protected abstract _age: number;
+
+    protected _powerAvailable : number = 0;
 
     public constructor(protected readonly GAME: Game) {
         
@@ -64,8 +72,9 @@ export abstract class Facility {
         return Canvas.ImageLoader.getImage(directory);
     }
 
-    public get buildCost(): number {
-        return this._buildcost;
+    public get BUILD_COST(): number {
+        return Facility._BUILD_COST;
+        //cell will get the buildcost and suubstract muney
     }
     public get maintenanceCost(): number {
         return this._maintenanceCost;
@@ -73,11 +82,19 @@ export abstract class Facility {
     public get taxRevenue(): number {
         return this._taxRevenue;
     }
-    public get powerUnits(): number {
-        return this._powerUnits;
+    public get POWER_COST(): number {
+        return Facility._POWER_COST;
     }
     public get pollution(): number {
         return this._pollution;
+    }
+    public tick(): void {
+        this._age++;
+        //tax revenue subtracts from money in game through setter
+        //Set money to subtract mainternance cost
+        //Update pollution units using what subclasses provide
+        //
+        
     }
 }
 
