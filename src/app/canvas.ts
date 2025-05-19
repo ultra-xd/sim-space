@@ -148,15 +148,25 @@ export class Canvas {
         private static IMAGES: {[src: string]: HTMLImageElement} = {};
 
         public static getImage(src: string): HTMLImageElement {
+            this.loadImage(src);
+            
+            return Canvas.ImageLoader.IMAGES[src];
+        }
+
+        public static loadImage(src: string): void {
             if (Canvas.ImageLoader.IMAGES[src]) {
-                return Canvas.ImageLoader.IMAGES[src];
+                return;
             }
 
             const IMAGE: HTMLImageElement = new Image();
             IMAGE.src = src;
             Canvas.ImageLoader.IMAGES[src] = IMAGE;
-            
-            return IMAGE;
+        }
+
+        public static loadImages(srcs: string[]): void {
+            for (let i: number = 0; i < srcs.length; i++) {
+                Canvas.ImageLoader.loadImage(srcs[i]);
+            }
         }
     }
 }

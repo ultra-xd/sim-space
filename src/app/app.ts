@@ -26,6 +26,45 @@ export class App {
         App._CONTROLLER.setup();
         StartMenu.setup();
 
+        Canvas.ImageLoader.loadImages(
+            [
+                "res/assets/buildings/isometric/affordable_home.png",
+                "res/assets/buildings/isometric/comfortable_home.png",
+                "res/assets/buildings/isometric/defense.png",
+                "res/assets/buildings/isometric/education.png",
+                "res/assets/buildings/isometric/emergency.png",
+                "res/assets/buildings/isometric/environment.png",
+                "res/assets/buildings/isometric/factory.png",
+                "res/assets/buildings/isometric/government.png",
+                "res/assets/buildings/isometric/luxury_home.png",
+                "res/assets/buildings/isometric/medical.png",
+                "res/assets/buildings/isometric/office.png",
+                "res/assets/buildings/isometric/power.png",
+                "res/assets/buildings/isometric/restaurant.png",
+                "res/assets/buildings/isometric/store.png",
+                "res/assets/buildings/isometric/warehouse.png",
+                "res/assets/buildings/straight/affordable_home.png",
+                "res/assets/buildings/straight/comfortable_home.png",
+                "res/assets/buildings/straight/defense.png",
+                "res/assets/buildings/straight/education.png",
+                "res/assets/buildings/straight/emergency.png",
+                "res/assets/buildings/straight/environment.png",
+                "res/assets/buildings/straight/factory.png",
+                "res/assets/buildings/straight/government.png",
+                "res/assets/buildings/straight/luxury_home.png",
+                "res/assets/buildings/straight/medical.png",
+                "res/assets/buildings/straight/office.png",
+                "res/assets/buildings/straight/power.png",
+                "res/assets/buildings/straight/restaurant.png",
+                "res/assets/buildings/straight/store.png",
+                "res/assets/buildings/straight/warehouse.png",
+                "res/assets/map/grass_isometric.png",
+                "res/assets/map/grass_straight.png",
+                "res/assets/title/title_background.jpg",
+                "res/assets/title/title_text.png",
+            ]
+        );
+
         App.start();
     }
 
