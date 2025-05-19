@@ -103,7 +103,7 @@ export class Controller {
                 return;
             }
 
-            const CODE: KeyEvent = event.which;
+            const CODE: number = event.which;
             if (this.KEY_EVENTS.has(CODE) && this.KEY_PRESS_EVENTS.has(CODE)) {
                 this.KEY_EVENTS.set(CODE, true);
                 this.KEY_PRESS_EVENTS.set(CODE, true);
@@ -115,7 +115,7 @@ export class Controller {
                 return;
             }
 
-            const CODE: KeyEvent = event.which;
+            const CODE: number = event.which;
             if (this.KEY_EVENTS.has(CODE) && this.KEY_PRESS_EVENTS.has(CODE)) {
                 this.KEY_EVENTS.set(CODE, false);
                 this.KEY_PRESS_EVENTS.set(CODE, false);
