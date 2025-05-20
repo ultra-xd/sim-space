@@ -144,6 +144,27 @@ span#stats-score-display {
     pointer-events: auto;
 }
 
+#game-menu .popup {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+#game-menu .popup.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+div#notification-box {
+    pointer-events: none;
+    position: absolute;
+    bottom: 1%;
+    right: 1%;
+    width: 15%;
+    overflow-y: auto;
+    height: 10%;
+}
+
 .icon img {
     width: 40px;
     height: 40px;

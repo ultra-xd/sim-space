@@ -172,6 +172,7 @@ export class Game {
         }
 
         // Update map and camera
+        GameMenu.NotificationManager.tick();
         this._MAP.tick();
         this._CAMERA.tick();
     }

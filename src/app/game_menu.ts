@@ -1,3 +1,6 @@
+import { App } from "./app.js";
+import { assert } from "../util/util.js";
+import { Queue } from "../data_structures/queue.js";
 import { Game, GameState } from "./game.js";
 import { Facility } from "../facility/facility.js";
 import { LuxuryHome, ComfortableHome, AffordableHome } from "../facility/facility_types/residential.js";
@@ -244,5 +247,66 @@ export class GameMenu {
 
     public static show(): void {
         GameMenu.GAME_MENU_DIV.hidden = false;
+    }
+
+    public static NotificationManager = class {
+        private static readonly NOTIFICATION_QUEUE: Queue<string> = new Queue<string>();
+        private static readonly NOTIFICATION_LENGTH: number = 3;
+        private static readonly COOLDOWN_LENGTH: number = 1;
+        private static tickCycle: number = 0;
+
+        private static showing: boolean = false;
+        private static inCycle: boolean = false;
+
+        private static readonly NOTIFICATION_DIV: HTMLDivElement = document.getElementById("notification-box") as HTMLDivElement;
+        private static readonly NOTIFICATION_PARAGRAPH: HTMLParagraphElement = document.getElementById("notification-text") as HTMLParagraphElement;
+
+        public static createNotification(message: string): void {
+            GameMenu.NotificationManager.NOTIFICATION_QUEUE.enqueue(message);
+        }
+
+        public static tick(): void {
+            if (GameMenu.NotificationManager.inCycle) {
+                GameMenu.NotificationManager.tickCycle++;
+
+                if (
+                    GameMenu.NotificationManager.showing &&
+                    GameMenu.NotificationManager.tickCycle / App.TPS >= GameMenu.NotificationManager.NOTIFICATION_LENGTH
+                ) {
+                    GameMenu.NotificationManager.hideNotification();
+                }
+
+                if (GameMenu.NotificationManager.tickCycle / App.TPS >= GameMenu.NotificationManager.NOTIFICATION_LENGTH + GameMenu.NotificationManager.COOLDOWN_LENGTH) {
+                    GameMenu.NotificationManager.inCycle = false;
+                    GameMenu.NotificationManager.tickCycle = 0;
+                }
+            } else {
+                if (!GameMenu.NotificationManager.NOTIFICATION_QUEUE.isEmpty()) {
+                    GameMenu.NotificationManager.showNotification();
+                }
+            }
+        }
+
+        public static showNotification(): void {
+            const NOTIFICATION_MESSAGE: string | null = GameMenu.NotificationManager.NOTIFICATION_QUEUE.dequeue();
+            assert (NOTIFICATION_MESSAGE != null);
+
+            GameMenu.NotificationManager.showing = true;
+            GameMenu.NotificationManager.inCycle = true;
+
+            GameMenu.NotificationManager.NOTIFICATION_PARAGRAPH.innerText = NOTIFICATION_MESSAGE;
+
+            if (!GameMenu.NotificationManager.NOTIFICATION_DIV.classList.contains("show")) {
+                GameMenu.NotificationManager.NOTIFICATION_DIV.classList.add("show");
+            }
+        }
+
+        public static hideNotification(): void {
+            GameMenu.NotificationManager.showing = false;
+
+            if (GameMenu.NotificationManager.NOTIFICATION_DIV.classList.contains("show")) {
+                GameMenu.NotificationManager.NOTIFICATION_DIV.classList.remove("show");
+            }
+        }
     }
 }

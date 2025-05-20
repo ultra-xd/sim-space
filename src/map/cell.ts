@@ -6,6 +6,7 @@ import { Camera } from "./camera.js";
 import { GameMap } from "./map.js";
 import { Queue } from "../data_structures/queue.js";
 import { assert } from "../util/util.js";
+import { GameMenu } from "../app/game_menu.js";
 
 /**
  * Represents a cell in the game map.
@@ -170,48 +171,64 @@ export class Cell {
             }
 
             else if (facilitySector == FacilitySector.RESIDENTIAL) {
-                console.log("afjk")
                 if (!this.game.MAP.containsTypes([
                     FacilityType.EMERGENCY,
                     FacilityType.EDUCATION,
                     FacilityType.MEDICAL,
                     FacilityType.GOVERNMENT,
                     FacilityType.POWER
-                ])) return false;
+                ])) {
+                    GameMenu.NotificationManager.createNotification("Residential facilities require an emergency building, education centre, medical centre, a government and a power plant to be built.");
+                    return false;
+                }
 
-                if (
-                    !this.game.MAP.BFS(
+                if (!this.game.MAP.BFS(
                         this.coordinates,
                         5,
                         (coordinates: Vector2): boolean => {
                             return this.game.MAP.getCell(coordinates).facilityType == FacilityType.STORE;
                         }
-                    ) ||
+                    )
+                ) {
+                    console.log("e")
+                    GameMenu.NotificationManager.createNotification("Residential facilities must be built 5 units of a store.");
+                    return false;
+                }
 
-                    !this.game.MAP.BFS(
+                else if (!this.game.MAP.BFS(
                         this.coordinates,
                         3,
                         (coordinates: Vector2): boolean => {
                             return this.game.MAP.getCell(coordinates).facilityType == FacilityType.RESTAURANT;
                         }
                     )
-                ) return false;
+                ) {
+                    console.log("f")
+                    GameMenu.NotificationManager.createNotification("Residential facilities must be built 3 units of a restaurant.");
+                    return false;
+                }
 
                 return true;
             }
 
             else if (facilitySector == FacilitySector.INDUSTRIAL) {
-                return (this.game.MAP.BFS(
+                if (!this.game.MAP.BFS(
                     this.coordinates,
                     6,
                     (coordinates: Vector2): boolean => {
                         return this.game.MAP.getCell(coordinates).facilityType == FacilityType.POWER;
                     }
-                ));
+                )) {
+                    GameMenu.NotificationManager.createNotification("Industrial facilities must be built within 6 units of a power plant.");
+                    return false;
+                }
+
+                return true;
             }
 
             return true;
         } else {
+            GameMenu.NotificationManager.createNotification("This cell is already occupied by a facility.");
             return false;
         }
     }
