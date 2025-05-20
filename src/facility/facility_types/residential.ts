@@ -2,7 +2,7 @@ import { Vector2 } from "../../data_structures/vector.js";
 import { Facility, FacilityType, FacilitySector } from "../facility.js";
 
 export abstract class ResidentialFacility extends Facility {
-    protected readonly _FACILITY_SECTOR = FacilitySector.RESIDENTIAL;
+    protected static readonly _FACILITY_SECTOR = FacilitySector.RESIDENTIAL;
 
     protected static readonly _MAX_POPULATION: number;
     protected static readonly _HAPPINESS_RATIO: number; 

@@ -1,16 +1,19 @@
 import { Cell } from "./cell.js";
-import { Facility } from "../facility/facility.js";
+import { Facility, FacilityType, FacilitySector } from "../facility/facility.js";
 import { Game } from "../app/game.js";
 import { Canvas } from "../app/canvas.js";
 import { Vector2 } from "../data_structures/vector.js";
+import { Queue } from "../data_structures/queue.js";
 import { Camera } from "./camera.js";
-import { GameState } from "../app/game.js";
+import { ArrayList } from "../data_structures/arraylist.js";
+import { assert } from "../util/util.js";
 
 /**
  * Represents the game map, which is a grid of cells.
  */
 export class GameMap {
-    private readonly cells: Cell[][];
+    private readonly _CELLS: Cell[][];
+    private readonly _OCCUPIED_CELLS: ArrayList<Vector2> = new ArrayList<Vector2>();
 
     // The width of the road and the road lines in the game map, in units
     private static readonly _ROAD_WIDTH: number = 0.3;
@@ -18,56 +21,169 @@ export class GameMap {
 
     /**
      * Creates a new game map with the specified width and height.
-     * @param _game The game for the map to be part of.
-     * @param _width The number of cells in the X direction of the map.
-     * @param _height The number of cells in the X direction of the map
+     * @param _GAME The game for the map to be part of.
+     * @param _WIDTH The number of cells in the X direction of the map.
+     * @param _HEIGHT The number of cells in the X direction of the map
      */
     public constructor(
-        private _game: Game, 
-        private _width: number, 
-        private _height: number
+        private readonly _GAME: Game, 
+        private readonly _WIDTH: number, 
+        private readonly _HEIGHT: number
     ) {
-        this.cells = new Array<Cell[]>(this.height);
+        this._CELLS = new Array<Cell[]>(this.height);
         for (let y: number = 0; y < this.height; y++) {
             const CELL_ROW: Cell[] = new Array<Cell>(this.width);
             for (let x: number = 0; x < CELL_ROW.length; x++) {
                 CELL_ROW[x] = new Cell(this.GAME, x, y, null);
             }
 
-            this.cells[y] = CELL_ROW;
+            this._CELLS[y] = CELL_ROW;
         }
     }
 
+    public containsType(facilityType: FacilityType): boolean {
+        for (let i: number = 0; i < this._GAME.MAP.OCCUPIED_CELLS.length; i++) {
+            const COORDINATES: Vector2 = this._GAME.MAP.OCCUPIED_CELLS.get(i);
+
+            if (this.getCell(COORDINATES).facilityType == facilityType) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public containsTypes(facilityTypes: FacilityType[]): boolean {
+        for (let i: number = 0; i < facilityTypes.length; i++) {
+            if (!this.containsType(facilityTypes[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public containsSector(facilitySector: FacilitySector): boolean {
+        for (let i: number = 0; i < this._GAME.MAP.OCCUPIED_CELLS.length; i++) {
+            const COORDINATES: Vector2 = this._GAME.MAP.OCCUPIED_CELLS.get(i);
+
+            if (this.getCell(COORDINATES).facilitySector == facilitySector) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public containsSectors(facilitySectors: FacilitySector[]): boolean {
+        for (let i: number = 0; i < facilitySectors.length; i++) {
+            if (!this.containsSector(facilitySectors[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public BFS(
+        start: Vector2, 
+        maxDistance: number, 
+        handleCondition: (coordinates: Vector2) => boolean
+    ): boolean {
+        const QUEUE: Queue<[Vector2, number]> = new Queue<[Vector2, number]>();
+        const VISITED: boolean[][] = new Array<boolean[]>(this.height);
+
+        for (let i: number = 0; i < this.height; i++) {
+            VISITED[i] = new Array<boolean>(this.width);
+
+            for (let j: number = 0; j < this.width; j++) {
+                VISITED[i][j] = false;
+            }
+        }
+
+        QUEUE.enqueue([start, 0]);
+        VISITED[start.y][start.x] = true;
+
+        const NEIGHBOURS: Vector2[] = [
+            Vector2.I_UNIT,
+            Vector2.J_UNIT,
+            Vector2.I_UNIT.multiply(-1),
+            Vector2.J_UNIT.multiply(-1)
+        ];
+
+        while (!QUEUE.isEmpty()) {
+            const [COORDINATES, DISTANCE]: [Vector2, number] = QUEUE.dequeue()!;
+            assert (COORDINATES != null && DISTANCE != null);
+
+            console.log(COORDINATES);
+
+            if (handleCondition(COORDINATES)) {
+                return true;
+            }
+
+            const NEW_DISTANCE: number = DISTANCE + 1;
+            if (NEW_DISTANCE > maxDistance) {
+                continue;
+            }
+
+            for (let i: number = 0; i < NEIGHBOURS.length; i++) {
+                const NEIGHBOUR: Vector2 = COORDINATES.add(NEIGHBOURS[i]);
+
+                if (!this.inBounds(NEIGHBOUR)) continue;
+                if (VISITED[NEIGHBOUR.y][NEIGHBOUR.x]) continue;
+
+                VISITED[NEIGHBOUR.y][NEIGHBOUR.x] = true;
+                QUEUE.enqueue([NEIGHBOUR, NEW_DISTANCE]);
+            }
+            
+        }
+
+        return false;
+    }
+
+    public inBounds(coordinates: Vector2): boolean {
+        return (
+            coordinates.x >= 0 &&
+            coordinates.x < this._WIDTH &&
+            coordinates.y >= 0 &&
+            coordinates.y < this._HEIGHT
+        );
+    }
     
     /**
      * Width of the game map in cells.
      */
     public get width(): number {
-        return this._width;
+        return this._WIDTH;
     }
-
     
     /**
      * Hedight of the game map in cells.
      */
     public get height(): number {
-        return this._height;
+        return this._HEIGHT;
     }
-
     
     /**
      * The game the map is part of.
      */
     public get GAME(): Game {
-        return this._game;
+        return this._GAME;
     }
-
     
     /**
      * Width of the road in the game map, in units.
      */
     public static get ROAD_WIDTH(): number {
         return GameMap._ROAD_WIDTH;
+    }
+
+    public get OCCUPIED_CELLS(): ArrayList<Vector2> {
+        return this._OCCUPIED_CELLS;
+    }
+
+    public getCell(coordinates: Vector2): Cell {
+        return this._CELLS[coordinates.y][coordinates.x];
     }
 
     /**
@@ -79,13 +195,16 @@ export class GameMap {
     public build<T extends {
         new (GAME: Game): Facility; 
         getSprite: (isometric: boolean) => HTMLImageElement; 
-        NAME: string
+        NAME: string;
     }>(FacilityClass: T, coordinates: Vector2): boolean {
         const FACILITY: Facility = new FacilityClass(this.GAME);
-        const CELL: Cell = this.cells[coordinates.y][coordinates.x];
+        const CELL: Cell = this._CELLS[coordinates.y][coordinates.x];
 
-        if (CELL.canBuild((FACILITY.constructor as typeof Facility).FACILITY_TYPE)) {
+        console.log(FACILITY.constructor);
+
+        if (CELL.canBuild(FACILITY.FACILITY_SECTOR)) {
             CELL.facility = FACILITY;
+            this._OCCUPIED_CELLS.add(coordinates);
             return true;
         }
 
@@ -98,9 +217,17 @@ export class GameMap {
      * @returns True if the facility was removed, false otherwise.
      */
     public destroy(coordinates: Vector2): boolean {
-        const CELL: Cell = this.cells[coordinates.y][coordinates.x];
+        const CELL: Cell = this._CELLS[coordinates.y][coordinates.x];
         if (CELL.canDestroy()) {
             CELL.facility = null;
+            
+            for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
+                if (this._OCCUPIED_CELLS.get(i).equals(coordinates)) {
+                    this._OCCUPIED_CELLS.delete(i);
+                    break;
+                }
+            }
+
             return true;
         }
 
@@ -187,7 +314,7 @@ export class GameMap {
         }
 
         for (let i: number = Math.max(0, MIN_Y); i <= (Math.min(MAX_Y, this.height - 1)); i++) {
-            const CELL_ROW: Cell[] = this.cells[i];
+            const CELL_ROW: Cell[] = this._CELLS[i];
             for (let j: number = Math.max(0, MIN_X); j <= (Math.min(MAX_X, this.width - 1)); j++) {
                 CELL_ROW[j].drawGround(canvas, camera);
             }
@@ -207,7 +334,7 @@ export class GameMap {
         }
 
         for (let i: number = Math.max(0, MIN_Y); i <= (Math.min(MAX_Y, this.height - 1)); i++) {
-            const CELL_ROW: Cell[] = this.cells[i];
+            const CELL_ROW: Cell[] = this._CELLS[i];
             for (let j: number = Math.max(0, MIN_X); j <= (Math.min(MAX_X, this.width - 1)); j++) {
                 CELL_ROW[j].drawFacility(canvas, camera);
             }
@@ -218,8 +345,8 @@ export class GameMap {
      * Updates the game map and all its cells & facilities.
      */
     public tick(): void {
-        for (let i: number = 0; i < this.cells.length; i++) {
-            const CELL_ROW: Cell[] = this.cells[i];
+        for (let i: number = 0; i < this._CELLS.length; i++) {
+            const CELL_ROW: Cell[] = this._CELLS[i];
             for (let j: number = 0; j < CELL_ROW.length; j++) {
                 CELL_ROW[j].tick();
             }

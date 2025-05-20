@@ -50,7 +50,7 @@ export class ArrayList<T> implements IArrayList<T> {
     public add(arg: T): number {
         // Resize array to double length when too long
         if (this.n == this.max) {
-            this.resize(this.max * 2);
+            this.resize(this.n * 2);
         }
 
         // Add element & update size
@@ -86,7 +86,7 @@ export class ArrayList<T> implements IArrayList<T> {
 
         // resize array to double length if arraylist is a quarter of array size
         if (this.n <= this.max / 4) {
-            this.resize(Math.ceil(this.n * 2));
+            this.resize(Math.ceil(this.max / 2));
         }
 
         return e;

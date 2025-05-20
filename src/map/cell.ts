@@ -3,12 +3,9 @@ import { Game } from "../app/game.js";
 import { Vector2 } from "../data_structures/vector.js";
 import { Canvas } from "../app/canvas.js";
 import { Camera } from "./camera.js";
-import { AffordableHome, ComfortableHome, LuxuryHome, ResidentialFacility } from "../facility/facility_types/residential.js";
-import { EducationCentre, Government } from "../facility/facility_types/essential.js";
-import { Restaurant, Store } from "../facility/facility_types/commercial.js";
-import { EnvironmentalFacility, Factory } from "../facility/facility_types/industrial.js";
 import { GameMap } from "./map.js";
-import { DefenseFacility } from "../facility/facility_types/defense.js";
+import { Queue } from "../data_structures/queue.js";
+import { assert } from "../util/util.js";
 
 /**
  * Represents a cell in the game map.
@@ -93,7 +90,9 @@ export class Cell {
      * Updates the cell and the facility in it, if it exists.
      */
     public tick(): void {
-
+        if (this._facility != null) {
+            this._facility.tick();
+        }
     }
 
     public get pollution(): number {
@@ -101,14 +100,6 @@ export class Cell {
     }
     public set pollution(pollution: number) {
         this._pollution = pollution;
-    }
-
-    public build(facility: Facility): boolean {
-        return true;
-    }
-
-    public destroy(facility: Facility): boolean {
-        return true;
     }
 
     /**
@@ -172,8 +163,57 @@ export class Cell {
      * @param facilityType The type of facility to build.
      * @returns True if the facility can be built, false otherwise.
      */
-    public canBuild(facilityType: FacilityType) : boolean {
-        return this.isEmpty();
+    public canBuild(facilitySector: FacilitySector) : boolean {
+        if (this.isEmpty()) {
+            if (facilitySector == FacilitySector.ESSENTIAL) {
+                return true;
+            }
+
+            else if (facilitySector == FacilitySector.RESIDENTIAL) {
+                console.log("afjk")
+                if (!this.game.MAP.containsTypes([
+                    FacilityType.EMERGENCY,
+                    FacilityType.EDUCATION,
+                    FacilityType.MEDICAL,
+                    FacilityType.GOVERNMENT,
+                    FacilityType.POWER
+                ])) return false;
+
+                if (
+                    !this.game.MAP.BFS(
+                        this.coordinates,
+                        5,
+                        (coordinates: Vector2): boolean => {
+                            return this.game.MAP.getCell(coordinates).facilityType == FacilityType.STORE;
+                        }
+                    ) ||
+
+                    !this.game.MAP.BFS(
+                        this.coordinates,
+                        3,
+                        (coordinates: Vector2): boolean => {
+                            return this.game.MAP.getCell(coordinates).facilityType == FacilityType.RESTAURANT;
+                        }
+                    )
+                ) return false;
+
+                return true;
+            }
+
+            else if (facilitySector == FacilitySector.INDUSTRIAL) {
+                return (this.game.MAP.BFS(
+                    this.coordinates,
+                    6,
+                    (coordinates: Vector2): boolean => {
+                        return this.game.MAP.getCell(coordinates).facilityType == FacilityType.POWER;
+                    }
+                ));
+            }
+
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**

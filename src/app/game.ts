@@ -3,10 +3,10 @@ import { Canvas } from "./canvas.js";
 import { Vector2 } from "../data_structures/vector.js";
 import { Camera } from "../map/camera.js";
 import { App } from "./app.js";
-import { Facility } from "../facility/facility.js";
+import { Facility, FacilitySector } from "../facility/facility.js";
 import { GameMenu } from "./game_menu.js";
 import { assert } from "../util/util.js";
-import { KeyEvent, MouseEvent, Controller } from "./controller.js";
+import { KeyEvent, MouseEvent } from "./controller.js";
 
 /**
  * Enum representing the different game states.
@@ -54,7 +54,7 @@ export class Game {
     private _selectedFacility: {
         new (GAME: Game): Facility;
         getSprite: (isometric: boolean) => HTMLImageElement; 
-        NAME: string
+        NAME: string;
     } | null = null;
 
     // State of game (standard view mode, build, destroy, etc.)
@@ -297,7 +297,7 @@ export class Game {
     public setSelectedFacility<T extends {
         new (GAME: Game): Facility; 
         getSprite: (isometric: boolean) => HTMLImageElement; 
-        NAME: string
+        NAME: string;
     }>(FacilityClass: T | null): void {
         this._selectedFacility = FacilityClass;
     }

@@ -54,8 +54,16 @@ export abstract class Facility {
         return this._FACILITY_SECTOR;
     }
 
+    public get FACILITY_SECTOR(): FacilitySector {
+        return (this.constructor as typeof Facility)._FACILITY_SECTOR;
+    }
+
     public static get FACILITY_TYPE(): FacilityType {
         return this._FACILITY_TYPE;
+    }
+
+    public get FACILITY_TYPE(): FacilityType {
+        return (this.constructor as typeof Facility)._FACILITY_TYPE;
     }
 
     public static get NAME(): string {

@@ -171,7 +171,7 @@ export class GameMenu {
     private createFacilityButton<T extends {
         new (GAME: Game): Facility; 
         getSprite: (isometric: boolean) => HTMLImageElement; 
-        NAME: string
+        NAME: string;
     }>(FacilityClass: T): HTMLButtonElement {
         // Create button element
         const BUTTON: HTMLButtonElement = document.createElement("button");
