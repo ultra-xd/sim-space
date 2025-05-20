@@ -1,4 +1,7 @@
 import { Facility, FacilitySector, FacilityType } from "../facility.js";
+import { Queue } from "../../data_structures/queue.js";
+import { Vector2 } from "../../data_structures/vector.js";
+import { assert } from "../../util/util.js";
 import { Canvas } from "../../app/canvas.js";
 
 export abstract class EssentialServicesFacility extends Facility {
@@ -59,12 +62,66 @@ export class PowerPlant extends EssentialServicesFacility {
     protected static readonly _BUILD_COST: number = 500000000;
     protected _maintenanceCost: number = 2000000;
     protected static readonly _POWER_COST: number = 0;
-    private _powerSurplus: number = 0;
+
+    private static readonly POWER_PRODUCED: number = 100;
 
     public override tick(): void {
         
     }
-    public get powerSurplus(): number {
-        return this._powerSurplus;
+    
+    /** Uses BFS to distribute power to the closest facilities. */
+    public distributePower(coordinates: Vector2): void {
+        const QUEUE: Queue<Vector2> = new Queue<Vector2>();
+        let powerAvailable: number = PowerPlant.POWER_PRODUCED;
+
+        const VISITED: boolean[][] = new Array<boolean[]>(this.GAME.MAP.height);
+        for (let i: number = 0; i < this.GAME.MAP.height; i++) {
+            VISITED[i] = new Array<boolean>(this.GAME.MAP.width);
+            for (let j: number = 0; j < this.GAME.MAP.width; j++) {
+                VISITED[i][j] = false;
+            }
+        }
+
+        const NEIGHBOURS: [Vector2, Vector2, Vector2, Vector2] = [
+             Vector2.I_UNIT,
+             Vector2.J_UNIT,
+             Vector2.I_UNIT.multiply(-1),
+             Vector2.J_UNIT.multiply(-1)
+        ];
+
+        QUEUE.enqueue(coordinates);
+        VISITED[coordinates.y][coordinates.x] = true;
+
+        while (!QUEUE.isEmpty()) {
+            const COORDINATES: Vector2 = QUEUE.dequeue()!;
+            assert (COORDINATES != null);
+
+            for (let i: number = 0; i < NEIGHBOURS.length; i++) {
+                let NEIGHBOUR: Vector2 = COORDINATES.add(NEIGHBOURS[i]);
+                
+                if (!this.GAME.MAP.inBounds(NEIGHBOUR)) continue;
+                if (VISITED[NEIGHBOUR.y][NEIGHBOUR.x]) continue;
+
+                VISITED[NEIGHBOUR.y][NEIGHBOUR.x] = true;
+                
+                const FACILITY: Facility | null = this.GAME.MAP.getCell(NEIGHBOUR).facility;
+
+                if (FACILITY == null) {
+                    QUEUE.enqueue(NEIGHBOUR);
+                } else {
+                    const USED_POWER: number = (FACILITY.constructor as typeof Facility).POWER_COST - FACILITY.powerAvailable;
+                    console.log((FACILITY.constructor as typeof Facility).POWER_COST, FACILITY.powerAvailable);
+                    if (USED_POWER < powerAvailable) {
+                        FACILITY.powerAvailable = (FACILITY.constructor as typeof Facility).POWER_COST;
+                        // console.log(FACILITY.powerAvailable);
+                        powerAvailable -= USED_POWER;
+                        QUEUE.enqueue(NEIGHBOUR);
+                    } else {
+                        FACILITY.powerAvailable = powerAvailable;
+                        return;
+                    }
+                }
+            }
+        }
     }
 }

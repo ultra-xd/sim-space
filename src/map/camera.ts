@@ -21,10 +21,10 @@ export class Camera {
 
     private isometric: boolean = true;
 
-    public constructor(private readonly game: Game) {
+    public constructor(private readonly _GAME: Game) {
         this._center = new Vector2(
-            this.game.MAP.width / 2,
-            this.game.MAP.height / 2
+            this._GAME.MAP.width / 2,
+            this._GAME.MAP.height / 2
         );
 
         this._DEFAULT_CENTER = this._center;

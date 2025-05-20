@@ -80,8 +80,8 @@ export abstract class Facility {
         return Canvas.ImageLoader.getImage(directory);
     }
 
-    public get BUILD_COST(): number {
-        return Facility._BUILD_COST;
+    public static get BUILD_COST(): number {
+        return this._BUILD_COST;
         //cell will get the buildcost and suubstract muney
     }
     public get maintenanceCost(): number {
@@ -90,9 +90,18 @@ export abstract class Facility {
     public get taxRevenue(): number {
         return this._taxRevenue;
     }
-    public get POWER_COST(): number {
-        return Facility._POWER_COST;
+    public static get POWER_COST(): number {
+        return this._POWER_COST;
     }
+
+    public get powerAvailable(): number {
+        return this._powerAvailable;
+    }
+
+    public set powerAvailable(powerAvailable: number) {
+        this._powerAvailable = powerAvailable;
+    }
+
     public get pollution(): number {
         return this._pollution;
     }

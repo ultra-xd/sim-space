@@ -51,11 +51,7 @@ export class Game {
     private static readonly HIGHLIGHT_ANIMATION_TICK_DURATION: number = this.HIGHLIGHT_ANIMATION_DURATION * 60; // Tracks the duration of the animation, in ticks
 
     // Build mode: get class of facility to build
-    private _selectedFacility: {
-        new (GAME: Game): Facility;
-        getSprite: (isometric: boolean) => HTMLImageElement; 
-        NAME: string;
-    } | null = null;
+    private _selectedFacility: {new (GAME: Game): Facility} | null = null;
 
     // State of game (standard view mode, build, destroy, etc.)
     private _gameState: GameState = GameState.STANDARD;
@@ -295,23 +291,14 @@ export class Game {
      * Sets the class of the selected facility to build while in build mode.
      * @param FacilityClass The class of the facility to build.
      */
-    public setSelectedFacility<T extends {
-        new (GAME: Game): Facility; 
-        getSprite: (isometric: boolean) => HTMLImageElement; 
-        NAME: string;
-    }>(FacilityClass: T | null): void {
+    public setSelectedFacility<T extends {new (GAME: Game): Facility}>(FacilityClass: T | null): void {
         this._selectedFacility = FacilityClass;
     }
     
     /**
      * Gets the class of the selected facility to build while in build mode.
      */
-    public get selectedFacility(): {
-        new (GAME: Game): Facility; 
-        getSprite: (isometric: boolean) => HTMLImageElement; 
-        NAME: string
-    } | null {
+    public get selectedFacility(): {new (GAME: Game): Facility} | null {
         return this._selectedFacility;
     }
 }
-

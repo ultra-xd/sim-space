@@ -1,5 +1,6 @@
 import { Cell } from "./cell.js";
 import { Facility, FacilityType, FacilitySector } from "../facility/facility.js";
+import { PowerPlant } from "../facility/facility_types/essential.js";
 import { Game } from "../app/game.js";
 import { Canvas } from "../app/canvas.js";
 import { Vector2 } from "../data_structures/vector.js";
@@ -104,7 +105,7 @@ export class GameMap {
         QUEUE.enqueue([start, 0]);
         VISITED[start.y][start.x] = true;
 
-        const NEIGHBOURS: Vector2[] = [
+        const NEIGHBOURS: [Vector2, Vector2, Vector2, Vector2] = [
             Vector2.I_UNIT,
             Vector2.J_UNIT,
             Vector2.I_UNIT.multiply(-1),
@@ -114,8 +115,6 @@ export class GameMap {
         while (!QUEUE.isEmpty()) {
             const [COORDINATES, DISTANCE]: [Vector2, number] = QUEUE.dequeue()!;
             assert (COORDINATES != null && DISTANCE != null);
-
-            console.log(COORDINATES);
 
             if (handleCondition(COORDINATES)) {
                 return true;
@@ -192,23 +191,44 @@ export class GameMap {
      * @param coordinates The location to build the facility at.
      * @returns True if the facility was built, false otherwise.
      */
-    public build<T extends {
-        new (GAME: Game): Facility; 
-        getSprite: (isometric: boolean) => HTMLImageElement; 
-        NAME: string;
-    }>(FacilityClass: T, coordinates: Vector2): boolean {
+    public build<T extends {new (GAME: Game): Facility}>(FacilityClass: T, coordinates: Vector2): boolean {
         const FACILITY: Facility = new FacilityClass(this.GAME);
         const CELL: Cell = this._CELLS[coordinates.y][coordinates.x];
-
-        console.log(FACILITY.constructor);
 
         if (CELL.canBuild(FACILITY.FACILITY_SECTOR)) {
             CELL.facility = FACILITY;
             this._OCCUPIED_CELLS.add(coordinates);
+            this.redistributePower();
             return true;
         }
 
         return false;
+    }
+
+    public redistributePower(): void {
+        for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
+            const FACILITY: Facility | null = this.getCell(this._OCCUPIED_CELLS.get(i)).facility;
+            assert (FACILITY != null);
+
+            FACILITY.powerAvailable = 0;
+        }
+
+        for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
+            const COORDINATES: Vector2 = this._OCCUPIED_CELLS.get(i);
+            const FACILITY: Facility | null = this.getCell(COORDINATES).facility;
+            assert (FACILITY != null);
+
+            if (FACILITY.FACILITY_TYPE == FacilityType.POWER) {
+                (FACILITY as PowerPlant).distributePower(COORDINATES);
+            }
+        }
+        // debug
+        // console.log("__________________________________________");
+        // for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
+        //     const FACILITY: Facility | null = this.getCell(this._OCCUPIED_CELLS.get(i)).facility;
+        //     assert (FACILITY != null);
+        //     console.log(FACILITY.FACILITY_TYPE, FACILITY.powerAvailable, (FACILITY.constructor as typeof Facility).POWER_COST);
+        // }
     }
 
     /**
@@ -227,6 +247,8 @@ export class GameMap {
                     break;
                 }
             }
+
+            this.redistributePower();
 
             return true;
         }

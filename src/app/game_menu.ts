@@ -172,9 +172,10 @@ export class GameMenu {
      * @returns The button element.
      */
     private createFacilityButton<T extends {
-        new (GAME: Game): Facility; 
+        new (GAME: Game): Facility;
         getSprite: (isometric: boolean) => HTMLImageElement; 
         NAME: string;
+        BUILD_COST: number
     }>(FacilityClass: T): HTMLButtonElement {
         // Create button element
         const BUTTON: HTMLButtonElement = document.createElement("button");
@@ -192,6 +193,18 @@ export class GameMenu {
         TITLE.appendChild(TITLE_TEXT);
         BUTTON.appendChild(TITLE);
 
+        const COST: HTMLParagraphElement = document.createElement("p");
+        const COST_TEXT: Text = document.createTextNode(Intl.NumberFormat(
+            "en-US",
+            {
+                style: "currency",
+                currency: "USD"
+            }
+        ).format(FacilityClass.BUILD_COST));
+        COST.appendChild(COST_TEXT);
+        COST.className = "cost-display";
+        BUTTON.appendChild(COST);
+
         // Add event listener to button to set the selected facility when clicked
         BUTTON.addEventListener("click", () => {
             // Hide dropdown
@@ -205,17 +218,17 @@ export class GameMenu {
 
         return BUTTON;
     }
-
     /**
      * Creates buttons for all facility types.
      */
     private createFacilityButtons(): void {
         // Create array of all facility types
-        const FACILITIES: ({
-            new (GAME: Game): Facility; 
+        const FACILITIES: {
+            new (GAME: Game): Facility;
             getSprite: (isometric: boolean) => HTMLImageElement; 
-            NAME: string
-        })[] = [
+            NAME: string;
+            BUILD_COST: number
+        }[] = [
             EmergencyBuilding,
             EducationCentre,
             MedicalCentre,

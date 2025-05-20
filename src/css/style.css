@@ -123,6 +123,10 @@ span#stats-score-display {
     color: rgb(231, 197, 0);
 }
 
+p.cost-display {
+    color: rgb(6, 155, 6);
+}
+
 #game-standard .dropdown {
     opacity: 0;
     pointer-events: none;
