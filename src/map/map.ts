@@ -54,6 +54,20 @@ export class GameMap {
         return false;
     }
 
+    public containsMultipleOfType(facilityType: FacilityType): boolean {
+        let found: boolean = false;
+        for (let i: number = 0; i < this._GAME.MAP.OCCUPIED_CELLS.length; i++) {
+            const COORDINATES: Vector2 = this._GAME.MAP.OCCUPIED_CELLS.get(i);
+
+            if (this.getCell(COORDINATES).facilityType == facilityType) {
+                if (found) return true;
+                found = true;
+            }
+        }
+
+        return false;
+    }
+
     public containsTypes(facilityTypes: FacilityType[]): boolean {
         for (let i: number = 0; i < facilityTypes.length; i++) {
             if (!this.containsType(facilityTypes[i])) {
@@ -89,10 +103,11 @@ export class GameMap {
     public BFS(
         start: Vector2, 
         maxDistance: number, 
-        handleCondition: (coordinates: Vector2) => boolean
+        handleCondition: (coordinates: Vector2) => boolean,
     ): boolean {
         const QUEUE: Queue<[Vector2, number]> = new Queue<[Vector2, number]>();
         const VISITED: boolean[][] = new Array<boolean[]>(this.height);
+        let found: number = 0;
 
         for (let i: number = 0; i < this.height; i++) {
             VISITED[i] = new Array<boolean>(this.width);
@@ -183,6 +198,32 @@ export class GameMap {
 
     public getCell(coordinates: Vector2): Cell {
         return this._CELLS[coordinates.y][coordinates.x];
+    }
+
+    public getAllOfType(facilityType: FacilityType): Vector2[] {
+        const LIST: ArrayList<Vector2> = new ArrayList<Vector2>();
+
+        for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
+            const COORDINATES: Vector2 = this._OCCUPIED_CELLS.get(i);
+            if (this.getCell(COORDINATES).facilityType == facilityType) {
+                LIST.add(COORDINATES);
+            }
+        }
+
+        return LIST.getArray();
+    }
+
+    public getAllOfSector(facilitySector: FacilitySector): Vector2[] {
+        const LIST: ArrayList<Vector2> = new ArrayList<Vector2>();
+
+        for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
+            const COORDINATES: Vector2 = this._OCCUPIED_CELLS.get(i);
+            if (this.getCell(COORDINATES).facilitySector == facilitySector) {
+                LIST.add(COORDINATES);
+            }
+        }
+
+        return LIST.getArray();
     }
 
     /**

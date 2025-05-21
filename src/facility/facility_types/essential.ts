@@ -12,8 +12,8 @@ export abstract class EssentialServicesFacility extends Facility {
 }
 
 export class EmergencyBuilding extends EssentialServicesFacility {
-    protected static readonly _FACILITY_TYPE = FacilityType.EMERGENCY;
-    protected static readonly _NAME : string = "Emergency Service";
+    protected static readonly _FACILITY_TYPE: FacilityType = FacilityType.EMERGENCY;
+    protected static readonly _NAME: string = "Emergency Service";
 
     protected static readonly _BUILD_COST: number = 100000000;
     protected _maintenanceCost: number = 1000000;
@@ -22,20 +22,20 @@ export class EmergencyBuilding extends EssentialServicesFacility {
 }
 
 export class EducationCentre extends EssentialServicesFacility {
-    protected static readonly _FACILITY_TYPE = FacilityType.EDUCATION;
-    protected static readonly _NAME = "Education Centre";
+    protected static readonly _FACILITY_TYPE: FacilityType = FacilityType.EDUCATION;
+    protected static readonly _NAME: string = "Education Centre";
 
-    protected static readonly _BUILD_COST : number = 500000000;
-    protected _maintenanceCost : number = 50000000;
-    protected static readonly _POWER_COST : number = 15;
+    protected static readonly _BUILD_COST: number = 500000000;
+    protected _maintenanceCost: number = 50000000;
+    protected static readonly _POWER_COST: number = 15;
 
 
 
 }
 
 export class MedicalCentre extends EssentialServicesFacility {
-    protected static readonly _FACILITY_TYPE = FacilityType.MEDICAL;
-    protected static readonly _NAME = "Medical Centre";
+    protected static readonly _FACILITY_TYPE: FacilityType = FacilityType.MEDICAL;
+    protected static readonly _NAME: string = "Medical Centre";
 
     protected static readonly _BUILD_COST: number = 1000000000;
     protected _maintenanceCost: number = 150000000;
@@ -45,8 +45,8 @@ export class MedicalCentre extends EssentialServicesFacility {
 }
 
 export class Government extends EssentialServicesFacility {
-    protected static readonly _FACILITY_TYPE = FacilityType.GOVERNMENT;
-    protected static readonly _NAME = "Government";
+    protected static readonly _FACILITY_TYPE: FacilityType = FacilityType.GOVERNMENT;
+    protected static readonly _NAME: string= "Government";
 
     protected static readonly _BUILD_COST: number = 100000000;
     protected _maintenanceCost: number = 1000000;
@@ -56,8 +56,8 @@ export class Government extends EssentialServicesFacility {
 }
 
 export class PowerPlant extends EssentialServicesFacility {
-    protected static readonly _FACILITY_TYPE = FacilityType.POWER;
-    protected static readonly _NAME = "Power Plant";
+    protected static readonly _FACILITY_TYPE: FacilityType = FacilityType.POWER;
+    protected static readonly _NAME: string = "Power Plant";
 
     protected static readonly _BUILD_COST: number = 500000000;
     protected _maintenanceCost: number = 2000000;

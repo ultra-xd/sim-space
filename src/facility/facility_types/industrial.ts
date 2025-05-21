@@ -7,22 +7,15 @@ export abstract class IndustrialFacility extends Facility {
 
 export class Factory extends IndustrialFacility {
     protected static readonly _FACILITY_TYPE = FacilityType.FACTORY;
-    protected static readonly _NAME : string = "Factory";
+    protected static readonly _NAME: string = "Factory";
 
     protected static readonly _BUILD_COST: number = 50000000;
-
     private static readonly _MAX_MAINTENANCE_COST: number = 500000;
-
-    protected _maintenanceCost : number = 500000;
-
+    protected _maintenanceCost: number = 500000;
     protected static readonly _POWER_COST: number = 50;
-
     protected _pollution: number = 20000;
-
     protected _taxRevenue: number = 1000000;
-
-    private static readonly _MAX_TAX_REVENUE : number = 5000000;
-
+    private static readonly _MAX_TAX_REVENUE: number = 5000000;
     private static readonly _GROWTH_RATE: number = 0.2;
 
     public override tick(): void {
@@ -49,7 +42,6 @@ export class Warehouse extends IndustrialFacility {
 export class EnvironmentalFacility extends IndustrialFacility {
     protected static readonly _FACILITY_TYPE = FacilityType.ENVIRONMENT;
     protected static readonly _NAME = "Environmental Facility";
-
 
     protected static readonly _BUILD_COST: number = 200000000;
     protected _taxRevenue: number = 0;

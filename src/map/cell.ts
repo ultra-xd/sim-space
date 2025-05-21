@@ -1,10 +1,13 @@
 import { Facility, FacilitySector, FacilityType } from "../facility/facility.js";
 import { Game } from "../app/game.js";
 import { Vector2 } from "../data_structures/vector.js";
+import { ArrayList } from "../data_structures/arraylist.js";
 import { Canvas } from "../app/canvas.js";
 import { Camera } from "./camera.js";
 import { GameMap } from "./map.js";
 import { GameMenu } from "../app/game_menu.js";
+import { assert } from "../util/util.js";
+import { ResidentialFacility } from "../facility/facility_types/residential.js";
 
 /**
  * Represents a cell in the game map.
@@ -12,6 +15,11 @@ import { GameMenu } from "../app/game_menu.js";
 export class Cell {
     private _coordinates: Vector2;
     private _pollution: number;
+
+    // Set variables for maximum distance between certain facilities
+    private static readonly _MAX_DISTANCE_RESIDENCE_STORE: number = 5;
+    private static readonly _MAX_DISTANCE_RESIDENCE_RESTAURANT: number = 3;
+    private static readonly _MAX_DISTANCE_INDUSTRIAL_POWER: number = 6;
 
     /**
      * Creates a new cell with the specified coordinates and facility.
@@ -163,11 +171,7 @@ export class Cell {
      */
     public canBuild(facilitySector: FacilitySector) : boolean {
         if (this.isEmpty()) {
-            if (facilitySector == FacilitySector.ESSENTIAL) {
-                return true;
-            }
-
-            else if (facilitySector == FacilitySector.RESIDENTIAL) {
+            if (facilitySector == FacilitySector.RESIDENTIAL) {
                 if (!this._GAME.MAP.containsTypes([
                     FacilityType.EMERGENCY,
                     FacilityType.EDUCATION,
@@ -175,31 +179,42 @@ export class Cell {
                     FacilityType.GOVERNMENT,
                     FacilityType.POWER
                 ])) {
-                    GameMenu.NotificationManager.createNotification("Residential facilities require an emergency building, education centre, medical centre, a government and a power plant to be built.");
+                    GameMenu.NotificationManager.createNotification(
+                        "Residential facilities require an emergency building, education centre, medical centre, a government and a power plant to be built."
+                    );
                     return false;
                 }
 
                 if (!this._GAME.MAP.BFS(
                         this.coordinates,
-                        5,
+                        Cell._MAX_DISTANCE_RESIDENCE_STORE,
                         (coordinates: Vector2): boolean => {
                             return this._GAME.MAP.getCell(coordinates).facilityType == FacilityType.STORE;
                         }
                     )
                 ) {
-                    GameMenu.NotificationManager.createNotification("Residential facilities must be built 5 units of a store.");
+                    GameMenu.NotificationManager.createNotification(
+                        `Residential facilities must be built ${
+                        Cell._MAX_DISTANCE_RESIDENCE_STORE
+                        } units of a store.`
+                    );
+
                     return false;
                 }
 
                 else if (!this._GAME.MAP.BFS(
                         this.coordinates,
-                        3,
+                        Cell._MAX_DISTANCE_RESIDENCE_RESTAURANT,
                         (coordinates: Vector2): boolean => {
                             return this._GAME.MAP.getCell(coordinates).facilityType == FacilityType.RESTAURANT;
                         }
                     )
                 ) {
-                    GameMenu.NotificationManager.createNotification("Residential facilities must be built 3 units of a restaurant.");
+                    GameMenu.NotificationManager.createNotification(
+                        `Residential facilities must be built ${
+                        Cell._MAX_DISTANCE_RESIDENCE_RESTAURANT
+                        } units of a restaurant.`
+                    );
                     return false;
                 }
 
@@ -209,12 +224,16 @@ export class Cell {
             else if (facilitySector == FacilitySector.INDUSTRIAL) {
                 if (!this._GAME.MAP.BFS(
                     this.coordinates,
-                    6,
+                    Cell._MAX_DISTANCE_INDUSTRIAL_POWER,
                     (coordinates: Vector2): boolean => {
                         return this._GAME.MAP.getCell(coordinates).facilityType == FacilityType.POWER;
                     }
                 )) {
-                    GameMenu.NotificationManager.createNotification("Industrial facilities must be built within 6 units of a power plant.");
+                    GameMenu.NotificationManager.createNotification(
+                        `Industrial facilities must be built within ${
+                            Cell._MAX_DISTANCE_INDUSTRIAL_POWER
+                        } units of a power plant.`
+                    );
                     return false;
                 }
 
@@ -223,7 +242,9 @@ export class Cell {
 
             return true;
         } else {
-            GameMenu.NotificationManager.createNotification("This cell is already occupied by a facility.");
+            GameMenu.NotificationManager.createNotification(
+                "This cell is already occupied by a facility."
+            );
             return false;
         }
     }
@@ -233,6 +254,123 @@ export class Cell {
      * @returns True if the facility can be destroyed, false otherwise.
      */
     public canDestroy(): boolean {
-        return !this.isEmpty();
+        if (!this.isEmpty()) {
+            const FACILITY_SECTOR: FacilitySector | null = this.facilitySector;
+            const FACILITY_TYPE: FacilityType | null = this.facilityType;
+            assert (FACILITY_SECTOR != null && FACILITY_TYPE != null);
+
+            if (FACILITY_SECTOR == FacilitySector.ESSENTIAL) {
+                if (!this._GAME.MAP.containsMultipleOfType(FACILITY_TYPE)) {
+                    GameMenu.NotificationManager.createNotification(
+                        "This facility is essential for building a residential facility: you must have at least one of these."
+                    );
+                    return false;
+                }
+            }
+
+            else if (FACILITY_TYPE == FacilityType.STORE) {
+                if (!this.facilityTypeDeleteCheck(
+                    FacilitySector.RESIDENTIAL,
+                    FacilityType.STORE,
+                    Cell._MAX_DISTANCE_RESIDENCE_STORE
+                )) {
+                    GameMenu.NotificationManager.createNotification(
+                        "A residential facility is dependent on this facility: remove that facility before proceeding."
+                    );
+                    return false;
+                }
+            }
+
+            else if (FACILITY_TYPE == FacilityType.RESTAURANT) {
+                if (!this.facilityTypeDeleteCheck(
+                    FacilitySector.RESIDENTIAL,
+                    FacilityType.RESTAURANT,
+                    Cell._MAX_DISTANCE_RESIDENCE_RESTAURANT
+                )) {
+                    GameMenu.NotificationManager.createNotification(
+                        "A residential facility is dependent on this facility: remove that facility before proceeding."
+                    );
+                    return false;
+                }
+            }
+
+            else if (FACILITY_TYPE == FacilityType.POWER) {
+                if (!this.facilitySectorDeleteCheck(
+                    FacilitySector.INDUSTRIAL,
+                    FacilityType.POWER,
+                    Cell._MAX_DISTANCE_INDUSTRIAL_POWER
+                )) {
+                    GameMenu.NotificationManager.createNotification(
+                        "An industrial facility is dependent on this facility: remove that facility before proceeding."
+                    );
+
+                    return false;
+                }
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private facilityTypeDeleteCheck(
+        facilitySector: FacilitySector, 
+        facilityType: FacilityType,
+        distance: number
+    ): boolean {
+        const SECTOR_CELLS: Vector2[] = this._GAME.MAP.getAllOfSector(facilitySector);
+
+        const TYPE_CELLS: Vector2[] = this._GAME.MAP.getAllOfType(facilityType).filter(
+            (coordinates: Vector2): boolean => {
+                return !coordinates.equals(this._coordinates);
+            } 
+        );
+        
+        if (TYPE_CELLS.length == 0 && SECTOR_CELLS.length != 0) return false;
+
+        return this.distanceCheck(SECTOR_CELLS, TYPE_CELLS, distance);
+    }
+
+    private facilitySectorDeleteCheck(
+        facilitySector: FacilitySector, 
+        facilityType: FacilityType,
+        distance: number
+    ): boolean {
+        const SECTOR_CELLS: Vector2[] = this._GAME.MAP.getAllOfSector(facilitySector).filter(
+            (coordinates: Vector2): boolean => {
+                return !coordinates.equals(this._coordinates);
+            }
+        );
+
+        const TYPE_CELLS: Vector2[] = this._GAME.MAP.getAllOfType(facilityType);
+
+        if (SECTOR_CELLS.length == 0 && TYPE_CELLS.length != 0) return false;
+
+        return this.distanceCheck(TYPE_CELLS, SECTOR_CELLS, distance);
+    }
+
+    private distanceCheck(
+        arr1: Vector2[],
+        arr2: Vector2[],
+        distance: number
+    ): boolean {
+        for (let i: number = 0; i < arr1.length; i++) {
+            let close: boolean = false;
+            const COORDINATES1: Vector2 = arr1[i];
+
+            for (let j: number = 0; j < arr2.length; j++) {
+                const COORDINATES2: Vector2 = arr2[j];
+                const DISTANCE: number = Math.abs(COORDINATES1.x - COORDINATES2.x) + Math.abs(COORDINATES1.y - COORDINATES2.y);
+                if (DISTANCE <= distance) {
+                    close = true;
+                    break;
+                }
+            }
+
+            if (!close) return false;
+        }
+
+        return true;
     }
 }

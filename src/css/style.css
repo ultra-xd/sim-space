@@ -74,6 +74,7 @@ button.general:hover, button.icon:hover, button.facility-button:hover {
 
 div#stats-display {
     position: absolute;
+    pointer-events: none;
     top: 1%;
     left: 1%;
     width: 20%;
