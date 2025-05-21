@@ -57,9 +57,25 @@ export class LuxuryHome extends ResidentialFacility {
     protected _pollution: number;
     protected _taxRevenue: number;
     
-    public facilityCheck(coordinates : Vector2): boolean {
-        return true;
+    public facilityCheck(coordinates: Vector2): boolean {
+        return (
+            this.GAME.MAP.BFS(
+                coordinates,
+                1,
+                (coords: Vector2): boolean => {
+                    return this.GAME.MAP.getCell(coords).facilityType == FacilityType.STORE;
+                }
+            ) &&
+            this.GAME.MAP.BFS(
+                coordinates,
+                1,
+                (coords: Vector2): boolean => {
+                    return this.GAME.MAP.getCell(coords).facilityType == FacilityType.RESTAURANT;
+                }
+            )
+        );
     }
+
     public override tick(): void {
 
     }

@@ -112,7 +112,6 @@ export class PowerPlant extends EssentialServicesFacility {
                     const USED_POWER: number = (FACILITY.constructor as typeof Facility).POWER_COST - FACILITY.powerAvailable;
                     if (USED_POWER < powerAvailable) {
                         FACILITY.powerAvailable = (FACILITY.constructor as typeof Facility).POWER_COST;
-                        // console.log(FACILITY.powerAvailable);
                         powerAvailable -= USED_POWER;
                         QUEUE.enqueue(NEIGHBOUR);
                     } else {

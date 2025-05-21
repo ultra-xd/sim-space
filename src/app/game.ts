@@ -147,14 +147,20 @@ export class Game {
                         assert (this._selectedFacility != null);
 
                         // Build facility on highlighted cell, if possible
-                        if (this._MAP.build(this._selectedFacility, this._highlightedCell)) {
+                        if (
+                            this._MAP.build(this._selectedFacility, this._highlightedCell) &&
+                            !App.CONTROLLER.keyToggled(KeyEvent.SHIFT)
+                        ) {
                             this.gameState = GameState.STANDARD;
                         }
 
                         break;
                     case GameState.DESTROY:
                         // Destroy facility on highlighted cell, if possible
-                        if (this._MAP.destroy(this._highlightedCell)) {
+                        if (
+                            this._MAP.destroy(this._highlightedCell) &&
+                            !App.CONTROLLER.keyToggled(KeyEvent.SHIFT)
+                        ) {
                             this.gameState = GameState.STANDARD;
                         }
 

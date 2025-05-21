@@ -11,7 +11,7 @@ export enum MouseEvent {
 
 export enum KeyEvent {
     ESCAPE = "escape",
-    X = "x"
+    SHIFT = "shift"
 }
 
 export class Controller {

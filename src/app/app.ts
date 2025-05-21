@@ -62,6 +62,7 @@ export class App {
                 "res/assets/map/grass_straight.png",
                 "res/assets/title/title_background.jpg",
                 "res/assets/title/title_text.png",
+                "res/assets/title/pidjeon.png"
             ]
         );
 
