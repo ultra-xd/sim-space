@@ -98,6 +98,8 @@ export class Cell {
         if (this._facility != null) {
             this._facility.tick();
         }
+
+        this._pollution = this._facility ? this._facility.pollution : 0;
     }
 
     public get pollution(): number {

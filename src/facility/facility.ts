@@ -46,8 +46,10 @@ export abstract class Facility {
 
     protected _powerAvailable : number = 0;
 
+    protected _game: Game;
+
     public constructor(protected readonly GAME: Game) {
-        
+        this._game = GAME;
     }
 
     public static get FACILITY_SECTOR(): FacilitySector {
@@ -111,12 +113,13 @@ export abstract class Facility {
     }
 
     public tick(): void {
+        //Increase age of the facility
         this._age++;
-        //tax revenue subtracts from money in game through setter
+        //tax revenue adds to money in game through setter
+        this._game.money += this._taxRevenue
         //Set money to subtract mainternance cost
-        //Update pollution units using what subclasses provide
-        //
-        
+        this._game.money -= this._maintenanceCost;
+        //Pollution handled in cell
     }
 }
 
