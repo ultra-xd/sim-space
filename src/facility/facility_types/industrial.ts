@@ -59,4 +59,7 @@ export class EnvironmentalFacility extends IndustrialFacility {
 
     }
 
+    public static get MAX_POLLUTION_REDUCTION(): number {
+        return this._MAX_POLLUTION_REDUCTION;
+    }
 }

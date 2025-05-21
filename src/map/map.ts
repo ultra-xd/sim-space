@@ -264,12 +264,12 @@ export class GameMap {
             }
         }
         // debug
-        // console.log("__________________________________________");
-        // for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
-        //     const FACILITY: Facility | null = this.getCell(this._OCCUPIED_CELLS.get(i)).facility;
-        //     assert (FACILITY != null);
-        //     console.log(FACILITY.FACILITY_TYPE, FACILITY.powerAvailable, (FACILITY.constructor as typeof Facility).POWER_COST);
-        // }
+        console.log("__________________________________________");
+        for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
+            const FACILITY: Facility | null = this.getCell(this._OCCUPIED_CELLS.get(i)).facility;
+            assert (FACILITY != null);
+            console.log(FACILITY.FACILITY_TYPE, FACILITY.powerAvailable, (FACILITY.constructor as typeof Facility).POWER_COST);
+        }
     }
 
     /**

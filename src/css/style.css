@@ -78,6 +78,22 @@ div#stats-display {
     top: 1%;
     left: 1%;
     width: 20%;
+    height: 15%;
+}
+
+div#facility-info {
+    position: absolute;
+    pointer-events: none;
+    top: 20%;
+    left: 1%;
+    width: 20%;
+}
+
+img#facility-info-sprite {
+    position: absolute;
+    top: 3%;
+    right: 3%;
+    width: 30%;
 }
 
 div#construction-buttons {
@@ -149,15 +165,26 @@ p.cost-display {
     pointer-events: auto;
 }
 
-#game-menu .popup {
+#game-menu div.popup {
     opacity: 0;
     transform: translateY(30px);
     transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
-#game-menu .popup.show {
+#game-menu div.popup.show {
     opacity: 1;
     transform: translateY(0);
+}
+
+#game-menu div.slide-left {
+    opacity: 0;
+    transform: translateX(-30px);
+    transition: opacity 0.4s ease, transform 0,4s ease;
+}
+
+#game-menu div.slide-left.show {
+    opacity: 1;
+    transform: translateX(0);
 }
 
 div#notification-box {

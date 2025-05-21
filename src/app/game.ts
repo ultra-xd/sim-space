@@ -129,6 +129,14 @@ export class Game {
         if (App.CONTROLLER.mouseClickToggled(MouseEvent.LMB) && this._highlightedCell != null) {
             switch (this._gameState) {
                 case GameState.STANDARD:
+                    if (!this._MAP.inBounds(this._highlightedCell)) break;
+                    const FACILITY: Facility | null = this._MAP.getCell(this._highlightedCell).facility;
+                    if (FACILITY == null) {
+                        GameMenu.hideFacilityInfo();
+                    } else {
+                        GameMenu.showFacilityInfo(FACILITY);
+                    }
+
                     break;
                 case GameState.BUILD:
                     assert (this._selectedFacility != null);

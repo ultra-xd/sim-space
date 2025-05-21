@@ -2,8 +2,8 @@ import { App } from "./app.js";
 import { assert } from "../util/util.js";
 import { Queue } from "../data_structures/queue.js";
 import { Game, GameState } from "./game.js";
-import { Facility } from "../facility/facility.js";
-import { LuxuryHome, ComfortableHome, AffordableHome } from "../facility/facility_types/residential.js";
+import { Facility, FacilitySector, FacilityType } from "../facility/facility.js";
+import { LuxuryHome, ComfortableHome, AffordableHome, ResidentialFacility } from "../facility/facility_types/residential.js";
 import { DefenseFacility } from "../facility/facility_types/defense.js";
 import { EmergencyBuilding, EducationCentre, MedicalCentre, Government, PowerPlant } from "../facility/facility_types/essential.js";
 import { Restaurant, Store, Office } from "../facility/facility_types/commercial.js";
@@ -23,6 +23,26 @@ export class GameMenu {
     public static readonly GAME_PAUSED_DIV: HTMLDivElement = document.getElementById("game-paused") as HTMLDivElement;
 
     public static readonly GAME_END_DIV: HTMLDivElement = document.getElementById("game-end") as HTMLDivElement;
+
+    public static readonly FACILITY_INFO_DIV: HTMLDivElement = document.getElementById("facility-info") as HTMLDivElement;
+
+    public static readonly FACILITY_NAME_PARAGRAPH: HTMLParagraphElement = document.getElementById("facility-name") as HTMLParagraphElement;
+
+    public static readonly FACILITY_AGE_SPAN: HTMLSpanElement = document.getElementById("facility-age") as HTMLSpanElement;
+
+    public static readonly FACILITY_POWER_AVAILABLE_SPAN: HTMLSpanElement = document.getElementById("facility-power-consume") as HTMLSpanElement;
+
+    public static readonly FACILITY_POWER_COST_SPAN: HTMLSpanElement = document.getElementById("facility-max-power") as HTMLSpanElement;
+
+    public static readonly FACILITY_TAX_REVENUE_SPAN: HTMLSpanElement = document.getElementById("facility-tax-revenue") as HTMLSpanElement;
+
+    public static readonly FACILITY_MAINTENANCE_COST_SPAN: HTMLSpanElement = document.getElementById("facility-maintenance-cost") as HTMLSpanElement;
+
+    public static readonly FACILITY_POLLUTION_SPAN: HTMLSpanElement = document.getElementById("facility-pollution") as HTMLSpanElement;
+
+    public static readonly FACILITY_ADDITIONAL_INFO: HTMLParagraphElement = document.getElementById("facility-additional-info") as HTMLParagraphElement;
+
+    public static readonly FACILITY_INFO_SPRITE: HTMLImageElement = document.getElementById("facility-info-sprite") as HTMLImageElement;
 
     public static readonly STATS_MONEY_PARAGRAPH: HTMLParagraphElement = document.getElementById("stats-money-display") as HTMLParagraphElement;
 
@@ -137,6 +157,64 @@ export class GameMenu {
         this.createFacilityButtons();
     }
 
+    public static showFacilityInfo(facility: Facility): void {
+        GameMenu.FACILITY_NAME_PARAGRAPH.innerText = (facility.constructor as typeof Facility).NAME;
+
+        GameMenu.FACILITY_AGE_SPAN.innerText = String(facility.age);
+
+        GameMenu.FACILITY_POWER_AVAILABLE_SPAN.innerText = String(facility.powerAvailable);
+
+        GameMenu.FACILITY_POWER_COST_SPAN.innerText = String((facility.constructor as typeof Facility).POWER_COST);
+
+        GameMenu.FACILITY_TAX_REVENUE_SPAN.innerText = Intl.NumberFormat(
+            "en-US",
+            {
+                style: "currency",
+                currency: "USD"
+            }
+        ).format(facility.taxRevenue);
+
+        GameMenu.FACILITY_MAINTENANCE_COST_SPAN.innerText = Intl.NumberFormat(
+            "en-US",
+            {
+                style: "currency",
+                currency: "USD"
+            }
+        ).format(facility.maintenanceCost);
+
+        GameMenu.FACILITY_POLLUTION_SPAN.innerText = String(facility.pollution);
+
+        GameMenu.FACILITY_INFO_SPRITE.src = facility.getSprite(true).src;
+
+        let additionalInfoText: string = "";
+
+        if (facility.FACILITY_SECTOR == FacilitySector.RESIDENTIAL) {
+            additionalInfoText += `Population: ${(facility as ResidentialFacility).population}\n`;
+            additionalInfoText += `Happy Population: ${(facility as ResidentialFacility).happyPopulation}\n`;
+            additionalInfoText += `Content Population: ${(facility as ResidentialFacility).contentPopulation}\n`;
+        }
+
+        if (facility.FACILITY_TYPE == FacilityType.POWER) {
+            additionalInfoText += `Power Produced: ${PowerPlant.POWER_PRODUCED}\n`;
+        }
+
+        if (facility.FACILITY_TYPE == FacilityType.ENVIRONMENT) {
+            additionalInfoText += `Pollution Reduced: ${EnvironmentalFacility.MAX_POLLUTION_REDUCTION}\n`;
+        }
+
+        GameMenu.FACILITY_ADDITIONAL_INFO.innerText = additionalInfoText;
+
+        if (!GameMenu.FACILITY_INFO_DIV.classList.contains("show")) {
+            GameMenu.FACILITY_INFO_DIV.classList.add("show");
+        }
+    }
+
+    public static hideFacilityInfo(): void {
+        if (GameMenu.FACILITY_INFO_DIV.classList.contains("show")) {
+            GameMenu.FACILITY_INFO_DIV.classList.remove("show");
+        }
+    }
+
     /**
      * Updates game menu UI with the current game state.
      * @param gameState State of game to switch to.
@@ -218,6 +296,7 @@ export class GameMenu {
 
         return BUTTON;
     }
+
     /**
      * Creates buttons for all facility types.
      */

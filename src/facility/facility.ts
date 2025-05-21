@@ -105,6 +105,11 @@ export abstract class Facility {
     public get pollution(): number {
         return this._pollution;
     }
+
+    public get age(): number {
+        return this._age;
+    }
+
     public tick(): void {
         this._age++;
         //tax revenue subtracts from money in game through setter

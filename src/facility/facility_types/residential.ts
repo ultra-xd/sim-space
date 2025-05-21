@@ -27,14 +27,14 @@ export abstract class ResidentialFacility extends Facility {
     public override tick(): void {
 
     }
-    protected get population(): number {
+    public get population(): number {
         return this._population;
     }
-    protected happyPopulation(): number {
-        return this._population * ResidentialFacility._HAPPINESS_RATIO;
+    public get happyPopulation(): number {
+        return this._population * (this.constructor as typeof ResidentialFacility)._HAPPINESS_RATIO;
     }
-    protected contentPopulation(): number {
-        return this._population - (this._population * ResidentialFacility._HAPPINESS_RATIO);
+    public get contentPopulation(): number {
+        return this._population - (this._population * (this.constructor as typeof ResidentialFacility)._HAPPINESS_RATIO);
     }
 
 }

@@ -260,7 +260,10 @@ export class Cell {
             assert (FACILITY_SECTOR != null && FACILITY_TYPE != null);
 
             if (FACILITY_SECTOR == FacilitySector.ESSENTIAL) {
-                if (!this._GAME.MAP.containsMultipleOfType(FACILITY_TYPE)) {
+                if (
+                    !this._GAME.MAP.containsMultipleOfType(FACILITY_TYPE) &&
+                    this._GAME.MAP.containsSector(FacilitySector.RESIDENTIAL)
+                ) {
                     GameMenu.NotificationManager.createNotification(
                         "This facility is essential for building a residential facility: you must have at least one of these."
                     );
