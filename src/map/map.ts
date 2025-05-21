@@ -107,7 +107,6 @@ export class GameMap {
     ): boolean {
         const QUEUE: Queue<[Vector2, number]> = new Queue<[Vector2, number]>();
         const VISITED: boolean[][] = new Array<boolean[]>(this.height);
-        let found: number = 0;
 
         for (let i: number = 0; i < this.height; i++) {
             VISITED[i] = new Array<boolean>(this.width);
@@ -263,13 +262,13 @@ export class GameMap {
                 (FACILITY as PowerPlant).distributePower(COORDINATES);
             }
         }
-        // debug
-        console.log("__________________________________________");
-        for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
-            const FACILITY: Facility | null = this.getCell(this._OCCUPIED_CELLS.get(i)).facility;
-            assert (FACILITY != null);
-            console.log(FACILITY.FACILITY_TYPE, FACILITY.powerAvailable, (FACILITY.constructor as typeof Facility).POWER_COST);
-        }
+        // // debug
+        // console.log("__________________________________________");
+        // for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
+        //     const FACILITY: Facility | null = this.getCell(this._OCCUPIED_CELLS.get(i)).facility;
+        //     assert (FACILITY != null);
+        //     console.log(FACILITY.FACILITY_TYPE, FACILITY.powerAvailable, (FACILITY.constructor as typeof Facility).POWER_COST);
+        // }
     }
 
     /**

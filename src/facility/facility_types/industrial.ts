@@ -1,4 +1,5 @@
 import { Vector2 } from "../../data_structures/vector.js";
+import { Cell } from "../../map/cell.js";
 import { Facility, FacilitySector, FacilityType } from "../facility.js";
 
 export abstract class IndustrialFacility extends Facility {
@@ -77,8 +78,30 @@ export class EnvironmentalFacility extends IndustrialFacility {
 
     protected _pollution: number = 0;
 
-    public reducePollution(coordinates : Vector2): void {
+    public reducePollution(coordinates: Vector2): void {
         //God save the queen (not), and maybe Joe Biden from prostate cancer too. He didn't save the pope tho wtf man?
+        // im keeping this comment LMAOOO
+        let pollutionReductionAvailable: number = EnvironmentalFacility.MAX_POLLUTION_REDUCTION;
+
+        this._game.MAP.BFS(
+            coordinates,
+            this._game.MAP.width + this._game.MAP.height,
+            (coords: Vector2): boolean => {
+                const CELL: Cell = this._game.MAP.getCell(coords);
+                const POLLUTION: number = CELL.pollution;
+
+                if (pollutionReductionAvailable > POLLUTION) {
+                    pollutionReductionAvailable -= POLLUTION;
+                    CELL.pollution = 0;
+                } else {
+                    CELL.pollution -= pollutionReductionAvailable;
+                    return true;
+                }
+
+                return false;
+            }
+        )
+
     }
     public override tick(): void {
         //Increase age of the facility

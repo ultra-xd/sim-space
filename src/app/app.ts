@@ -2,9 +2,6 @@ import { Game } from "./game.js";
 import { StartMenu } from "./start_menu.js";
 import { GameMenu } from "./game_menu.js";
 import { Canvas } from "./canvas.js";
-import { ArrayList } from "../data_structures/arraylist.js";
-import { Vector2 } from "../data_structures/vector.js";
-import { assert } from "../util/util.js";
 import { Controller, KeyEvent } from "./controller.js";
 
 export enum AppState {

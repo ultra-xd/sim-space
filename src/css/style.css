@@ -51,12 +51,19 @@ div#game-paused, div#game-end {
     background-color: rgba(14, 28, 38, 0.5);
 }
 
-div#paused-button-container {
+div#paused-button-container, div#game-end-menu {
     position: absolute;
     display: inline-block;
+    text-align: center;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+}
+
+p#game-over-message {
+    color: white;
+    font-size: 20px;
+    pointer-events: none;
 }
 
 .general, .icon, .facility-button {

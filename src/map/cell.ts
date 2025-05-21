@@ -315,6 +315,9 @@ export class Cell {
 
             return true;
         } else {
+            GameMenu.NotificationManager.createNotification(
+                "There is nothing in this space."
+            );
             return false;
         }
     }

@@ -5,7 +5,7 @@ import { Camera } from "../map/camera.js";
 import { App } from "./app.js";
 import { Facility, FacilitySector } from "../facility/facility.js";
 import { GameMenu } from "./game_menu.js";
-import { assert } from "../util/util.js";
+import { assert, randomInteger } from "../util/util.js";
 import { KeyEvent, MouseEvent } from "./controller.js";
 
 /**
@@ -55,6 +55,13 @@ export class Game {
 
     // State of game (standard view mode, build, destroy, etc.)
     private _gameState: GameState = GameState.STANDARD;
+
+    // destroying the city yipppiiiieeee
+    private static readonly DEFAULT_GAME_END_PROBABILITY: number = 1;
+    private gameEndProbability: number = Game.DEFAULT_GAME_END_PROBABILITY;
+    private isGameEnding: boolean = false;
+    private static readonly GAME_ENDING_ANIMATION_LENGTH: number = 2;
+    private gameEndingAnimationTicks: number = 0;
 
     /**
      * Creates a new Game.
@@ -180,6 +187,13 @@ export class Game {
                 this._CAMERA.adjustZoom(-0.05);
             }
 
+            if (this.isGameEnding) {
+                this.gameEndingAnimationTicks++;
+                if (this.gameEndingAnimationTicks == Game.GAME_ENDING_ANIMATION_LENGTH * App.TPS) {
+                    this.gameState = GameState.END;
+                }
+            }
+
             // Update map and camera
             GameMenu.NotificationManager.tick();
             this._MAP.tick();
@@ -200,6 +214,22 @@ export class Game {
                     break;
             }
         }
+
+        if (this.monthEnded()) {
+            this.updateStatsDisplay();
+            console.log('e')
+            if (!this.isGameEnding) {
+                const COMPARE: number = this.gameEndProbability * 100;
+                let RANDOM: number = randomInteger(1, 100);
+                if (RANDOM <= COMPARE) {
+                    this.gameEnd();
+                }
+            }
+        }
+    }
+
+    private updateStatsDisplay(): void {
+        GameMenu.STATS_MONEY_PARAGRAPH.innerText
     }
 
     /**
@@ -212,13 +242,31 @@ export class Game {
             new Vector2(canvas.width / 2, canvas.height / 2),
             canvas.width,
             canvas.height,
-            "rgb(0, 96, 175)",
+            "rgb(0, 96, 175)"
         );
 
         // Draw map and facilities in map
         this.MAP.draw(canvas, this._CAMERA);
 
-        
+        if (this.isGameEnding && this._gameState != GameState.END) {
+            const FLASH_OPACITY: number = this.gameEndingAnimationTicks / (Game.GAME_ENDING_ANIMATION_LENGTH * App.TPS);
+            console.log(FLASH_OPACITY)
+            canvas.fillRect(
+                new Vector2(canvas.width / 2, canvas.height / 2),
+                canvas.width,
+                canvas.height,
+                `rgba(255, 255, 255, ${FLASH_OPACITY})`
+            );
+        }
+
+        // if (this._gameState == GameState.END) {
+        //     canvas.fillRect(
+        //         new Vector2(canvas.width / 2, canvas.height / 2),
+        //         canvas.width,
+        //         canvas.height,
+        //         "rgb(255, 255, 255)"
+        //     );
+        // }
     }
 
     /**
@@ -329,5 +377,13 @@ export class Game {
      */
     public get selectedFacility(): {new (GAME: Game): Facility} | null {
         return this._selectedFacility;
+    }
+
+    public nullifyGameEndProbability(): void {
+        this.gameEndProbability = 0;
+    }
+
+    public gameEnd(): void {
+        this.isGameEnding = true;
     }
 }

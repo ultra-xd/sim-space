@@ -13,8 +13,7 @@ export class DefenseFacility extends Facility {
     protected _taxRevenue: number;
 
     public preventDisaster() : void{
-        //Where tf is the nuke everything in the game thingy? Maybe I have to add it...
-        //Note to self straight up just like nuke their pc if they get hit then nothing else matters
+        this._game.nullifyGameEndProbability();
     }
     public override tick(): void {
         //what is this supposed to fking do? Might just be a dummkopf
