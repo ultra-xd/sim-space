@@ -1,4 +1,4 @@
-import { App } from "./app.js";
+import { App, AppState } from "./app.js";
 import { assert } from "../util/util.js";
 import { Queue } from "../data_structures/queue.js";
 import { Game, GameState } from "./game.js";
@@ -72,6 +72,12 @@ export class GameMenu {
     
     public static readonly CONSTRUCTION_CANCEL_BUTTON: HTMLButtonElement = document.getElementById("view-cancel") as HTMLButtonElement;
 
+    public static readonly PAUSED_MENU_BUTTON: HTMLButtonElement = document.getElementById("pause-return-to-menu") as HTMLButtonElement;
+
+    public static readonly PAUSED_CONTINUE_BUTTON: HTMLButtonElement = document.getElementById("pause-continue-game") as HTMLButtonElement;
+
+    public static readonly END_MENU_BUTTON: HTMLButtonElement = document.getElementById("end-return-to-menu") as HTMLButtonElement;
+
     /**
      * Creates a new GameMenu.
      * @param game The game instance for GameMeny to handle.
@@ -83,7 +89,7 @@ export class GameMenu {
      */
     public setup(): void {
         // Handle event listener for building button dropdown
-        GameMenu.CONSTRUCTION_BUILD_BUTTON.addEventListener("click", () => {
+        GameMenu.CONSTRUCTION_BUILD_BUTTON.onclick = () => {
             // Toggle the display of the building button dropdown if not shown, otherwise hide it
             if (!GameMenu.CONSTRUCTION_BUILDINGS_DISPLAY_DIV.classList.contains("show")) {
                 GameMenu.CONSTRUCTION_BUILDINGS_DISPLAY_DIV.classList.add("show");
@@ -92,10 +98,10 @@ export class GameMenu {
                 GameMenu.CONSTRUCTION_BUILDINGS_DISPLAY_DIV.classList.remove("show");
                 GameMenu.CONSTRUCTION_BUILD_BUTTON.classList.remove("active");
             }
-        });
+        };
 
         // Handle event listener of zoom in button
-        GameMenu.MAP_ZOOM_IN_BUTTON.addEventListener("click", () => {
+        GameMenu.MAP_ZOOM_IN_BUTTON.onclick = () => {
             // Don't zoom in if the camera is animating
             if (this.game.CAMERA.isAnimating()) return;
             
@@ -103,10 +109,10 @@ export class GameMenu {
             this.game.CAMERA.createZoomAnimation(
                 this.game.CAMERA.pixelsPerUnit * 2
             );
-        });
+        };
 
         // Handle event listener of zoom out button
-        GameMenu.MAP_ZOOM_OUT_BUTTON.addEventListener("click", () => {
+        GameMenu.MAP_ZOOM_OUT_BUTTON.onclick = () => {
             // Don't zoom out if the camera is animating
             if (this.game.CAMERA.isAnimating()) return;
 
@@ -114,10 +120,10 @@ export class GameMenu {
             this.game.CAMERA.createZoomAnimation(
                 this.game.CAMERA.pixelsPerUnit / 2
             );
-        });
+        };
 
         // Handle event listener of reset button, which resets the camera to its default position
-        GameMenu.MAP_RESET_BUTTON.addEventListener("click", () => {
+        GameMenu.MAP_RESET_BUTTON.onclick = () => {
             // Don't reset the camera if it is animating
             if (this.game.CAMERA.isAnimating()) return;
 
@@ -126,10 +132,10 @@ export class GameMenu {
                 this.game.CAMERA.DEFAULT_CENTER,
                 this.game.CAMERA.DEFAULT_PIXELS_PER_UNIT
             );
-        });
+        };
 
         // Handle event listener of view change button, which switches between isometric and top down view
-        GameMenu.MAP_VIEW_CHANGE_BUTTON.addEventListener("click", () => {
+        GameMenu.MAP_VIEW_CHANGE_BUTTON.onclick = () => {
             // Switch the camera view
             this.game.CAMERA.switchView();
 
@@ -139,22 +145,35 @@ export class GameMenu {
             } else {
                 GameMenu.MAP_VIEW_CHANGE_BUTTON_IMG.src = "res/assets/icons/isometric-icon.png";
             }
-        });
+        };
 
         // Handle event listener of cancel button, which cancels the current construction
-        GameMenu.CONSTRUCTION_CANCEL_BUTTON.addEventListener("click", () => {
+        GameMenu.CONSTRUCTION_CANCEL_BUTTON.onclick = () => {
             // Change game state to standard viewing
             this.game.gameState = GameState.STANDARD;
-        });
+        };
 
         // Handle event listener of delete button, which changes the game state to destroy
-        GameMenu.CONSTRUCTION_DELETE_BUTTON.addEventListener("click", () => {
+        GameMenu.CONSTRUCTION_DELETE_BUTTON.onclick = () => {
             // Change game state to destroy
             this.game.gameState = GameState.DESTROY;
-        });
+        };
+
+        GameMenu.PAUSED_CONTINUE_BUTTON.onclick = () => {
+            this.game.gameState = GameState.STANDARD;
+        }
+
+        GameMenu.PAUSED_MENU_BUTTON.onclick = () => {
+            App.changeAppState(AppState.START_MENU);
+        }
+
+        GameMenu.END_MENU_BUTTON.onclick = () => {
+            App.changeAppState(AppState.START_MENU);
+        }
 
         // Create all buttons for construction in the building button dropdown
         this.createFacilityButtons();
+        GameMenu.switchUI(GameState.STANDARD);
     }
 
     public static showFacilityInfo(facility: Facility): void {
@@ -219,7 +238,7 @@ export class GameMenu {
      * Updates game menu UI with the current game state.
      * @param gameState State of game to switch to.
      */
-    public switchUI(gameState: GameState): void {
+    public static switchUI(gameState: GameState): void {
         // Hide all game menu UI elements
         GameMenu.GAME_STANDARD_DIV.hidden = true;
         GameMenu.GAME_CONSTRUCTION_DIV.hidden = true;
@@ -301,6 +320,7 @@ export class GameMenu {
      * Creates buttons for all facility types.
      */
     private createFacilityButtons(): void {
+        GameMenu.CONSTRUCTION_BUILDINGS_DISPLAY_DIV.innerHTML = "";
         // Create array of all facility types
         const FACILITIES: {
             new (GAME: Game): Facility;

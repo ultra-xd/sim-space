@@ -5,7 +5,7 @@ import { Canvas } from "./canvas.js";
 import { ArrayList } from "../data_structures/arraylist.js";
 import { Vector2 } from "../data_structures/vector.js";
 import { assert } from "../util/util.js";
-import { Controller } from "./controller.js";
+import { Controller, KeyEvent } from "./controller.js";
 
 export enum AppState {
     IN_GAME,
@@ -13,7 +13,7 @@ export enum AppState {
 }
 
 export class App {
-    private static GAME: Game | null = null;
+    private static game: Game | null = null;
     private static readonly _CANVAS: Canvas = new Canvas("canvas");
     private static readonly _CONTROLLER: Controller = new Controller(App._CANVAS);
 
@@ -84,10 +84,8 @@ export class App {
     }
 
     private static tick(): void {
-        if (App.appState == AppState.IN_GAME && App.GAME != null) {
-            App.GAME.tick();
-        } else if (App.appState == AppState.START_MENU) {
-            StartMenu.tick();
+        if (App.appState == AppState.IN_GAME && App.game != null) {
+            App.game.tick();
         }
 
         App._CANVAS.tick();
@@ -95,8 +93,8 @@ export class App {
     }
 
     private static draw(): void {
-        if (App.appState == AppState.IN_GAME && App.GAME != null) {
-            App.GAME.draw(App.CANVAS);
+        if (App.appState == AppState.IN_GAME && App.game != null) {
+            App.game.draw(App.CANVAS);
         } else if (this.appState == AppState.START_MENU) {
             StartMenu.draw(App.CANVAS);
         }
@@ -127,11 +125,11 @@ export class App {
     }
 
     public static createNewGame(): void {
-        App.GAME = new Game();
+        App.game = new Game();
     }
 
     public static deleteGame(): void {
-        App.GAME = null;
+        App.game = null;
         App.changeAppState(AppState.START_MENU);
     }
 }

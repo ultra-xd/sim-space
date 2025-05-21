@@ -67,118 +67,133 @@ export class Game {
      * Updates the game once, according to the ticks per second
      */
     public tick(): void {
-        // Update number of ticks passed
-        this._ticks++;
-
-        // Check for mouse movement events
         if (
-            App.CONTROLLER.currentMousePosition != null &&
-            App.CONTROLLER.previousMousePosition != null
+            this._gameState == GameState.STANDARD ||
+            this._gameState == GameState.BUILD ||
+            this._gameState == GameState.DESTROY
         ) {
-            // Update highlight animation progress
-            this.highlightAnimationTicks++;
+            // Update number of ticks passed
+            this._ticks++;
 
-            // Make sure highlight animation ticks do not exceed the max duration
-            if (this.highlightAnimationTicks > Game.HIGHLIGHT_ANIMATION_TICK_DURATION) {
-                this.highlightAnimationTicks = Game.HIGHLIGHT_ANIMATION_TICK_DURATION;
-            }
+            // Check for mouse movement events
+            if (
+                App.CONTROLLER.currentMousePosition != null &&
+                App.CONTROLLER.previousMousePosition != null
+            ) {
+                // Update highlight animation progress
+                this.highlightAnimationTicks++;
 
-            // Drag using right mouse button and adjust camera position accordingly
-            if (App.CONTROLLER.mouseToggled(MouseEvent.RMB)) {
-                // get the amount of units changed from movement from last tick to current tick
-                const UNITS_CHANGE = this._CAMERA.pixelsToUnits(
-                    App.CONTROLLER.previousMousePosition
-                ).subtract(
-                    this._CAMERA.pixelsToUnits(
-                        App.CONTROLLER.currentMousePosition
-                    )
+                // Make sure highlight animation ticks do not exceed the max duration
+                if (this.highlightAnimationTicks > Game.HIGHLIGHT_ANIMATION_TICK_DURATION) {
+                    this.highlightAnimationTicks = Game.HIGHLIGHT_ANIMATION_TICK_DURATION;
+                }
+
+                // Drag using right mouse button and adjust camera position accordingly
+                if (App.CONTROLLER.mouseToggled(MouseEvent.RMB)) {
+                    // get the amount of units changed from movement from last tick to current tick
+                    const UNITS_CHANGE = this._CAMERA.pixelsToUnits(
+                        App.CONTROLLER.previousMousePosition
+                    ).subtract(
+                        this._CAMERA.pixelsToUnits(
+                            App.CONTROLLER.currentMousePosition
+                        )
+                    );
+                
+                    this._CAMERA.adjustCamera(UNITS_CHANGE);
+                }
+
+                // Find cell the mouse is currently over
+                const MOUSE_POS_UNITS: Vector2 = this._CAMERA.pixelsToUnits(App.CONTROLLER.currentMousePosition);
+                const HIGHLIGHT: Vector2 = new Vector2(
+                    Math.floor(MOUSE_POS_UNITS.x),
+                    Math.floor(MOUSE_POS_UNITS.y)
                 );
-            
-                this._CAMERA.adjustCamera(UNITS_CHANGE);
-            }
 
-            // Find cell the mouse is currently over
-            const MOUSE_POS_UNITS: Vector2 = this._CAMERA.pixelsToUnits(App.CONTROLLER.currentMousePosition);
-            const HIGHLIGHT: Vector2 = new Vector2(
-                Math.floor(MOUSE_POS_UNITS.x),
-                Math.floor(MOUSE_POS_UNITS.y)
-            );
-
-            // Reset animation ticks if the highlighted cell is different from the last one
-            if (this._highlightedCell != null) {
-                if (!this._highlightedCell.equals(HIGHLIGHT)) {
-                    this.highlightAnimationTicks = 0;
+                // Reset animation ticks if the highlighted cell is different from the last one
+                if (this._highlightedCell != null) {
+                    if (!this._highlightedCell.equals(HIGHLIGHT)) {
+                        this.highlightAnimationTicks = 0;
+                        this._highlightedCell = HIGHLIGHT;
+                    }
+                } else {
                     this._highlightedCell = HIGHLIGHT;
                 }
-            } else {
-                this._highlightedCell = HIGHLIGHT;
+                
+                // Reset animation ticks if the highlighted cell is out of bounds
+                if (
+                    HIGHLIGHT.x < 0 ||
+                    HIGHLIGHT.x >= Game.MAP_WIDTH ||
+                    HIGHLIGHT.y < 0 ||
+                    HIGHLIGHT.y >= Game.MAP_HEIGHT
+                ) {
+                    this._highlightedCell = null;
+                }
             }
+
+            // Handle left click mouse events on map
+            if (App.CONTROLLER.mouseClickToggled(MouseEvent.LMB) && this._highlightedCell != null) {
+                switch (this._gameState) {
+                    case GameState.STANDARD:
+                        if (!this._MAP.inBounds(this._highlightedCell)) break;
+                        const FACILITY: Facility | null = this._MAP.getCell(this._highlightedCell).facility;
+                        if (FACILITY == null) {
+                            GameMenu.hideFacilityInfo();
+                        } else {
+                            GameMenu.showFacilityInfo(FACILITY);
+                        }
+
+                        break;
+                    case GameState.BUILD:
+                        assert (this._selectedFacility != null);
+
+                        // Build facility on highlighted cell, if possible
+                        if (this._MAP.build(this._selectedFacility, this._highlightedCell)) {
+                            this.gameState = GameState.STANDARD;
+                        }
+
+                        break;
+                    case GameState.DESTROY:
+                        // Destroy facility on highlighted cell, if possible
+                        if (this._MAP.destroy(this._highlightedCell)) {
+                            this.gameState = GameState.STANDARD;
+                        }
+
+                        break;
+                }
+            }
+
+            // Zoom in/out if scrolled mouse wheel
+        
+            // zoom in if scroll up
+            if (App.CONTROLLER.mouseToggled(MouseEvent.MOUSE_SCROLL_UP)) {
+                this._CAMERA.adjustZoom(0.05);
+            } 
             
-            // Reset animation ticks if the highlighted cell is out of bounds
-            if (
-                HIGHLIGHT.x < 0 ||
-                HIGHLIGHT.x >= Game.MAP_WIDTH ||
-                HIGHLIGHT.y < 0 ||
-                HIGHLIGHT.y >= Game.MAP_HEIGHT
-            ) {
-                this._highlightedCell = null;
+            // zoom out if scroll down
+            else if (App.CONTROLLER.mouseToggled(MouseEvent.MOUSE_SCROLL_DOWN)) { 
+                this._CAMERA.adjustZoom(-0.05);
             }
-        }
 
-        // Handle left click mouse events on map
-        if (App.CONTROLLER.mouseClickToggled(MouseEvent.LMB) && this._highlightedCell != null) {
-            switch (this._gameState) {
-                case GameState.STANDARD:
-                    if (!this._MAP.inBounds(this._highlightedCell)) break;
-                    const FACILITY: Facility | null = this._MAP.getCell(this._highlightedCell).facility;
-                    if (FACILITY == null) {
-                        GameMenu.hideFacilityInfo();
-                    } else {
-                        GameMenu.showFacilityInfo(FACILITY);
-                    }
-
-                    break;
-                case GameState.BUILD:
-                    assert (this._selectedFacility != null);
-
-                    // Build facility on highlighted cell, if possible
-                    if (this._MAP.build(this._selectedFacility, this._highlightedCell)) {
-                        this.gameState = GameState.STANDARD;
-                    }
-
-                    break;
-                case GameState.DESTROY:
-                    // Destroy facility on highlighted cell, if possible
-                    if (this._MAP.destroy(this._highlightedCell)) {
-                        this.gameState = GameState.STANDARD;
-                    }
-
-                    break;
-            }
+            // Update map and camera
+            GameMenu.NotificationManager.tick();
+            this._MAP.tick();
+            this._CAMERA.tick();
         }
 
         if (
-            App.CONTROLLER.keyPressToggled(KeyEvent.ESC) &&
-            this.gameState != GameState.STANDARD
+            App.CONTROLLER.keyPressToggled(KeyEvent.ESCAPE)
         ) {
-            this.gameState = GameState.STANDARD;
+            switch (this._gameState) {
+                case GameState.STANDARD:
+                    this.gameState = GameState.PAUSED;
+                    break;
+                case GameState.BUILD:
+                case GameState.DESTROY:
+                case GameState.PAUSED:
+                    this.gameState = GameState.STANDARD;
+                    break;
+            }
         }
-        // Zoom in/out if scrolled mouse wheel
-    
-        // zoom in if scroll up
-        if (App.CONTROLLER.mouseToggled(MouseEvent.MOUSE_SCROLL_UP)) {
-            this._CAMERA.adjustZoom(0.05);
-        } 
-        
-        // zoom out if scroll down
-        else if (App.CONTROLLER.mouseToggled(MouseEvent.MOUSE_SCROLL_DOWN)) { 
-            this._CAMERA.adjustZoom(-0.05);
-        }
-
-        // Update map and camera
-        GameMenu.NotificationManager.tick();
-        this._MAP.tick();
-        this._CAMERA.tick();
     }
 
     /**
@@ -292,7 +307,7 @@ export class Game {
     /** The state of the game (in standard viewing, building, destroying, etc.) */
     public set gameState(gameState: GameState) {
         this._gameState = gameState;
-        this.GAME_MENU.switchUI(gameState);
+        GameMenu.switchUI(gameState);
     }
 
     /**

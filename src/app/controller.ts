@@ -10,15 +10,16 @@ export enum MouseEvent {
 }
 
 export enum KeyEvent {
-    ESC = 27
+    ESCAPE = "escape",
+    X = "x"
 }
 
 export class Controller {
 
-    private readonly MOUSE_EVENTS: Map<MouseEvent, boolean> = new Map<MouseEvent, boolean>();
-    private readonly MOUSE_CLICK_EVENTS: Map<MouseEvent, boolean> = new Map<MouseEvent, boolean>();
-    private readonly KEY_EVENTS: Map<KeyEvent, boolean> = new Map<KeyEvent, boolean>();
-    private readonly KEY_PRESS_EVENTS: Map<KeyEvent, boolean> = new Map<KeyEvent, boolean>();
+    private readonly MOUSE_EVENTS: Map<number, boolean> = new Map<number, boolean>();
+    private readonly MOUSE_CLICK_EVENTS: Map<number, boolean> = new Map<number, boolean>();
+    private readonly KEY_EVENTS: Map<string, boolean> = new Map<string, boolean>();
+    private readonly KEY_PRESS_EVENTS: Map<string, boolean> = new Map<string, boolean>();
 
     private _currentMousePosition: Vector2 | null = null;
     private _previousMousePosition: Vector2 | null = null;
@@ -30,11 +31,8 @@ export class Controller {
         }
 
         for (let keyEvent of Object.keys(KeyEvent)) {
-            const CODE: number = Number(keyEvent);
-            if (!isNaN(CODE)) {
-                this.KEY_EVENTS.set(CODE as KeyEvent, false);
-                this.KEY_PRESS_EVENTS.set(CODE as KeyEvent, false);
-            }
+            this.KEY_EVENTS.set(keyEvent.toLowerCase(), false);
+            this.KEY_PRESS_EVENTS.set(keyEvent.toLowerCase(), false);
         }
     }
 
@@ -103,7 +101,7 @@ export class Controller {
                 return;
             }
 
-            const CODE: number = event.which;
+            const CODE: string = event.key.toLowerCase();
             if (this.KEY_EVENTS.has(CODE) && this.KEY_PRESS_EVENTS.has(CODE)) {
                 this.KEY_EVENTS.set(CODE, true);
                 this.KEY_PRESS_EVENTS.set(CODE, true);
@@ -115,7 +113,7 @@ export class Controller {
                 return;
             }
 
-            const CODE: number = event.which;
+            const CODE: string = event.key.toLowerCase();
             if (this.KEY_EVENTS.has(CODE) && this.KEY_PRESS_EVENTS.has(CODE)) {
                 this.KEY_EVENTS.set(CODE, false);
                 this.KEY_PRESS_EVENTS.set(CODE, false);
@@ -132,8 +130,8 @@ export class Controller {
             this.MOUSE_CLICK_EVENTS.set(i, false);
         }
 
-        for (let i: number = 0; i < Object.keys(KeyEvent).length; i++) {
-            this.KEY_PRESS_EVENTS.set(i, false);
+        for (let keyEvent of Object.keys(KeyEvent)) {
+            this.KEY_PRESS_EVENTS.set(keyEvent.toLowerCase(), false);
         }
     }
 

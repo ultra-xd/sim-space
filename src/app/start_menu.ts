@@ -11,13 +11,9 @@ export class StartMenu {
 
     public static setup(): void {
         StartMenu.START_BUTTON.addEventListener("click", () => {
-            App.changeAppState(AppState.IN_GAME);
             App.createNewGame();
+            App.changeAppState(AppState.IN_GAME);
         });
-    }
-
-    public static tick(): void {
-
     }
 
     public static draw(canvas: Canvas): void {
