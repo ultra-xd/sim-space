@@ -93,7 +93,7 @@ export class Cell {
      * Updates the cell and the facility in it, if it exists.
      */
     public tick(): void {
-
+        this._pollution = this._facility ? this._facility.pollution : 0;
     }
 
     public get pollution(): number {
