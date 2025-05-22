@@ -8,15 +8,17 @@ export class DefenseFacility extends Facility {
     protected static readonly _NAME = "Planetary Defense System";
     protected static readonly _BUILD_COST = 1000000000000;
 
-    protected _maintenanceCost: number;
-    protected _pollution: number;
-    protected _taxRevenue: number;
+    protected _maintenanceCost: number = 0;
+    protected _pollution: number = 0;
+    protected _taxRevenue: number = 0;
 
     public preventDisaster() : void{
-        //Where tf is the nuke everything in the game thingy? Maybe I have to add it...
-        //Note to self straight up just like nuke their pc if they get hit then nothing else matters
+        //mogged
     }
     public override tick(): void {
-        //what is this supposed to fking do? Might just be a dummkopf
+        super.tick();
+        if (this.GAME.monthEnded()) {
+            this.preventDisaster();
+        }
     }
 }

@@ -103,11 +103,10 @@ export class GameMap {
     public BFS(
         start: Vector2, 
         maxDistance: number, 
-        handleCondition: (coordinates: Vector2) => boolean,
+        handleCondition: (coordinates: Vector2, distance?: number) => boolean,
     ): boolean {
         const QUEUE: Queue<[Vector2, number]> = new Queue<[Vector2, number]>();
         const VISITED: boolean[][] = new Array<boolean[]>(this.height);
-        let found: number = 0;
 
         for (let i: number = 0; i < this.height; i++) {
             VISITED[i] = new Array<boolean>(this.width);
@@ -131,7 +130,7 @@ export class GameMap {
             const [COORDINATES, DISTANCE]: [Vector2, number] = QUEUE.dequeue()!;
             assert (COORDINATES != null && DISTANCE != null);
 
-            if (handleCondition(COORDINATES)) {
+            if (handleCondition(COORDINATES, DISTANCE)) {
                 return true;
             }
 
@@ -149,7 +148,7 @@ export class GameMap {
                 VISITED[NEIGHBOUR.y][NEIGHBOUR.x] = true;
                 QUEUE.enqueue([NEIGHBOUR, NEW_DISTANCE]);
             }
-            
+
         }
 
         return false;
