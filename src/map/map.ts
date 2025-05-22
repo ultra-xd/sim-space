@@ -1,5 +1,5 @@
 import { Cell } from "./cell.js";
-import { Facility, FacilityType, FacilitySector } from "../facility/facility.js";
+import { Facility, FacilityType, FacilitySector, FacilityClass } from "../facility/facility.js";
 import { PowerPlant } from "../facility/facility_types/essential.js";
 import { Game } from "../app/game.js";
 import { Canvas } from "../app/canvas.js";
@@ -231,12 +231,11 @@ export class GameMap {
      * @param coordinates The location to build the facility at.
      * @returns True if the facility was built, false otherwise.
      */
-    public build<T extends {new (GAME: Game): Facility}>(FacilityClass: T, coordinates: Vector2): boolean {
-        const FACILITY: Facility = new FacilityClass(this.GAME);
+    public build<T extends FacilityClass>(FacilityClass: T, coordinates: Vector2): boolean {
         const CELL: Cell = this._CELLS[coordinates.y][coordinates.x];
 
-        if (CELL.canBuild(FACILITY.FACILITY_SECTOR)) {
-            CELL.facility = FACILITY;
+        if (CELL.canBuild(FacilityClass.FACILITY_SECTOR)) {
+            CELL.facility = new FacilityClass(this.GAME);;
             this._OCCUPIED_CELLS.add(coordinates);
             this.redistributePower();
             return true;

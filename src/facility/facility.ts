@@ -27,6 +27,16 @@ export enum FacilityType {
     DEFENSE = "defense"
 }
 
+export type FacilityClass = {
+    new (GAME: Game): Facility;
+    getSprite: (isometric: boolean) => HTMLImageElement; 
+    NAME: string;
+    BUILD_COST: number;
+    FACILITY_SECTOR: FacilitySector;
+    FACILITY_TYPE: FacilityType;
+    canBuy(money: number): boolean;
+};
+
 export abstract class Facility {
     protected static readonly _FACILITY_SECTOR: FacilitySector;
     protected static readonly _FACILITY_TYPE: FacilityType;
@@ -50,6 +60,7 @@ export abstract class Facility {
 
     public constructor(protected readonly GAME: Game) {
         this._game = GAME;
+        this._game.money -= (this.constructor as typeof Facility)._BUILD_COST;
     }
 
     public static get FACILITY_SECTOR(): FacilitySector {
@@ -120,6 +131,10 @@ export abstract class Facility {
         //Set money to subtract mainternance cost
         this._game.money -= this._maintenanceCost;
         //Pollution handled in cell
+    }
+
+    public static canBuy(money: number): boolean {
+        return money >= this._BUILD_COST;
     }
 }
 

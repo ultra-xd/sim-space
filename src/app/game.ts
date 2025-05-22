@@ -3,7 +3,7 @@ import { Canvas } from "./canvas.js";
 import { Vector2 } from "../data_structures/vector.js";
 import { Camera } from "../map/camera.js";
 import { App } from "./app.js";
-import { Facility, FacilitySector } from "../facility/facility.js";
+import { Facility, FacilityClass } from "../facility/facility.js";
 import { GameMenu } from "./game_menu.js";
 import { assert, randomInteger } from "../util/util.js";
 import { KeyEvent, MouseEvent } from "./controller.js";
@@ -51,13 +51,13 @@ export class Game {
     private static readonly HIGHLIGHT_ANIMATION_TICK_DURATION: number = this.HIGHLIGHT_ANIMATION_DURATION * 60; // Tracks the duration of the animation, in ticks
 
     // Build mode: get class of facility to build
-    private _selectedFacility: {new (GAME: Game): Facility} | null = null;
+    private _selectedFacility: FacilityClass | null = null;
 
     // State of game (standard view mode, build, destroy, etc.)
     private _gameState: GameState = GameState.STANDARD;
 
     // destroying the city yipppiiiieeee
-    private static readonly DEFAULT_GAME_END_PROBABILITY: number = 1;
+    private static readonly DEFAULT_GAME_END_PROBABILITY: number = 0.01;
     private gameEndProbability: number = Game.DEFAULT_GAME_END_PROBABILITY;
     private isGameEnding: boolean = false;
     private static readonly GAME_ENDING_ANIMATION_LENGTH: number = 2;
@@ -68,6 +68,7 @@ export class Game {
      */
     public constructor() {
         this.GAME_MENU.setup();
+        this.GAME_MENU.updateStatsDisplay();
     }
 
     /**
@@ -153,6 +154,14 @@ export class Game {
                     case GameState.BUILD:
                         assert (this._selectedFacility != null);
 
+                        if (!this._selectedFacility.canBuy(this.money)) {
+                            GameMenu.NotificationManager.createNotification(
+                                "You don't have enough money."
+                            );
+
+                            break;
+                        }
+
                         // Build facility on highlighted cell, if possible
                         if (
                             this._MAP.build(this._selectedFacility, this._highlightedCell) &&
@@ -216,8 +225,7 @@ export class Game {
         }
 
         if (this.monthEnded()) {
-            this.updateStatsDisplay();
-            console.log('e')
+            this.GAME_MENU.updateStatsDisplay();
             if (!this.isGameEnding) {
                 const COMPARE: number = this.gameEndProbability * 100;
                 let RANDOM: number = randomInteger(1, 100);
@@ -228,9 +236,6 @@ export class Game {
         }
     }
 
-    private updateStatsDisplay(): void {
-        GameMenu.STATS_MONEY_PARAGRAPH.innerText
-    }
 
     /**
      * Draws all components of the game that should be displayed on the canvas.
@@ -250,7 +255,6 @@ export class Game {
 
         if (this.isGameEnding && this._gameState != GameState.END) {
             const FLASH_OPACITY: number = this.gameEndingAnimationTicks / (Game.GAME_ENDING_ANIMATION_LENGTH * App.TPS);
-            console.log(FLASH_OPACITY)
             canvas.fillRect(
                 new Vector2(canvas.width / 2, canvas.height / 2),
                 canvas.width,
@@ -258,15 +262,6 @@ export class Game {
                 `rgba(255, 255, 255, ${FLASH_OPACITY})`
             );
         }
-
-        // if (this._gameState == GameState.END) {
-        //     canvas.fillRect(
-        //         new Vector2(canvas.width / 2, canvas.height / 2),
-        //         canvas.width,
-        //         canvas.height,
-        //         "rgb(255, 255, 255)"
-        //     );
-        // }
     }
 
     /**
@@ -283,6 +278,7 @@ export class Game {
      */
     public set money(money: number) {
         this._money = money;
+        this.GAME_MENU.updateStatsDisplay();
     }
     
     /** Amount of money the player has. */
@@ -303,6 +299,11 @@ export class Game {
     public get population(): number {
         return this._population;
     }
+
+    public set population(population: number) {
+        this._population = population;
+        this.GAME_MENU.updateStatsDisplay();
+    }
     
     /**
      * The number of ticks that have passed since the start of the game.`
@@ -317,6 +318,10 @@ export class Game {
      */
     public get score(): number {
         return (3 * this._happyPopulation + this._contentedPopulation) - this._pollution;
+    }
+
+    public get month(): number {
+        return Math.floor(this._ticks / Game.TICKS_PER_MONTH);
     }
 
     /**
@@ -368,7 +373,7 @@ export class Game {
      * Sets the class of the selected facility to build while in build mode.
      * @param FacilityClass The class of the facility to build.
      */
-    public setSelectedFacility<T extends {new (GAME: Game): Facility}>(FacilityClass: T | null): void {
+    public setSelectedFacility<T extends FacilityClass>(FacilityClass: T | null): void {
         this._selectedFacility = FacilityClass;
     }
     

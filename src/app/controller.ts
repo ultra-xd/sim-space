@@ -14,12 +14,15 @@ export enum KeyEvent {
     SHIFT = "shift"
 }
 
+type MouseEventMap = Map<number, boolean>;
+type KeyEventMap = Map<string, boolean>;
+
 export class Controller {
 
-    private readonly MOUSE_EVENTS: Map<number, boolean> = new Map<number, boolean>();
-    private readonly MOUSE_CLICK_EVENTS: Map<number, boolean> = new Map<number, boolean>();
-    private readonly KEY_EVENTS: Map<string, boolean> = new Map<string, boolean>();
-    private readonly KEY_PRESS_EVENTS: Map<string, boolean> = new Map<string, boolean>();
+    private readonly MOUSE_EVENTS: MouseEventMap = new Map<number, boolean>();
+    private readonly MOUSE_CLICK_EVENTS: MouseEventMap = new Map<number, boolean>();
+    private readonly KEY_EVENTS: KeyEventMap = new Map<string, boolean>();
+    private readonly KEY_PRESS_EVENTS: KeyEventMap = new Map<string, boolean>();
 
     private _currentMousePosition: Vector2 | null = null;
     private _previousMousePosition: Vector2 | null = null;

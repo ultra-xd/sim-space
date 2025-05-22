@@ -2,7 +2,7 @@ import { App, AppState } from "./app.js";
 import { assert } from "../util/util.js";
 import { Queue } from "../data_structures/queue.js";
 import { Game, GameState } from "./game.js";
-import { Facility, FacilitySector, FacilityType } from "../facility/facility.js";
+import { Facility, FacilitySector, FacilityType, FacilityClass } from "../facility/facility.js";
 import { LuxuryHome, ComfortableHome, AffordableHome, ResidentialFacility } from "../facility/facility_types/residential.js";
 import { DefenseFacility } from "../facility/facility_types/defense.js";
 import { EmergencyBuilding, EducationCentre, MedicalCentre, Government, PowerPlant } from "../facility/facility_types/essential.js";
@@ -44,13 +44,13 @@ export class GameMenu {
 
     public static readonly FACILITY_INFO_SPRITE: HTMLImageElement = document.getElementById("facility-info-sprite") as HTMLImageElement;
 
-    public static readonly STATS_MONEY_PARAGRAPH: HTMLParagraphElement = document.getElementById("stats-money-display") as HTMLParagraphElement;
+    public static readonly STATS_MONEY_SPAN: HTMLSpanElement = document.getElementById("stats-money-display") as HTMLSpanElement;
 
     public static readonly STATS_DATE_PARAGRAPH: HTMLParagraphElement = document.getElementById("stats-date-display") as HTMLParagraphElement;
 
-    public static readonly STATS_POPULATION_PARAGRAPH: HTMLParagraphElement = document.getElementById("stats-population-display") as HTMLParagraphElement;
+    public static readonly STATS_POPULATION_SPAN: HTMLSpanElement = document.getElementById("stats-population-display") as HTMLSpanElement;
 
-    public static readonly STATS_SCORE_PARAGRAPH: HTMLParagraphElement = document.getElementById("stats-score-display") as HTMLParagraphElement;
+    public static readonly STATS_SCORE_SPAN: HTMLSpanElement = document.getElementById("stats-score-display") as HTMLSpanElement;
 
     public static readonly STATS_DIV: HTMLDivElement = document.getElementById("stats-display") as HTMLDivElement;
 
@@ -80,7 +80,7 @@ export class GameMenu {
 
     /**
      * Creates a new GameMenu.
-     * @param game The game instance for GameMeny to handle.
+     * @param game The game instance for GameMenu to handle.
      */
     public constructor(private readonly game: Game) {};
 
@@ -268,12 +268,7 @@ export class GameMenu {
      * @param FacilityClass The class of the facility to create a button for.
      * @returns The button element.
      */
-    private createFacilityButton<T extends {
-        new (GAME: Game): Facility;
-        getSprite: (isometric: boolean) => HTMLImageElement; 
-        NAME: string;
-        BUILD_COST: number
-    }>(FacilityClass: T): HTMLButtonElement {
+    private createFacilityButton<T extends FacilityClass>(FacilityClass: T): HTMLButtonElement {
         // Create button element
         const BUTTON: HTMLButtonElement = document.createElement("button");
         BUTTON.type = "button";
@@ -322,12 +317,7 @@ export class GameMenu {
     private createFacilityButtons(): void {
         GameMenu.CONSTRUCTION_BUILDINGS_DISPLAY_DIV.innerHTML = "";
         // Create array of all facility types
-        const FACILITIES: {
-            new (GAME: Game): Facility;
-            getSprite: (isometric: boolean) => HTMLImageElement; 
-            NAME: string;
-            BUILD_COST: number
-        }[] = [
+        const FACILITIES: FacilityClass[] = [
             EmergencyBuilding,
             EducationCentre,
             MedicalCentre,
@@ -351,6 +341,19 @@ export class GameMenu {
                 this.createFacilityButton(FACILITIES[i])
             );
         }
+    }
+
+    public updateStatsDisplay(): void {
+        GameMenu.STATS_MONEY_SPAN.innerText = Intl.NumberFormat(
+            "en-US",
+            {
+                style: "currency",
+                currency: "USD"
+            }
+        ).format(this.game.money);
+        GameMenu.STATS_DATE_PARAGRAPH.innerText = `Month ${this.game.month}`;
+        GameMenu.STATS_POPULATION_SPAN.innerText = String(this.game.population);
+        GameMenu.STATS_SCORE_SPAN.innerText = String(this.game.score);
     }
 
     public static hide(): void {
