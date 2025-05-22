@@ -1,4 +1,5 @@
 import { Game } from "../app/game.js";
+import { GameMenu } from "../app/game_menu.js";
 import { Canvas } from "../app/canvas.js";
 
 export enum FacilitySector {

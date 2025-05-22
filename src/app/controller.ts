@@ -121,24 +121,32 @@ export class Controller {
 
     /** Sets up all key event listeners. */
     private setupKeyEvents(): void {
+        // Connect key press event listener
         document.body.addEventListener("keydown", (event) => {
             if (event.defaultPrevented) {
                 return;
             }
 
+            // Get key pressed
             const CODE: string = event.key.toLowerCase();
+
+            // Store that the key has been pressed
             if (this.KEY_EVENTS.has(CODE) && this.KEY_PRESS_EVENTS.has(CODE)) {
                 this.KEY_EVENTS.set(CODE, true);
                 this.KEY_PRESS_EVENTS.set(CODE, true);
             }
         });
 
+        // Connect key release event listener
         document.body.addEventListener("keyup", (event) => {
             if (event.defaultPrevented) {
                 return;
             }
 
+            // Get key released
             const CODE: string = event.key.toLowerCase();
+
+            // Store that key has been released
             if (this.KEY_EVENTS.has(CODE) && this.KEY_PRESS_EVENTS.has(CODE)) {
                 this.KEY_EVENTS.set(CODE, false);
                 this.KEY_PRESS_EVENTS.set(CODE, false);

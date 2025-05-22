@@ -25,8 +25,8 @@ export enum GameState {
 export class Game {
 
     // Specify map dimensions
-    private static readonly MAP_WIDTH: number = 25;
-    private static readonly MAP_HEIGHT: number = 25;
+    private static readonly MAP_WIDTH: number = 50;
+    private static readonly MAP_HEIGHT: number = 50;
 
     // Specify ticks per month, calculated as TPS x Number of Seconds in a Month
     private static readonly TICKS_PER_MONTH: number = 10 * 60;
@@ -40,7 +40,7 @@ export class Game {
     private _population: number = 0;
     private _happyPopulation: number = 0;
     private _contentedPopulation: number = 0;
-    private _money: number = Infinity;
+    private _money: number = 5_000_000_000;
     private _ticks: number = 0;
     private _pollution: number = 0;
 
@@ -57,7 +57,7 @@ export class Game {
     private _gameState: GameState = GameState.STANDARD;
 
     // destroying the city yipppiiiieeee
-    private static readonly DEFAULT_GAME_END_PROBABILITY: number = 0;
+    private static readonly DEFAULT_GAME_END_PROBABILITY: number = 0.01;
     private gameEndProbability: number = Game.DEFAULT_GAME_END_PROBABILITY;
     private isGameEnding: boolean = false;
     private static readonly GAME_ENDING_ANIMATION_LENGTH: number = 2;
@@ -144,11 +144,7 @@ export class Game {
                     case GameState.STANDARD:
                         if (!this._MAP.inBounds(this._highlightedCell)) break;
                         const FACILITY: Facility | null = this._MAP.getCell(this._highlightedCell).facility;
-                        if (FACILITY == null) {
-                            GameMenu.hideFacilityInfo();
-                        } else {
-                            GameMenu.showFacilityInfo(FACILITY);
-                        }
+                        GameMenu.facilityDisplayed = FACILITY;
 
                         break;
 
@@ -234,6 +230,7 @@ export class Game {
         // Update stats display every time month ends
         if (this.monthEnded()) {
             this.GAME_MENU.updateStatsDisplay();
+            GameMenu.showFacilityInfo();
             if (!this.isGameEnding && !this._MAP.containsType(FacilityType.DEFENSE)) {
                 const COMPARE: number = this.gameEndProbability * 100;
                 let RANDOM: number = randomInteger(1, 100);

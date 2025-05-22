@@ -76,6 +76,8 @@ export class GameMenu {
 
     public static readonly END_MENU_BUTTON: HTMLButtonElement = document.getElementById("end-return-to-menu") as HTMLButtonElement;
 
+    private static _facilityDisplayed: Facility | null = null;
+
     /**
      * Creates a new GameMenu.
      * @param game The game instance for GameMenu to handle.
@@ -179,23 +181,34 @@ export class GameMenu {
         GameMenu.switchUI(GameState.STANDARD);
     }
     
+    public static set facilityDisplayed(facility: Facility | null) {
+        this._facilityDisplayed = facility;
+        if (facility == null) {
+            this.hideFacilityInfo();
+        } else {
+            this.showFacilityInfo();
+        }
+    }
+
     /**
      * Shows all info of the facility given on the game menu.
-     * @param facility The facility whose info is displayed.
+     * @param this.facilityDisplayed The facility whose info is displayed.
      */
-    public static showFacilityInfo(facility: Facility): void {
+    public static showFacilityInfo(): void {
+        if (this._facilityDisplayed == null) return;
+
         // Showing information of facility
-        GameMenu.FACILITY_NAME_PARAGRAPH.innerText = (facility.constructor as typeof Facility).NAME;
-        GameMenu.FACILITY_AGE_SPAN.innerText = String(facility.age);
-        GameMenu.FACILITY_POWER_AVAILABLE_SPAN.innerText = String(facility.powerAvailable);
-        GameMenu.FACILITY_POWER_COST_SPAN.innerText = String((facility.constructor as typeof Facility).POWER_COST);
+        GameMenu.FACILITY_NAME_PARAGRAPH.innerText = (this._facilityDisplayed.constructor as typeof Facility).NAME;
+        GameMenu.FACILITY_AGE_SPAN.innerText = String(this._facilityDisplayed.age);
+        GameMenu.FACILITY_POWER_AVAILABLE_SPAN.innerText = String(this._facilityDisplayed.powerAvailable);
+        GameMenu.FACILITY_POWER_COST_SPAN.innerText = String((this._facilityDisplayed.constructor as typeof Facility).POWER_COST);
         GameMenu.FACILITY_TAX_REVENUE_SPAN.innerText = Intl.NumberFormat( // Format as money
             "en-US",
             {
                 style: "currency",
                 currency: "USD"
             }
-        ).format(facility.taxRevenue);
+        ).format(this._facilityDisplayed.taxRevenue);
 
         GameMenu.FACILITY_MAINTENANCE_COST_SPAN.innerText = Intl.NumberFormat( // Format as money
             "en-US",
@@ -203,29 +216,29 @@ export class GameMenu {
                 style: "currency",
                 currency: "USD"
             }
-        ).format(facility.maintenanceCost);
+        ).format(this._facilityDisplayed.maintenanceCost);
 
-        GameMenu.FACILITY_POLLUTION_SPAN.innerText = String(facility.pollution);
+        GameMenu.FACILITY_POLLUTION_SPAN.innerText = String(this._facilityDisplayed.pollution);
 
         // Show sprite of facility, in isometric view
-        GameMenu.FACILITY_INFO_SPRITE.src = facility.getSprite(true).src;
+        GameMenu.FACILITY_INFO_SPRITE.src = this._facilityDisplayed.getSprite(true).src;
 
         let additionalInfoText: string = "";
 
         // Show populations of facility if residential
-        if (facility.FACILITY_SECTOR == FacilitySector.RESIDENTIAL) {
-            additionalInfoText += `Population: ${(facility as ResidentialFacility).population}\n`;
-            additionalInfoText += `Happy Population: ${(facility as ResidentialFacility).happyPopulation}\n`;
-            additionalInfoText += `Content Population: ${(facility as ResidentialFacility).contentPopulation}\n`;
+        if (this._facilityDisplayed.FACILITY_SECTOR == FacilitySector.RESIDENTIAL) {
+            additionalInfoText += `Population: ${(this._facilityDisplayed as ResidentialFacility).population}\n`;
+            additionalInfoText += `Happy Population: ${(this._facilityDisplayed as ResidentialFacility).happyPopulation}\n`;
+            additionalInfoText += `Content Population: ${(this._facilityDisplayed as ResidentialFacility).contentPopulation}\n`;
         }
 
         // Show power produced if power plant
-        if (facility.FACILITY_TYPE == FacilityType.POWER) {
+        if (this._facilityDisplayed.FACILITY_TYPE == FacilityType.POWER) {
             additionalInfoText += `Power Produced: ${PowerPlant.POWER_PRODUCED}\n`;
         }
 
         // Show pollution reduction if environment
-        if (facility.FACILITY_TYPE == FacilityType.ENVIRONMENT) {
+        if (this._facilityDisplayed.FACILITY_TYPE == FacilityType.ENVIRONMENT) {
             additionalInfoText += `Pollution Reduced: ${EnvironmentalFacility.MAX_POLLUTION_REDUCTION}\n`;
         }
 
