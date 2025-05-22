@@ -5,48 +5,69 @@ export abstract class CommercialFacility extends Facility {
     protected static readonly _FACILITY_SECTOR = FacilitySector.COMMERCIAL;
     protected static readonly _BASE_TAX_REVENUE : number;
     protected static readonly _BASE_MAINTENANCE_COST : number;
+    protected static readonly _RESIDENTIAL_FACILITY_RADIUS : number = 6;
 
-    public facilityCheck(coordinates : Vector2) : boolean {
-        //Will not only check for the residential in r=6,
-        //but will also check if there was a fucking residential facility in the first place
-        //Fk it return the goddamn radius too y not
-        return true;
+    public facilityCheck(origin : Vector2) : { residenceWithinSixUnits : boolean, residenceFound : boolean, distanceToNearestResidence : number } {
+        let residenceWithinSixUnits : boolean;
+        let residenceFound : boolean;
+        let distanceToNearestResidence : number = -1;
+
+        //If residential facility is not found within game bounds mark none found
+        //Else, check if the residence is within 6 units
+        if (!this.GAME.MAP.BFS(origin,this.GAME.MAP.width + this.GAME.MAP.height,(coordinates : Vector2) : boolean => {
+            const CELL = this.GAME.MAP.getCell(coordinates);
+                return CELL.facilitySector == FacilitySector.RESIDENTIAL
+            })
+        ) {
+            residenceFound = false;
+            residenceWithinSixUnits = false;
+        }
+        else {
+            residenceFound = true;
+            //If not within rad of 6
+            if (!this.GAME.MAP.BFS(origin,CommercialFacility._RESIDENTIAL_FACILITY_RADIUS,(coordinates : Vector2, distance) : boolean => {
+                const CELL = this.GAME.MAP.getCell(coordinates);
+                if (CELL.facilitySector == FacilitySector.RESIDENTIAL) {
+                    distanceToNearestResidence = distance as number;
+                    return true;
+                }
+                return false;
+            })
+            ) {
+                residenceWithinSixUnits = false;
+            } else {
+                residenceWithinSixUnits = true;
+            }
+        }
+        return {
+            residenceWithinSixUnits, residenceFound, distanceToNearestResidence
+        };
     }
     public override tick(): void {
-        let placeholdFacilityCheck : boolean = true;
-        let residentialFacilityExists : boolean = true;
-        //Omfg another NOTE TO SELF REAL FUCKING IMPORTANT: How to handle radius,
-        //Radius may not necessarily be a set number bruh so what? Shortest damn route?
-        let radiustoNearestResident : number = 1
-        this._age++;
+        if (this.GAME.monthEnded()) {
+            let residenceFound : boolean = this.facilityCheck(Vector2.I_UNIT).residenceFound;
+            let residenceWithinSixUnits : boolean = this.facilityCheck(Vector2.I_UNIT).residenceWithinSixUnits;
+            let radiustoNearestResident : number = this.facilityCheck(Vector2.I_UNIT).distanceToNearestResidence;
 
-        //Oh this is just tax revenue btw
-        if (!residentialFacilityExists) {
-            this._taxRevenue = 0;
-        }
-        //FARTHER ffs than r>6
-        else if(radiustoNearestResident > 6) {
-            this._taxRevenue = 6/radiustoNearestResident * CommercialFacility._BASE_TAX_REVENUE
-        }
-        else {
-            //Bro istg there's literally empty space for the revenue factor when r<=6
-        }
+            this._age++;
 
-        //yup that's the maint
-        if (!residentialFacilityExists) {
-            this._maintenanceCost = 0;
+            //Oh this is just tax revenue btw
+            if (!residenceFound) {
+                this._taxRevenue = 0;
+                this._maintenanceCost = 0;
+            }
+            //FARTHER ffs than r>6
+            else if(!residenceWithinSixUnits) {
+                this._taxRevenue = 6/radiustoNearestResident * CommercialFacility._BASE_TAX_REVENUE;
+                this._maintenanceCost = 6/radiustoNearestResident * CommercialFacility._BASE_MAINTENANCE_COST;
+            }
+            else {
+                this._taxRevenue = CommercialFacility._BASE_TAX_REVENUE;
+                this._maintenanceCost = CommercialFacility._BASE_MAINTENANCE_COST;
+            }
+            this.GAME.money += this._taxRevenue
+            this.GAME.money -= this._maintenanceCost;
         }
-        //FARTHER ffs than r>6
-        else if(radiustoNearestResident > 6) {
-            this._maintenanceCost = 6/radiustoNearestResident * CommercialFacility._BASE_MAINTENANCE_COST
-        }
-        else {
-            //Bro istg there's literally empty space for the MAINT factor too when r<=6
-        }
-
-        this.GAME.money += this._taxRevenue
-
-        this.GAME.money -= this._maintenanceCost;
     }
 }
 

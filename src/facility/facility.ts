@@ -1,6 +1,7 @@
 import { Game } from "../app/game.js";
 import { GameMenu } from "../app/game_menu.js";
 import { Canvas } from "../app/canvas.js";
+import { Vector2 } from "../data_structures/vector.js";
 
 export enum FacilitySector {
     INDUSTRIAL,
@@ -59,6 +60,11 @@ export abstract class Facility {
 
     public constructor(protected readonly GAME: Game) {
         this.GAME.money -= (this.constructor as typeof Facility)._BUILD_COST;
+        for (let y = 0; y < this.GAME.MAP.height; y++) {
+            for (let x = 0; x < this.GAME.MAP.width; x++) {
+                this.GAME.MAP.getCell(new Vector2(x,y)).pollution += this.pollution;
+            }
+        }
     }
 
     public static get FACILITY_SECTOR(): FacilitySector {
@@ -122,17 +128,19 @@ export abstract class Facility {
     }
 
     public tick(): void {
-        //Increase age of the facility
-        this._age++;
-        //tax revenue adds to money in game through setter
-        this.GAME.money += this._taxRevenue
-        //Set money to subtract mainternance cost
-        this.GAME.money -= this._maintenanceCost;
-        //Pollution handled in cell
+        //NOTE TO SELF, TICK RUNS LIKE 60 TIMES A SECOND. CHECK IF MONTH ENDED, AND DON'T RUN IT EVERY TICK
+        if (this.GAME.monthEnded()) {
+            //Increase age of the facility
+            this._age++;
+            //tax revenue adds to money in game through setter
+            this.GAME.money += this._taxRevenue
+            //Set money to subtract mainternance cost
+            this.GAME.money -= this._maintenanceCost;
+            //Pollution handled in cell
+        }
     }
 
     public static canBuy(money: number): boolean {
         return money >= this._BUILD_COST;
     }
 }
-

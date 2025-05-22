@@ -30,11 +30,30 @@ export abstract class ResidentialFacility extends Facility {
         this._pollution = Math.floor(this.population/1000) * ResidentialFacility._POLLUTION_PER_UNIT;
     }
     public override tick(): void {
-        if (this._population >= ResidentialFacility._MAX_POPULATION) {
-            this._population = ResidentialFacility._MAX_POPULATION;
+        if (this.GAME.monthEnded()) {
+            if (this._population >= ResidentialFacility._MAX_POPULATION) {
+                this._population = ResidentialFacility._MAX_POPULATION;
+            }
+            else {
+            this._population = ResidentialFacility._MAX_POPULATION * (ResidentialFacility._GROWTH_RATE*this._age);
+
+            }
+            //nvm above is only to get the pop, now this is the actual revenue shit
+
+            //Increase age of the facility
+            this._age++;
+
+            //Idk anymore just update the shit and then push it out there
+            this.updateTaxRevenue();
+            this.updateMaintenanceCost();
+            this.updatePollution();
+            //tax revenue adds to money in game through setter
+            this.GAME.money += this._taxRevenue
+            //Set money to subtract mainternance cost
+            this.GAME.money -= this._maintenanceCost;
         }
         else {
-         this._population = ResidentialFacility._MAX_POPULATION * (ResidentialFacility._GROWTH_RATE*this._age);
+            this._population = ResidentialFacility._MAX_POPULATION * (ResidentialFacility._GROWTH_RATE*this._age);
 
         }
         //nvm above is only to get the pop, now this is the actual revenue shit
@@ -98,7 +117,8 @@ export class LuxuryHome extends ResidentialFacility {
     }
     
     public override tick(): void {
-        let placeholdFacilityCheck : boolean = true;
+        if (this.GAME.monthEnded()) {
+            let placeholdFacilityCheck : boolean = true;
         if (placeholdFacilityCheck) {
             //if it passes the vibe check, then the growth rate will go up to the real max ppl
             if (this._population >= ResidentialFacility._MAX_POPULATION) {
@@ -130,8 +150,8 @@ export class LuxuryHome extends ResidentialFacility {
         this.GAME.money += this._taxRevenue
         //Set money to subtract mainternance cost
         this.GAME.money -= this._maintenanceCost;
+        }
     }
-
 }
 
 export class ComfortableHome extends ResidentialFacility {

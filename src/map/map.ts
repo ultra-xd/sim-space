@@ -142,7 +142,7 @@ export class GameMap {
     public BFS(
         start: Vector2, 
         maxDistance: number, 
-        handleCondition: (coordinates: Vector2) => boolean,
+        handleCondition: (coordinates: Vector2, distance?: number) => boolean,
     ): boolean {
         // Create queue to store all cells
         const QUEUE: Queue<[Vector2, number]> = new Queue<[Vector2, number]>();
@@ -199,7 +199,7 @@ export class GameMap {
                 VISITED[NEIGHBOUR.y][NEIGHBOUR.x] = true;
                 QUEUE.enqueue([NEIGHBOUR, NEW_DISTANCE]);
             }
-            
+
         }
 
         return false;
