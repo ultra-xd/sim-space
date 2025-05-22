@@ -17,9 +17,7 @@ export interface IVector2 {
     magnitude(): number;
 }
 
-/**
- * 2D vector class for handling coordinate systems
- */
+/** 2D vector class for handling coordinate systems. */
 export class Vector2 implements IVector2 {
 
     public static I_UNIT: Vector2 = new Vector2(1, 0);
@@ -31,7 +29,7 @@ export class Vector2 implements IVector2 {
     /**
      * Creates new 2D vector
      * @param _x X component of vector.
-     * @param _y H+Y component of vector.
+     * @param _y Y component of vector.
      */
     public constructor(
         private _x: number,

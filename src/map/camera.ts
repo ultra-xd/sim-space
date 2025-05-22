@@ -3,6 +3,7 @@ import { Game } from "../app/game.js";
 import { assert, ease } from "../util/util.js";
 import { App } from "../app/app.js";
 
+/** Handles conversion of units and pixels and the viewport of the map. */
 export class Camera {
 
     private _center: Vector2;
@@ -21,6 +22,10 @@ export class Camera {
 
     private isometric: boolean = true;
 
+    /**
+     * Initializes a camera.
+     * @param _GAME The game the camera is looking at.
+     */
     public constructor(private readonly _GAME: Game) {
         this._center = new Vector2(
             this._GAME.MAP.width / 2,
@@ -30,6 +35,7 @@ export class Camera {
         this._DEFAULT_CENTER = this._center;
     }
 
+    /** Updates the camera. */
     public tick(): void {
         this.animateZoom();
         this.animateMove();
@@ -43,14 +49,27 @@ export class Camera {
         }
     }
 
+    /**
+     * Adjusts the camera position.
+     * @param difference The number of units to change the camera position by.
+     */
     public adjustCamera(difference: Vector2): void {
         this._center = this._center.add(difference);
     }
 
+    /**
+     * Adjusts the camera zoom level.
+     * @param difference The decimal ratio to adjust the zoom factor by.
+     */
     public adjustZoom(difference: number): void {
         this._pixelsPerUnits *= (1 + difference);
     }
 
+    /**
+     * Converts pixels coordinates to unit coordinates on the map.
+     * @param pixels The pixel coordinates to convert to.
+     * @returns The corresponding coordinates on the map.
+     */
     public pixelsToUnits(pixels: Vector2): Vector2 {
         const CENTER_PIXELS: Vector2 = new Vector2(
             App.CANVAS.width / 2,
@@ -75,6 +94,11 @@ export class Camera {
         return this._center.add(differenceUnits);
     }
 
+    /**
+     * Converts unit coordinates on the map to a pixel position on the canvas.
+     * @param units The map coordinates.
+     * @returns The corresponding location on the screen
+     */
     public unitsToPixels(units: Vector2): Vector2 {
         const CENTER_PIXELS: Vector2 = new Vector2(
             App.CANVAS.width / 2,
@@ -101,6 +125,10 @@ export class Camera {
         return CENTER_PIXELS.add(differencePixels);
     }
 
+    /**
+     * Creates a new zoom animation on the map.
+     * @param nextScale The zoom factor to zoom into.
+     */
     public createZoomAnimation(nextScale: number): void {
         if (this.zoomAnimation != null || this.moveAnimation != null) return;
 
@@ -112,6 +140,7 @@ export class Camera {
         );
     }
 
+    /** Updates the viewport according to the zoom animation. */
     public animateZoom(): void {
         if (this.zoomAnimation == null) return;
 
@@ -124,6 +153,11 @@ export class Camera {
         }
     }
 
+    /**
+     * Creates a new movement animation on the map
+     * @param nextCenter The new center of the camera.
+     * @param nextScale The zoom factor to zoom into.
+     */
     public createMoveAnimation(nextCenter: Vector2, nextScale: number): void {
         if (this.zoomAnimation != null || this.moveAnimation != null) return;
 
@@ -137,6 +171,7 @@ export class Camera {
         );
     }
 
+    /** Updates the viewport according to the move animation. */
     public animateMove(): void {
         if (this.moveAnimation == null) return;
 
@@ -150,48 +185,71 @@ export class Camera {
         }
     }
 
+    /** Gets the number of pixels per cell. */
     public get pixelsPerUnit(): number {
         return this._pixelsPerUnits;
     }
 
+    /** Gets the diagonal width of one cell, horizontally, when in isometric view. */
     public get isometricUnitWidth(): number {
         return this.pixelsPerUnit * Math.cos(Math.PI / 6) * 2;
     }
 
+    /** Gets the diagonal height of one cell, vertically, when in isometric view. */
     public get isometricUnitHeight(): number {
         return this.pixelsPerUnit * Math.sin(Math.PI / 6) * 2;
     }
-
+    
+    /**
+     * Determines if the camera viewport is in isometric mode.
+     * @returns True if in isometric mode, false otherwise.
+     */
     public isIsometric(): boolean {
         return this.isometric;
     }
 
+    /** Switchs from top-down view and isometric view. */
     public switchView(): void {
         this.isometric = !this.isometric;
     }
 
+    /**
+     * Determines if the map is currently animating (zooming or moving)
+     * @returns True if animating, false otherwise.
+     */
     public isAnimating(): boolean {
         return this.zoomAnimation != null && this.moveAnimation != null;
     }
 
+    /** Gets the center of the viewport. */
     public get center(): Vector2 {
         return this._center;
     }
 
+    /** Gets the center of the viewport, by default. */
     public get DEFAULT_CENTER(): Vector2 {
         return this._DEFAULT_CENTER;
     }
 
+    /** Gets the scale/zoom factor of the view port. by default. */
     public get DEFAULT_PIXELS_PER_UNIT(): number {
         return this._DEFAULT_PIXELS_PER_UNIT;
     }
 
+    /** Handles a zoom animation. */
     private static ZoomAnimation = class {
         private completed: boolean = false;
         private readonly TOTAL_ANIMATED_TICKS: number;
         private readonly FINAL_TICK: number;
         private currentTick: number = 0;
 
+        /**
+         * Initializes zoom animation.
+         * @param CURRENT_SCALE The current zoom scale of the viewport.
+         * @param NEXT_SCALE The zoom scale to animate to.
+         * @param duration The duration of the animation, in seconds.
+         * @param TPS The number of ticks per second.
+         */
         public constructor(
             private readonly CURRENT_SCALE: number,
             private readonly NEXT_SCALE: number,
@@ -202,6 +260,10 @@ export class Camera {
             this.FINAL_TICK = Math.floor(this.TOTAL_ANIMATED_TICKS + 1);
         }
 
+        /**
+         * Gets the next zoom scale.
+         * @returns The next zoom scale in the animation.
+         */
         public next(): number {
             if (this.completed) {
                 throw new Error("animation already completed");
@@ -219,11 +281,16 @@ export class Camera {
             return a * ease(this.currentTick, 0, this.TOTAL_ANIMATED_TICKS) + c;
         }
 
+        /**
+         * Determines if the animation is completed or not.
+         * @returns True if the animation is completed, false otherwise.
+         */
         public isCompleted(): boolean {
             return this.completed;
         }
     }
 
+    /** Handles a movement animation. */
     private static MoveAnimation = class {
         private readonly ZOOM_ANIMATION: InstanceType<typeof Camera.ZoomAnimation>;
 
@@ -232,6 +299,15 @@ export class Camera {
         private readonly FINAL_TICK: number;
         private completed: boolean = false;
 
+        /**
+         * Initializes movement animation.
+         * @param CURRENT_CENTER The current center of the viewport.
+         * @param NEXT_CENTER The new center to animate to.
+         * @param CURRENT_SCALE The current zoom scale of the viewport.
+         * @param NEXT_SCALE The zoom scale to animate to.
+         * @param duration The duration of the animation, in seconds.
+         * @param TPS The number of ticks per second.
+         */
         public constructor(
             private readonly CURRENT_CENTER: Vector2,
             private readonly NEXT_CENTER: Vector2,
@@ -251,10 +327,18 @@ export class Camera {
             this.FINAL_TICK = Math.floor(this.TOTAL_ANIMATED_TICKS + 1);
         }
 
+        /**
+         * Gets the next zoom scale.
+         * @returns The next zoom scale in the animation.
+         */
         public nextZoom(): number {
             return this.ZOOM_ANIMATION.next();
         }
 
+        /**
+         * Gets the next center of the viewport.
+         * @returns The next center of the viewport.
+         */
         public nextPosition(): Vector2 {
             if (this.completed) {
                 throw new Error("animation already completed");
@@ -277,7 +361,11 @@ export class Camera {
                 ay * ease(this.currentTick, 0, this.TOTAL_ANIMATED_TICKS) + cy
             );
         }
-
+        
+        /**
+         * Determines if the animation is completed or not.
+         * @returns True if the animation is completed, false otherwise.
+         */
         public isCompleted(): boolean {
             return this.completed;
         }

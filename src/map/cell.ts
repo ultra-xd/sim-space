@@ -9,9 +9,7 @@ import { GameMenu } from "../app/game_menu.js";
 import { assert } from "../util/util.js";
 import { ResidentialFacility } from "../facility/facility_types/residential.js";
 
-/**
- * Represents a cell in the game map.
- */
+/** Represents a cell in the game map. */
 export class Cell {
     private _coordinates: Vector2;
     private _pollution: number;
@@ -37,9 +35,7 @@ export class Cell {
         this._coordinates = new Vector2(x, y);
     }
 
-    /**
-     * The type of the facility in the cell, or null if the cell is empty.
-     */
+    /** The type of the facility in the cell, or null if the cell is empty. */
     public get facilityType(): FacilityType | null {
         if (this._facility == null) {
             return null;
@@ -48,9 +44,7 @@ export class Cell {
         return (this._facility.constructor as typeof Facility).FACILITY_TYPE;
     }
 
-    /**
-     * The sector of the facility in the cell, or null if the cell is empty.
-     */
+    /** The sector of the facility in the cell, or null if the cell is empty. */
     public get facilitySector(): FacilitySector | null {
         if (this._facility == null) {
             return null;
@@ -59,41 +53,32 @@ export class Cell {
         return (this._facility.constructor as typeof Facility).FACILITY_SECTOR;
     }
     
-    /**
-     * The facility in the cell, or null if the cell is empty.
-     */
+    /** The facility in the cell, or null if the cell is empty. */
     public set facility(facility: Facility | null) {
         this._facility = facility;
     }
 
+    /** The facility in the cell, or null if the cell is empty. */
     public get facility(): Facility | null {
         return this._facility;
     }
     
-    /**
-     * The X coordinate of the cell.
-     */
+    /** The X coordinate of the cell. */
     public get x(): number {
         return this._coordinates.x;
     }
     
-    /**
-     * The Y coordinate of the cell.
-     */
+    /** The Y coordinate of the cell. */
     public get y(): number {
         return this._coordinates.y;
     }
     
-    /**
-     * The coordinates of the cell.
-     */
+    /** The coordinates of the cell. */
     public get coordinates(): Vector2 {
         return this._coordinates;
     }
 
-    /**
-     * Updates the cell and the facility in it, if it exists.
-     */
+    /** Updates the cell and the facility in it, if it exists. */
     public tick(): void {
         if (this._facility != null) {
             this._facility.tick();
@@ -102,10 +87,12 @@ export class Cell {
         this._pollution = this._facility ? this._facility.pollution : 0;
     }
 
+    /** The pollution level of the cell. */
     public get pollution(): number {
         return this._pollution;
     }
 
+    /** The pollution level of the cell. */
     public set pollution(pollution: number) {
         this._pollution = pollution;
     }
@@ -274,7 +261,7 @@ export class Cell {
             }
 
             else if (FACILITY_TYPE == FacilityType.STORE) {
-                if (!this.facilityTypeDeleteCheck(
+                if (!this.facilitySectorDeleteCheck(
                     FacilitySector.RESIDENTIAL,
                     FacilityType.STORE,
                     Cell._MAX_DISTANCE_RESIDENCE_STORE
@@ -287,7 +274,7 @@ export class Cell {
             }
 
             else if (FACILITY_TYPE == FacilityType.RESTAURANT) {
-                if (!this.facilityTypeDeleteCheck(
+                if (!this.facilitySectorDeleteCheck(
                     FacilitySector.RESIDENTIAL,
                     FacilityType.RESTAURANT,
                     Cell._MAX_DISTANCE_RESIDENCE_RESTAURANT
@@ -300,7 +287,7 @@ export class Cell {
             }
 
             else if (FACILITY_TYPE == FacilityType.POWER) {
-                if (!this.facilitySectorDeleteCheck(
+                if (!this.facilityTypeDeleteCheck(
                     FacilitySector.INDUSTRIAL,
                     FacilityType.POWER,
                     Cell._MAX_DISTANCE_INDUSTRIAL_POWER
@@ -322,7 +309,14 @@ export class Cell {
         }
     }
 
-    private facilityTypeDeleteCheck(
+    /**
+     * Determines if a facility of the specified sector can be deleted, dependent on its distance to another facility type.
+     * @param facilitySector The specified facility sector.
+     * @param facilityType The specified facility type.
+     * @param distance The maximum distance between the two facilities.
+     * @returns True if can be deleted, false otherwise.
+     */
+    private facilitySectorDeleteCheck(
         facilitySector: FacilitySector, 
         facilityType: FacilityType,
         distance: number
@@ -340,7 +334,14 @@ export class Cell {
         return this.distanceCheck(SECTOR_CELLS, TYPE_CELLS, distance);
     }
 
-    private facilitySectorDeleteCheck(
+    /**
+     * Determines if a facility of the specified type can be deleted, dependent on its distance to another facility sector.
+     * @param facilitySector The specified facility sector.
+     * @param facilityType The specified facility type.
+     * @param distance The maximum distance between the two facilities.
+     * @returns True if can be deleted, false otherwise.
+     */
+    private facilityTypeDeleteCheck(
         facilitySector: FacilitySector, 
         facilityType: FacilityType,
         distance: number
@@ -358,6 +359,13 @@ export class Cell {
         return this.distanceCheck(TYPE_CELLS, SECTOR_CELLS, distance);
     }
 
+    /**
+     * Checks if all coordinates in one array are less than or equal to a distance from another coordinate array.
+     * @param arr1 The first coordinate array.
+     * @param arr2 The second coordinate array.
+     * @param distance The maximum distance from one coordinate to another.
+     * @returns True if all coordinates in one array are less than or equal to a distance from another coordinate array, false otherwise.
+     */
     private distanceCheck(
         arr1: Vector2[],
         arr2: Vector2[],

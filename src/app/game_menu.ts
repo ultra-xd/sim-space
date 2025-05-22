@@ -9,9 +9,7 @@ import { EmergencyBuilding, EducationCentre, MedicalCentre, Government, PowerPla
 import { Restaurant, Store, Office } from "../facility/facility_types/commercial.js";
 import { EnvironmentalFacility, Factory, Warehouse } from "../facility/facility_types/industrial.js";
 
-/**
- * Class that handles the game menu UI.
- */
+/** Class that handles the game menu UI. */
 export class GameMenu {
     // Get all HTML elements
     public static readonly GAME_MENU_DIV: HTMLDivElement = document.getElementById("game-menu") as HTMLDivElement;
@@ -84,9 +82,7 @@ export class GameMenu {
      */
     public constructor(private readonly game: Game) {};
 
-    /**
-     * Sets up the game menu UI, including event listeners, creating buttons, etc.
-     */
+    /** Sets up the game menu UI, including event listeners, creating buttons, etc. */
     public setup(): void {
         // Handle event listener for building button dropdown
         GameMenu.CONSTRUCTION_BUILD_BUTTON.onclick = () => {
@@ -175,7 +171,11 @@ export class GameMenu {
         this.createFacilityButtons();
         GameMenu.switchUI(GameState.STANDARD);
     }
-
+    
+    /**
+     * Shows all info of the facility given on the game menu.
+     * @param facility The facility whose info is displayed.
+     */
     public static showFacilityInfo(facility: Facility): void {
         GameMenu.FACILITY_NAME_PARAGRAPH.innerText = (facility.constructor as typeof Facility).NAME;
 
@@ -228,6 +228,7 @@ export class GameMenu {
         }
     }
 
+    /** Hides the facility info box. */
     public static hideFacilityInfo(): void {
         if (GameMenu.FACILITY_INFO_DIV.classList.contains("show")) {
             GameMenu.FACILITY_INFO_DIV.classList.remove("show");
@@ -311,9 +312,7 @@ export class GameMenu {
         return BUTTON;
     }
 
-    /**
-     * Creates buttons for all facility types.
-     */
+    /** Creates buttons for all facility types and stores them in the construction menu. */
     private createFacilityButtons(): void {
         GameMenu.CONSTRUCTION_BUILDINGS_DISPLAY_DIV.innerHTML = "";
         // Create array of all facility types
@@ -343,6 +342,7 @@ export class GameMenu {
         }
     }
 
+    /** Updates the statistics of the game onto the game menu. */
     public updateStatsDisplay(): void {
         GameMenu.STATS_MONEY_SPAN.innerText = Intl.NumberFormat(
             "en-US",
@@ -356,14 +356,17 @@ export class GameMenu {
         GameMenu.STATS_SCORE_SPAN.innerText = String(this.game.score);
     }
 
+    /** Hides all HTML elements on the game menu. */
     public static hide(): void {
         GameMenu.GAME_MENU_DIV.hidden = true;
     }
 
+    /** Shows all HTML elements on the game menu. */
     public static show(): void {
         GameMenu.GAME_MENU_DIV.hidden = false;
     }
 
+    /** Handles all that appear in the bottom right corner of the screen. */
     public static NotificationManager = class {
         private static readonly NOTIFICATION_QUEUE: Queue<string> = new Queue<string>();
         private static readonly NOTIFICATION_LENGTH: number = 3;
@@ -375,11 +378,16 @@ export class GameMenu {
 
         private static readonly NOTIFICATION_DIV: HTMLDivElement = document.getElementById("notification-box") as HTMLDivElement;
         private static readonly NOTIFICATION_PARAGRAPH: HTMLParagraphElement = document.getElementById("notification-text") as HTMLParagraphElement;
-
+        
+        /**
+         * Creates a notification to display to the screen.
+         * @param message The message to display to the screen.
+         */
         public static createNotification(message: string): void {
             GameMenu.NotificationManager.NOTIFICATION_QUEUE.enqueue(message);
         }
 
+        /** Updates the notification manager. */
         public static tick(): void {
             if (GameMenu.NotificationManager.inCycle) {
                 GameMenu.NotificationManager.tickCycle++;
@@ -402,6 +410,7 @@ export class GameMenu {
             }
         }
 
+        /** Updates the notification message shows the notification box on screen. */
         public static showNotification(): void {
             const NOTIFICATION_MESSAGE: string | null = GameMenu.NotificationManager.NOTIFICATION_QUEUE.dequeue();
             assert (NOTIFICATION_MESSAGE != null);
@@ -416,6 +425,7 @@ export class GameMenu {
             }
         }
 
+        /** Hides the notification box from the screen. */
         public static hideNotification(): void {
             GameMenu.NotificationManager.showing = false;
 

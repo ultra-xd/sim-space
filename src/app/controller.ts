@@ -1,6 +1,7 @@
 import { Canvas } from "./canvas.js";
 import { Vector2 } from "../data_structures/vector.js";
 
+/** Enum storing all mouse buttons the game will need. */
 export enum MouseEvent {
     LMB = 0,
     MMB = 1,
@@ -9,6 +10,7 @@ export enum MouseEvent {
     MOUSE_SCROLL_DOWN = 4
 }
 
+/** Enum storing all keys on the keyboard the game will need. */
 export enum KeyEvent {
     ESCAPE = "escape",
     SHIFT = "shift"
@@ -17,6 +19,7 @@ export enum KeyEvent {
 type MouseEventMap = Map<number, boolean>;
 type KeyEventMap = Map<string, boolean>;
 
+/** Handles and tracks all key events. */
 export class Controller {
 
     private readonly MOUSE_EVENTS: MouseEventMap = new Map<number, boolean>();
@@ -27,6 +30,10 @@ export class Controller {
     private _currentMousePosition: Vector2 | null = null;
     private _previousMousePosition: Vector2 | null = null;
 
+    /**
+     * Initializes a controller.
+     * @param CANVAS The canvas for which the mouse events are tracked.
+     */
     public constructor(private readonly CANVAS: Canvas) {
         for (let i: number = 0; i < Object.keys(MouseEvent).length; i++) {
             this.MOUSE_EVENTS.set(i, false);
@@ -39,6 +46,7 @@ export class Controller {
         }
     }
 
+    /** Sets up all event listeners. */
     public setup(): void {
         document.body.addEventListener("contextmenu", (event) => {
             event.preventDefault();
@@ -48,6 +56,7 @@ export class Controller {
         this.setupKeyEvents();
     }
 
+    /** Sets up all mouse event listeners. */
     private setupMouseEvents(): void {
         this.CANVAS.HTMLElement.addEventListener("mousedown", (event) => {
             if (event.defaultPrevented) {
@@ -98,6 +107,7 @@ export class Controller {
         });
     }
 
+    /** Sets up all key event listeners. */
     private setupKeyEvents(): void {
         document.body.addEventListener("keydown", (event) => {
             if (event.defaultPrevented) {
@@ -124,6 +134,7 @@ export class Controller {
         });
     }
 
+    /** Updates all mouse and key events. */
     public tick(): void {
         this._previousMousePosition = this._currentMousePosition;
         this.MOUSE_EVENTS.set(MouseEvent.MOUSE_SCROLL_DOWN, false);
@@ -138,26 +149,48 @@ export class Controller {
         }
     }
 
+    /**
+     * Tracks if a mouse button is being pressed.
+     * @param event The mouse button being tracked.
+     * @returns True if the mouse button is pressed, false otherwise.
+     */
     public mouseToggled(event: MouseEvent): boolean {
         return this.MOUSE_EVENTS.get(event) ?? false;
     }
 
+    /**
+     * Tracks if a mouse button has just been pressed (i.e it is pressed but not held down).
+     * @param event The mouse button being tracked.
+     * @returns True if the mouse button has just been pressed, false otherwise.
+     */
     public mouseClickToggled(event: MouseEvent): boolean {
         return this.MOUSE_CLICK_EVENTS.get(event) ?? false;
     }
 
+    /**
+     * Tracks if a key is being pressed.
+     * @param event The key being tracked.
+     * @returns True if the key is pressed, false otherwise.
+     */
     public keyToggled(event: KeyEvent): boolean {
         return this.KEY_EVENTS.get(event) ?? false;
     }
 
+    /**
+     * Tracks if a key has just been pressed (i.e it is pressed but not held down).
+     * @param event The key being tracks
+     * @returns true if the key has just been pressed, false otherwise.
+     */
     public keyPressToggled(event: KeyEvent): boolean {
         return this.KEY_PRESS_EVENTS.get(event) ?? false;
     }
 
+    /** Gets the current cursor position relative to the canvas. */
     public get currentMousePosition(): Vector2 | null {
         return this._currentMousePosition;
     }
 
+    /** Gets the cursor position of the mouse on the last tick relative to the canvas. */
     public get previousMousePosition(): Vector2 | null {
         return this._previousMousePosition;
     }

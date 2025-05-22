@@ -42,6 +42,11 @@ export class GameMap {
         }
     }
 
+    /**
+     * Determines if the map contains a facility of the specified facility type.
+     * @param facilityType The specified facility type to check for.
+     * @returns True if found, false otherwise.
+     */
     public containsType(facilityType: FacilityType): boolean {
         for (let i: number = 0; i < this._GAME.MAP.OCCUPIED_CELLS.length; i++) {
             const COORDINATES: Vector2 = this._GAME.MAP.OCCUPIED_CELLS.get(i);
@@ -54,6 +59,11 @@ export class GameMap {
         return false;
     }
 
+    /**
+     * Determines if the map contains multiple of a facility of the specified facility type.
+     * @param facilityType The specified facility type to check for.
+     * @returns True if found more than once, false otherwise.
+     */
     public containsMultipleOfType(facilityType: FacilityType): boolean {
         let found: boolean = false;
         for (let i: number = 0; i < this._GAME.MAP.OCCUPIED_CELLS.length; i++) {
@@ -68,6 +78,11 @@ export class GameMap {
         return false;
     }
 
+    /**
+     * Determines if the map contains all of the facility types specified.
+     * @param facilityTypes An array containing all facility types to check for.
+     * @returns True if all facility types are found, false otherwise.
+     */
     public containsTypes(facilityTypes: FacilityType[]): boolean {
         for (let i: number = 0; i < facilityTypes.length; i++) {
             if (!this.containsType(facilityTypes[i])) {
@@ -78,6 +93,11 @@ export class GameMap {
         return true;
     }
 
+    /**
+     * Determines if the map contains a facility of the specified facility sector.
+     * @param facilitySector The specified facility sector to check for.
+     * @returns True if found, false otherwise.
+     */
     public containsSector(facilitySector: FacilitySector): boolean {
         for (let i: number = 0; i < this._GAME.MAP.OCCUPIED_CELLS.length; i++) {
             const COORDINATES: Vector2 = this._GAME.MAP.OCCUPIED_CELLS.get(i);
@@ -90,6 +110,11 @@ export class GameMap {
         return false;
     }
 
+    /**
+     * Determines if the map contains all of the facility sector specified.
+     * @param facilitySectors An array containing all facility sector to check for.
+     * @returns True if all facility sectors are found, false otherwise.
+     */
     public containsSectors(facilitySectors: FacilitySector[]): boolean {
         for (let i: number = 0; i < facilitySectors.length; i++) {
             if (!this.containsSector(facilitySectors[i])) {
@@ -100,6 +125,13 @@ export class GameMap {
         return true;
     }
 
+    /**
+     * Searches through all cells of the map using breadth first search.
+     * @param start The start to search from.
+     * @param maxDistance The maximum distance from the starting cell to search from.
+     * @param handleCondition Function that handles each cell searched. Returns true if the search should be ended, false otherwise.
+     * @returns True if a cell is found, false otherwise.
+     */
     public BFS(
         start: Vector2, 
         maxDistance: number, 
@@ -154,6 +186,11 @@ export class GameMap {
         return false;
     }
 
+    /**
+     * Determines if a set of coordinates is within the map.
+     * @param coordinates The coordinates on the map.
+     * @returns True if the coordinates are on the map, false otherwise.
+     */
     public inBounds(coordinates: Vector2): boolean {
         return (
             coordinates.x >= 0 &&
@@ -163,42 +200,45 @@ export class GameMap {
         );
     }
     
-    /**
-     * Width of the game map in cells.
-     */
+    /** Width of the game map in cells. */
     public get width(): number {
         return this._WIDTH;
     }
     
-    /**
-     * Hedight of the game map in cells.
-     */
+    /** Height of the game map in cells. */
     public get height(): number {
         return this._HEIGHT;
     }
     
-    /**
-     * The game the map is part of.
-     */
+    /** The game the map is part of. */
     public get GAME(): Game {
         return this._GAME;
     }
     
-    /**
-     * Width of the road in the game map, in units.
-     */
+    /** Width of the road in the game map, in units. */
     public static get ROAD_WIDTH(): number {
         return GameMap._ROAD_WIDTH;
     }
 
+    /** An ArrayList containing every single cell that has a facility. */
     public get OCCUPIED_CELLS(): ArrayList<Vector2> {
         return this._OCCUPIED_CELLS;
     }
 
+    /**
+     * Gets the cell at specified coordinates.
+     * @param coordinates The coordinates of the cell.
+     * @returns The cell at the specified coordinates.
+     */
     public getCell(coordinates: Vector2): Cell {
         return this._CELLS[coordinates.y][coordinates.x];
     }
 
+    /**
+     * Gets the cooridnates of all facilities that are of the specified type.
+     * @param facilityType The facility type to search for.
+     * @returns An array of 2D vectors containing all of the coordinates of all facilities that are of the specified type.
+     */
     public getAllOfType(facilityType: FacilityType): Vector2[] {
         const LIST: ArrayList<Vector2> = new ArrayList<Vector2>();
 
@@ -211,7 +251,12 @@ export class GameMap {
 
         return LIST.getArray();
     }
-
+    
+    /**
+     * Gets the cooridnates of all facilities that are of the specified sector.
+     * @param facilitySector The facility sector to search for.
+     * @returns An array of 2D vectors containing all of the coordinates of all facilities that are of the specified sector.
+     */
     public getAllOfSector(facilitySector: FacilitySector): Vector2[] {
         const LIST: ArrayList<Vector2> = new ArrayList<Vector2>();
 
@@ -244,6 +289,7 @@ export class GameMap {
         return false;
     }
 
+    /** Distributes all of the power from all power plants. */
     public redistributePower(): void {
         for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
             const FACILITY: Facility | null = this.getCell(this._OCCUPIED_CELLS.get(i)).facility;
@@ -261,13 +307,6 @@ export class GameMap {
                 (FACILITY as PowerPlant).distributePower(COORDINATES);
             }
         }
-        // // debug
-        // console.log("__________________________________________");
-        // for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
-        //     const FACILITY: Facility | null = this.getCell(this._OCCUPIED_CELLS.get(i)).facility;
-        //     assert (FACILITY != null);
-        //     console.log(FACILITY.FACILITY_TYPE, FACILITY.powerAvailable, (FACILITY.constructor as typeof Facility).POWER_COST);
-        // }
     }
 
     /**
@@ -402,9 +441,7 @@ export class GameMap {
         }
     }
 
-    /**
-     * Updates the game map and all its cells & facilities.
-     */
+    /** Updates the game map and all its cells & facilities. */
     public tick(): void {
         for (let i: number = 0; i < this._CELLS.length; i++) {
             const CELL_ROW: Cell[] = this._CELLS[i];

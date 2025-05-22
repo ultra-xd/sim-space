@@ -25,9 +25,7 @@ export interface IArrayList<T> {
     slice(begin: number, end: number): ArrayList<T>;
 }
 
-/**
- * ArrayList data structure: can add, delete, find elements in array, etc. Features dynamic resizing
- */
+/** ArrayList data structure: can add, delete, find elements in array, etc. Features dynamic resizing. */
 export class ArrayList<T> implements IArrayList<T> {
     private n: number = 0; // Store size of arraylist
     private max: number; // Store size of array
@@ -235,7 +233,7 @@ export class ArrayList<T> implements IArrayList<T> {
     }
 
     /**
-     * turns the ArrayList into an array.
+     * Turns the ArrayList into an array.
      * @returns Array that the ArrayList contained.
      */
     public getArray(): T[] {

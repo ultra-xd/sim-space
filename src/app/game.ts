@@ -40,7 +40,7 @@ export class Game {
     private _population: number = 0;
     private _happyPopulation: number = 0;
     private _contentedPopulation: number = 0;
-    private _money: number = 5_000_000_000;
+    private _money: number = Infinity;
     private _ticks: number = 0;
     private _pollution: number = 0;
 
@@ -57,7 +57,7 @@ export class Game {
     private _gameState: GameState = GameState.STANDARD;
 
     // destroying the city yipppiiiieeee
-    private static readonly DEFAULT_GAME_END_PROBABILITY: number = 0.01;
+    private static readonly DEFAULT_GAME_END_PROBABILITY: number = 0;
     private gameEndProbability: number = Game.DEFAULT_GAME_END_PROBABILITY;
     private isGameEnding: boolean = false;
     private static readonly GAME_ENDING_ANIMATION_LENGTH: number = 2;
@@ -272,7 +272,7 @@ export class Game {
                 new Vector2(canvas.width / 2, canvas.height / 2),
                 canvas.width,
                 canvas.height,
-                `rgba(255, 255, 255, ${PROGRESS})`
+                `rgba(255, 0, 255, ${PROGRESS})`
             );
         }
     }
