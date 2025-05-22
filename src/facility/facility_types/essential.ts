@@ -124,9 +124,9 @@ export class PowerPlant extends EssentialServicesFacility {
 
         let powerAvailable: number = PowerPlant._POWER_PRODUCED;
 
-        this._game.MAP.BFS(
+        this.GAME.MAP.BFS(
             coordinates,
-            this._game.MAP.width + this._game.MAP.height,
+            this.GAME.MAP.width + this.GAME.MAP.height,
             (coords: Vector2): boolean => {
                 if (coordinates.equals(coords)) return false;
 

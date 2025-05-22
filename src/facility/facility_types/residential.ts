@@ -47,9 +47,9 @@ export abstract class ResidentialFacility extends Facility {
         this.updateMaintenanceCost();
         this.updatePollution();
         //tax revenue adds to money in game through setter
-        this._game.money += this._taxRevenue
+        this.GAME.money += this._taxRevenue
         //Set money to subtract mainternance cost
-        this._game.money -= this._maintenanceCost;
+        this.GAME.money -= this._maintenanceCost;
     }
     public get population(): number {
         return this._population;
@@ -127,9 +127,9 @@ export class LuxuryHome extends ResidentialFacility {
         this.updateMaintenanceCost();
         this.updatePollution();
         //tax revenue adds to money in game through setter
-        this._game.money += this._taxRevenue
+        this.GAME.money += this._taxRevenue
         //Set money to subtract mainternance cost
-        this._game.money -= this._maintenanceCost;
+        this.GAME.money -= this._maintenanceCost;
     }
 
 }

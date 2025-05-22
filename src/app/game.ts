@@ -3,7 +3,7 @@ import { Canvas } from "./canvas.js";
 import { Vector2 } from "../data_structures/vector.js";
 import { Camera } from "../map/camera.js";
 import { App } from "./app.js";
-import { Facility, FacilityClass } from "../facility/facility.js";
+import { Facility, FacilityType, FacilityClass } from "../facility/facility.js";
 import { GameMenu } from "./game_menu.js";
 import { assert, randomInteger } from "../util/util.js";
 import { KeyEvent, MouseEvent } from "./controller.js";
@@ -62,6 +62,9 @@ export class Game {
     private isGameEnding: boolean = false;
     private static readonly GAME_ENDING_ANIMATION_LENGTH: number = 2;
     private gameEndingAnimationTicks: number = 0;
+    private static readonly EXPLOSION_IMAGE: HTMLImageElement = Canvas.ImageLoader.getImage(
+        "res/assets/other/nuke.png"
+    );
 
     /**
      * Creates a new Game.
@@ -226,7 +229,7 @@ export class Game {
 
         if (this.monthEnded()) {
             this.GAME_MENU.updateStatsDisplay();
-            if (!this.isGameEnding) {
+            if (!this.isGameEnding && !this._MAP.containsType(FacilityType.DEFENSE)) {
                 const COMPARE: number = this.gameEndProbability * 100;
                 let RANDOM: number = randomInteger(1, 100);
                 if (RANDOM <= COMPARE) {
@@ -254,12 +257,22 @@ export class Game {
         this.MAP.draw(canvas, this._CAMERA);
 
         if (this.isGameEnding && this._gameState != GameState.END) {
-            const FLASH_OPACITY: number = this.gameEndingAnimationTicks / (Game.GAME_ENDING_ANIMATION_LENGTH * App.TPS);
+            const PROGRESS: number = this.gameEndingAnimationTicks / (Game.GAME_ENDING_ANIMATION_LENGTH * App.TPS);
+
+            canvas.drawImage(
+                Game.EXPLOSION_IMAGE,
+                this._CAMERA.unitsToPixels(
+                    new Vector2(this._MAP.width / 2, this._MAP.height / 2)
+                ),
+                this._MAP.width * this._CAMERA.pixelsPerUnit * PROGRESS * 2,
+                this._MAP.height * this._CAMERA.pixelsPerUnit * PROGRESS * 2
+            )
+
             canvas.fillRect(
                 new Vector2(canvas.width / 2, canvas.height / 2),
                 canvas.width,
                 canvas.height,
-                `rgba(255, 255, 255, ${FLASH_OPACITY})`
+                `rgba(255, 255, 255, ${PROGRESS})`
             );
         }
     }

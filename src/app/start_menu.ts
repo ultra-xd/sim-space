@@ -39,6 +39,13 @@ export class StartMenu {
             backgroundWidth,
             backgroundHeight
         );
+
+        canvas.fillRect(
+            new Vector2(canvas.width / 2, canvas.height / 2),
+            canvas.width,
+            canvas.height,
+            "rgba(0, 0, 0, 0.3)"
+        );
         
         canvas.drawImage(
             StartMenu.TITLE_TEXT,

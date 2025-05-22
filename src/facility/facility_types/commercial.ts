@@ -44,9 +44,9 @@ export abstract class CommercialFacility extends Facility {
             //Bro istg there's literally empty space for the MAINT factor too when r<=6
         }
 
-        this._game.money += this._taxRevenue
+        this.GAME.money += this._taxRevenue
 
-        this._game.money -= this._maintenanceCost;
+        this.GAME.money -= this._maintenanceCost;
     }
 }
 

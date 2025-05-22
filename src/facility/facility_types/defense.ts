@@ -11,11 +11,4 @@ export class DefenseFacility extends Facility {
     protected _maintenanceCost: number;
     protected _pollution: number;
     protected _taxRevenue: number;
-
-    public preventDisaster() : void{
-        this._game.nullifyGameEndProbability();
-    }
-    public override tick(): void {
-        //what is this supposed to fking do? Might just be a dummkopf
-    }
 }

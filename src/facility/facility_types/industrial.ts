@@ -25,17 +25,17 @@ export class Factory extends IndustrialFacility {
         this.updateTaxRevenue();
         this._age++;
         if (this._taxRevenue >= Factory._MAX_TAX_REVENUE) {
-            this._game.money += Factory._MAX_TAX_REVENUE;
+            this.GAME.money += Factory._MAX_TAX_REVENUE;
         }
         else {
-            this._game.money += this._taxRevenue;
+            this.GAME.money += this._taxRevenue;
         }
 
         if (this._maintenanceCost >= Factory._MAX_MAINTENANCE_COST) {
-            this._game.money += Factory._MAX_MAINTENANCE_COST;
+            this.GAME.money += Factory._MAX_MAINTENANCE_COST;
         }
         else {
-            this._game.money -= this._maintenanceCost;
+            this.GAME.money -= this._maintenanceCost;
         }
     }
 
@@ -83,11 +83,11 @@ export class EnvironmentalFacility extends IndustrialFacility {
         // im keeping this comment LMAOOO
         let pollutionReductionAvailable: number = EnvironmentalFacility.MAX_POLLUTION_REDUCTION;
 
-        this._game.MAP.BFS(
+        this.GAME.MAP.BFS(
             coordinates,
-            this._game.MAP.width + this._game.MAP.height,
+            this.GAME.MAP.width + this.GAME.MAP.height,
             (coords: Vector2): boolean => {
-                const CELL: Cell = this._game.MAP.getCell(coords);
+                const CELL: Cell = this.GAME.MAP.getCell(coords);
                 const POLLUTION: number = CELL.pollution;
 
                 if (pollutionReductionAvailable > POLLUTION) {
@@ -107,9 +107,9 @@ export class EnvironmentalFacility extends IndustrialFacility {
         //Increase age of the facility
         this._age++;
         //tax revenue adds to money in game through setter
-        this._game.money += this._taxRevenue
+        this.GAME.money += this._taxRevenue
         //Set money to subtract mainternance cost
-        this._game.money -= this._maintenanceCost;
+        this.GAME.money -= this._maintenanceCost;
         //Pollution handled in cell
         //Again, all this is handleded later when I give a fuck
         // this.reducePollution()
