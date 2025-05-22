@@ -48,6 +48,7 @@ export class Controller {
 
     /** Sets up all event listeners. */
     public setup(): void {
+        // Prevent the right click menu from opening
         document.body.addEventListener("contextmenu", (event) => {
             event.preventDefault();
         });
@@ -58,37 +59,45 @@ export class Controller {
 
     /** Sets up all mouse event listeners. */
     private setupMouseEvents(): void {
+        // Connect mouse down event listener (press)
         this.CANVAS.HTMLElement.addEventListener("mousedown", (event) => {
             if (event.defaultPrevented) {
                 return;
             }
 
+            // Get button clicked on mouse
             const CODE: number = event.button;
 
+            // Store that mouse button has been clicked
             if (this.MOUSE_EVENTS.has(CODE) && this.MOUSE_CLICK_EVENTS.has(CODE)) {
                 this.MOUSE_EVENTS.set(CODE, true);
                 this.MOUSE_CLICK_EVENTS.set(CODE, true);
             }
         });
 
+        // Connect mouse up event listener (release)
         this.CANVAS.HTMLElement.addEventListener("mouseup", (event) => {
             if (event.defaultPrevented) {
                 return;
             }
 
+            // Get button released on mouse
             const CODE: number = event.button;
 
+            // Store that mouse button has been released
             if (this.MOUSE_EVENTS.has(CODE) && this.MOUSE_CLICK_EVENTS.has(CODE)) {
                 this.MOUSE_EVENTS.set(CODE, false);
                 this.MOUSE_CLICK_EVENTS.set(CODE, false);
             }
         });
 
+        // Connect mouse movement even listener
         document.body.addEventListener("mousemove", (event) => {
             if (event.defaultPrevented) {
                 return;
             }
 
+            // Store current mouse position
             const RECT: DOMRect = document.body.getBoundingClientRect();
             this._currentMousePosition = new Vector2(
                 event.clientX - RECT.left,
@@ -96,9 +105,12 @@ export class Controller {
             );
         });
 
+        // Connect mouse wheel event listener
         document.body.addEventListener("wheel", (event) => {
+            // Store scroll value
             let scroll: number = event.deltaY;
             
+            // Change mouse scroll values in mouse event map
             if (scroll > 0) {
                 this.MOUSE_EVENTS.set(MouseEvent.MOUSE_SCROLL_DOWN, true);
             } else if (scroll < 0) {

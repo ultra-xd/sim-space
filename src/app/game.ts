@@ -66,17 +66,13 @@ export class Game {
         "res/assets/other/nuke.png"
     );
 
-    /**
-     * Creates a new Game.
-     */
+    /** Creates a new Game. */
     public constructor() {
         this.GAME_MENU.setup();
         this.GAME_MENU.updateStatsDisplay();
     }
 
-    /**
-     * Updates the game once, according to the ticks per second
-     */
+    /** Updates the game once, according to the ticks per second */
     public tick(): void {
         if (
             this._gameState == GameState.STANDARD ||
@@ -144,6 +140,7 @@ export class Game {
             // Handle left click mouse events on map
             if (App.CONTROLLER.mouseClickToggled(MouseEvent.LMB) && this._highlightedCell != null) {
                 switch (this._gameState) {
+                    // If in standard view mode, show the information of the facility clicked on
                     case GameState.STANDARD:
                         if (!this._MAP.inBounds(this._highlightedCell)) break;
                         const FACILITY: Facility | null = this._MAP.getCell(this._highlightedCell).facility;
@@ -154,9 +151,12 @@ export class Game {
                         }
 
                         break;
+
+                    // If in build mode, build a facility if capable
                     case GameState.BUILD:
                         assert (this._selectedFacility != null);
 
+                        // Notify & decline user if not enough money
                         if (!this._selectedFacility.canBuy(this.money)) {
                             GameMenu.NotificationManager.createNotification(
                                 "You don't have enough money."
@@ -174,6 +174,8 @@ export class Game {
                         }
 
                         break;
+                    
+                    // If in destroy modde, destroy the facility on the cell if it exists
                     case GameState.DESTROY:
                         // Destroy facility on highlighted cell, if possible
                         if (
@@ -200,6 +202,7 @@ export class Game {
             }
 
             if (this.isGameEnding) {
+                // Animate the game's ending
                 this.gameEndingAnimationTicks++;
                 if (this.gameEndingAnimationTicks == Game.GAME_ENDING_ANIMATION_LENGTH * App.TPS) {
                     this.gameState = GameState.END;
@@ -212,13 +215,14 @@ export class Game {
             this._CAMERA.tick();
         }
 
-        if (
-            App.CONTROLLER.keyPressToggled(KeyEvent.ESCAPE)
-        ) {
+        // Handle ESCAPE keyboard key press
+        if (App.CONTROLLER.keyPressToggled(KeyEvent.ESCAPE)) {
+            // If in standard viewing mode, pause the game, otherwise return to standard viewing mode
             switch (this._gameState) {
                 case GameState.STANDARD:
                     this.gameState = GameState.PAUSED;
                     break;
+                
                 case GameState.BUILD:
                 case GameState.DESTROY:
                 case GameState.PAUSED:
@@ -227,6 +231,7 @@ export class Game {
             }
         }
 
+        // Update stats display every time month ends
         if (this.monthEnded()) {
             this.GAME_MENU.updateStatsDisplay();
             if (!this.isGameEnding && !this._MAP.containsType(FacilityType.DEFENSE)) {
@@ -256,9 +261,12 @@ export class Game {
         // Draw map and facilities in map
         this.MAP.draw(canvas, this._CAMERA);
 
+        // Draw game ending animation
         if (this.isGameEnding && this._gameState != GameState.END) {
+            // Determine the fraction of the animation that has completed
             const PROGRESS: number = this.gameEndingAnimationTicks / (Game.GAME_ENDING_ANIMATION_LENGTH * App.TPS);
 
+            // Draw a nuke in the center of the map that gradually grows in size
             canvas.drawImage(
                 Game.EXPLOSION_IMAGE,
                 this._CAMERA.unitsToPixels(
@@ -268,6 +276,7 @@ export class Game {
                 this._MAP.height * this._CAMERA.pixelsPerUnit * PROGRESS * 2
             )
 
+            // Draw an increasingly white rectangle over the city
             canvas.fillRect(
                 new Vector2(canvas.width / 2, canvas.height / 2),
                 canvas.width,
@@ -333,6 +342,7 @@ export class Game {
         return (3 * this._happyPopulation + this._contentedPopulation) - this._pollution;
     }
 
+    /** The month number. */
     public get month(): number {
         return Math.floor(this._ticks / Game.TICKS_PER_MONTH);
     }

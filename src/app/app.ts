@@ -16,16 +16,19 @@ export class App {
     private static readonly _CANVAS: Canvas = new Canvas("canvas");
     private static readonly _CONTROLLER: Controller = new Controller(App._CANVAS);
 
+    // Constrols if the app is in its start menu or playing the game
     private static appState: AppState = AppState.START_MENU;
 
+    // Contains ID of the interval loop running the mainloop
     private static intervalLoop: number;
-    private static readonly _TPS: number = 60;
+    private static readonly _TPS: number = 60; // # ticks per second
 
     /** Sets up the app, including the controller, canvas, resources. Starts the app. */
     public static setup(): void {
         App._CONTROLLER.setup();
         StartMenu.setup();
 
+        // Preload all images so that we don't run into "empty image" artifacts
         Canvas.ImageLoader.loadImages(
             [
                 "res/assets/buildings/isometric/affordable_home.png",
@@ -72,6 +75,7 @@ export class App {
 
     /** Starts the mainloop of the app. */
     public static start(): void {
+        // Set interval loop to run mainloop
         App.intervalLoop = setInterval(() => {
             App.mainloop();
         }, 1000 / App.TPS);
@@ -100,6 +104,7 @@ export class App {
 
     /** Draws the app on the canvas. */
     private static draw(): void {
+        // Draw the start menu or game, depending on app state
         if (App.appState == AppState.IN_GAME && App.game != null) {
             App.game.draw(App.CANVAS);
         } else if (this.appState == AppState.START_MENU) {
@@ -127,8 +132,10 @@ export class App {
      * @param state The app state.
      */
     public static changeAppState(state: AppState): void {
+        // Set app state
         App.appState = state;
 
+        // Show correct HTML UI based on app state
         if (state == AppState.IN_GAME) {
             StartMenu.hide();
             GameMenu.show();

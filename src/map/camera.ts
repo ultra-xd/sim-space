@@ -5,21 +5,22 @@ import { App } from "../app/app.js";
 
 /** Handles conversion of units and pixels and the viewport of the map. */
 export class Camera {
+    public readonly _DEFAULT_CENTER: Vector2;
+    private _center: Vector2; // Stores the center of the viewport
+    public readonly _DEFAULT_PIXELS_PER_UNIT: number = 100; // Stores the default zoom scale of the viewport
+    private _pixelsPerUnits: number = this._DEFAULT_PIXELS_PER_UNIT; // Stores the zoom scale of the viewport
 
-    private _center: Vector2;
-    public readonly _DEFAULT_PIXELS_PER_UNIT: number = 100;
-    private _pixelsPerUnits: number = this._DEFAULT_PIXELS_PER_UNIT;
-
+    // Store maximum and minimum zoom scale
     private static readonly MIN_PIXELS_PER_UNIT: number = 20;
     private static readonly MAX_PIXELS_PER_UNIT: number = 500;
 
+    // Store any animations occuring and their animation length, in seconds
     private zoomAnimation: InstanceType<typeof Camera.ZoomAnimation> | null = null;
     private moveAnimation: InstanceType<typeof Camera.MoveAnimation> | null = null;
     private static readonly ZOOM_ANIMATION_LENGTH: number = 0.5;
     private static readonly MOVE_ANIMATION_LENGTH: number = 2;
 
-    public readonly _DEFAULT_CENTER: Vector2;
-
+    // Stores whether a top-down or isometric view is used
     private isometric: boolean = true;
 
     /**
@@ -27,6 +28,7 @@ export class Camera {
      * @param _GAME The game the camera is looking at.
      */
     public constructor(private readonly _GAME: Game) {
+        // Set viewport to be center of map
         this._center = new Vector2(
             this._GAME.MAP.width / 2,
             this._GAME.MAP.height / 2
@@ -37,9 +39,11 @@ export class Camera {
 
     /** Updates the camera. */
     public tick(): void {
+        // Update animations
         this.animateZoom();
         this.animateMove();
 
+        // Update zooms if they are outside of bounds
         if (this._pixelsPerUnits < Camera.MIN_PIXELS_PER_UNIT) {
             this._pixelsPerUnits = Camera.MIN_PIXELS_PER_UNIT;
         }
@@ -71,15 +75,21 @@ export class Camera {
      * @returns The corresponding coordinates on the map.
      */
     public pixelsToUnits(pixels: Vector2): Vector2 {
+        // Get the center of the screen in pixels
         const CENTER_PIXELS: Vector2 = new Vector2(
             App.CANVAS.width / 2,
             App.CANVAS.height / 2
         );
 
+        // Get the difference between the center and the pixels specified
         const differencePixels: Vector2 = pixels.subtract(CENTER_PIXELS);
-        differencePixels.y *= -1; // account for canvas starting from top left corner
+        differencePixels.y *= -1; // Account for canvas  coordinates starting from top left corner
         let differenceUnits: Vector2;
 
+        /* Calculate the difference between the coordinates of the map at the center
+        of the screen and the coordinates of the map at the specified pixels.
+        Adjust based on whether the viewport is isometric or top-down
+        */
         if (this.isometric) {
             const ISOMETRIC_DIFFERENCE_PIXELS: Vector2 = new Vector2(
                 Math.sqrt(3) / 3 * differencePixels.x + differencePixels.y,
@@ -100,15 +110,18 @@ export class Camera {
      * @returns The corresponding location on the screen
      */
     public unitsToPixels(units: Vector2): Vector2 {
+        // Get the center of the screen in pixels
         const CENTER_PIXELS: Vector2 = new Vector2(
             App.CANVAS.width / 2,
             App.CANVAS.height / 2
         );
 
+        // Get the difference between the center of the viewport and the specified coordinates 
         const DIFFERENCE_UNITS: Vector2 = units.subtract(this._center);
-
         let differencePixels: Vector2
 
+        /* Calculate the difference between the center of the screen and the pixel coordinates
+        of the coordinates of the map. Adjust based on whether the viewport is isometric or not */
         if (this.isometric) {
             //
             const ISOMETRIC_DIFFERENCE_PIXELS = DIFFERENCE_UNITS.multiply(this._pixelsPerUnits);
@@ -120,7 +133,7 @@ export class Camera {
             differencePixels = DIFFERENCE_UNITS.multiply(this._pixelsPerUnits);
         }
 
-        differencePixels.y *= -1;
+        differencePixels.y *= -1; // Account for canvas  coordinates starting from top left corner
 
         return CENTER_PIXELS.add(differencePixels);
     }
@@ -130,7 +143,8 @@ export class Camera {
      * @param nextScale The zoom factor to zoom into.
      */
     public createZoomAnimation(nextScale: number): void {
-        if (this.zoomAnimation != null || this.moveAnimation != null) return;
+        // Don't create new animation if already animating
+        if (this.isAnimating()) return;
 
         this.zoomAnimation = new Camera.ZoomAnimation(
             this.pixelsPerUnit,
@@ -142,12 +156,13 @@ export class Camera {
 
     /** Updates the viewport according to the zoom animation. */
     public animateZoom(): void {
+        // Make sure zoom animation exist
         if (this.zoomAnimation == null) return;
 
-        assert (this.zoomAnimation != null);
-
+        // Adjust zoom level
         this._pixelsPerUnits = this.zoomAnimation.next();
 
+        // Delete zoom animation if completed
         if (this.zoomAnimation.isCompleted()) {
             this.zoomAnimation = null;
         }
@@ -159,7 +174,8 @@ export class Camera {
      * @param nextScale The zoom factor to zoom into.
      */
     public createMoveAnimation(nextCenter: Vector2, nextScale: number): void {
-        if (this.zoomAnimation != null || this.moveAnimation != null) return;
+        // Don't create new animation if already animating
+        if (this.isAnimating()) return;
 
         this.moveAnimation = new Camera.MoveAnimation(
             this._center,
@@ -173,13 +189,13 @@ export class Camera {
 
     /** Updates the viewport according to the move animation. */
     public animateMove(): void {
+        // Make sure move animation exists
         if (this.moveAnimation == null) return;
 
-        assert (this.moveAnimation != null);
+        // Adjust viewport center & zoom
+        [this._center, this._pixelsPerUnits] = this.moveAnimation.next();
 
-        this._pixelsPerUnits = this.moveAnimation.nextZoom();
-        this._center = this.moveAnimation.nextPosition();
-
+        // Delete move animation if completed
         if (this.moveAnimation.isCompleted()) {
             this.moveAnimation = null;
         }
@@ -218,7 +234,7 @@ export class Camera {
      * @returns True if animating, false otherwise.
      */
     public isAnimating(): boolean {
-        return this.zoomAnimation != null && this.moveAnimation != null;
+        return this.zoomAnimation != null || this.moveAnimation != null;
     }
 
     /** Gets the center of the viewport. */
@@ -238,9 +254,9 @@ export class Camera {
 
     /** Handles a zoom animation. */
     private static ZoomAnimation = class {
-        private completed: boolean = false;
-        private readonly TOTAL_ANIMATED_TICKS: number;
-        private readonly FINAL_TICK: number;
+        private completed: boolean = false; // Store whether animation is complete or not.
+        private readonly TOTAL_ANIMATED_TICKS: number; // Store total length of animation in ticks (can be decimal)
+        private readonly FINAL_TICK: number; // Store final tick of animation
         private currentTick: number = 0;
 
         /**
@@ -265,16 +281,19 @@ export class Camera {
          * @returns The next zoom scale in the animation.
          */
         public next(): number {
+            // Don't animate if animation is complete
             if (this.completed) {
-                throw new Error("animation already completed");
+                throw new Error("Zoom animation already completed");
             }
 
+            // Tick and check if completed. If so, return final scale
             this.currentTick++;
             if (this.currentTick == this.FINAL_TICK) {
                 this.completed = true;
                 return this.NEXT_SCALE;
             }
 
+            // Use linear interpolation and ease function to determine next scale
             const a: number = (this.NEXT_SCALE - this.CURRENT_SCALE) / this.TOTAL_ANIMATED_TICKS;
             const c: number = this.CURRENT_SCALE;
 
@@ -294,10 +313,10 @@ export class Camera {
     private static MoveAnimation = class {
         private readonly ZOOM_ANIMATION: InstanceType<typeof Camera.ZoomAnimation>;
 
+        private completed: boolean = false; // Store whether animation is complete or not.
+        private readonly TOTAL_ANIMATED_TICKS: number; // Store total length of animation in ticks (can be decimal)
+        private readonly FINAL_TICK: number; // Store final tick of animation
         private currentTick: number = 0;
-        private readonly TOTAL_ANIMATED_TICKS: number;
-        private readonly FINAL_TICK: number;
-        private completed: boolean = false;
 
         /**
          * Initializes movement animation.
@@ -316,6 +335,7 @@ export class Camera {
             duration: number = 1,
             TPS: number = 60
         ) {
+            // Create zoom animation
             this.ZOOM_ANIMATION = new Camera.ZoomAnimation(
                 this.CURRENT_SCALE,
                 this.NEXT_SCALE,
@@ -328,38 +348,34 @@ export class Camera {
         }
 
         /**
-         * Gets the next zoom scale.
-         * @returns The next zoom scale in the animation.
+         * Gets the next center and zoom scale.
+         * @returns A tuple containing the next center and zoom scale.
          */
-        public nextZoom(): number {
-            return this.ZOOM_ANIMATION.next();
-        }
-
-        /**
-         * Gets the next center of the viewport.
-         * @returns The next center of the viewport.
-         */
-        public nextPosition(): Vector2 {
+        public next(): [Vector2, number] {
+            // Don't animate if animation is complete
             if (this.completed) {
-                throw new Error("animation already completed");
+                throw new Error("Move animation already completed");
             }
 
+            // Tick and check if completed. If so, return final center of viewport & final scale
             this.currentTick++;
             if (this.currentTick == this.FINAL_TICK) {
                 this.completed = true;
-                return this.NEXT_CENTER;
+                return [this.NEXT_CENTER, this.ZOOM_ANIMATION.next()];
             }
 
+            // Use linear interpolation & ease function to determine next center
             const ax: number = (this.NEXT_CENTER.x - this.CURRENT_CENTER.x) / this.TOTAL_ANIMATED_TICKS;
             const cx: number = this.CURRENT_CENTER.x;
 
             const ay: number = (this.NEXT_CENTER.y - this.CURRENT_CENTER.y) / this.TOTAL_ANIMATED_TICKS;
             const cy: number = this.CURRENT_CENTER.y;
 
-            return new Vector2(
+            // Return next center and next zoom scale based on zoom animation
+            return [new Vector2(
                 ax * ease(this.currentTick, 0, this.TOTAL_ANIMATED_TICKS) + cx,
                 ay * ease(this.currentTick, 0, this.TOTAL_ANIMATED_TICKS) + cy
-            );
+            ), this.ZOOM_ANIMATION.next()];
         }
         
         /**

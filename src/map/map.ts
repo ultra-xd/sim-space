@@ -13,8 +13,11 @@ import { assert } from "../util/util.js";
  * Represents the game map, which is a grid of cells.
  */
 export class GameMap {
+    // Create 2D array of all cells
     private readonly _CELLS: Cell[][];
-    private readonly _OCCUPIED_CELLS: ArrayList<Vector2> = new ArrayList<Vector2>();
+
+    // Create ArrayList of all cells that have a facility on them
+    private readonly _OCCUPIED_CELLS: ArrayList<Vector2> = new ArrayList<Vector2>(); 
 
     // The width of the road and the road lines in the game map, in units
     private static readonly _ROAD_WIDTH: number = 0.3;
@@ -31,14 +34,13 @@ export class GameMap {
         private readonly _WIDTH: number, 
         private readonly _HEIGHT: number
     ) {
+        // Fill all elements of 2D of cells with empty cells
         this._CELLS = new Array<Cell[]>(this.height);
         for (let y: number = 0; y < this.height; y++) {
-            const CELL_ROW: Cell[] = new Array<Cell>(this.width);
-            for (let x: number = 0; x < CELL_ROW.length; x++) {
-                CELL_ROW[x] = new Cell(this.GAME, x, y, null);
+            this._CELLS[y] = new Array<Cell>(this.width);
+            for (let x: number = 0; x < this._CELLS[y].length; x++) {
+                this._CELLS[y][x] = new Cell(this._GAME, x, y, null);
             }
-
-            this._CELLS[y] = CELL_ROW;
         }
     }
 
@@ -48,6 +50,7 @@ export class GameMap {
      * @returns True if found, false otherwise.
      */
     public containsType(facilityType: FacilityType): boolean {
+        // Iterate through all occupied cells and determine if facility matches facility type
         for (let i: number = 0; i < this._GAME.MAP.OCCUPIED_CELLS.length; i++) {
             const COORDINATES: Vector2 = this._GAME.MAP.OCCUPIED_CELLS.get(i);
 
@@ -65,6 +68,7 @@ export class GameMap {
      * @returns True if found more than once, false otherwise.
      */
     public containsMultipleOfType(facilityType: FacilityType): boolean {
+        // Iterate through all occupied cells and determine if facility is found twice
         let found: boolean = false;
         for (let i: number = 0; i < this._GAME.MAP.OCCUPIED_CELLS.length; i++) {
             const COORDINATES: Vector2 = this._GAME.MAP.OCCUPIED_CELLS.get(i);
@@ -84,6 +88,7 @@ export class GameMap {
      * @returns True if all facility types are found, false otherwise.
      */
     public containsTypes(facilityTypes: FacilityType[]): boolean {
+        // Iterate through all facility types and determine if the map contains that facility type
         for (let i: number = 0; i < facilityTypes.length; i++) {
             if (!this.containsType(facilityTypes[i])) {
                 return false;
@@ -99,6 +104,7 @@ export class GameMap {
      * @returns True if found, false otherwise.
      */
     public containsSector(facilitySector: FacilitySector): boolean {
+        // Iterate through all occupied cells and determine if facility matches facility sector
         for (let i: number = 0; i < this._GAME.MAP.OCCUPIED_CELLS.length; i++) {
             const COORDINATES: Vector2 = this._GAME.MAP.OCCUPIED_CELLS.get(i);
 
@@ -116,6 +122,7 @@ export class GameMap {
      * @returns True if all facility sectors are found, false otherwise.
      */
     public containsSectors(facilitySectors: FacilitySector[]): boolean {
+        // Iterate through all facility types and determine if the map contains that facility sectors
         for (let i: number = 0; i < facilitySectors.length; i++) {
             if (!this.containsSector(facilitySectors[i])) {
                 return false;
@@ -137,7 +144,10 @@ export class GameMap {
         maxDistance: number, 
         handleCondition: (coordinates: Vector2) => boolean,
     ): boolean {
+        // Create queue to store all cells
         const QUEUE: Queue<[Vector2, number]> = new Queue<[Vector2, number]>();
+
+        // Track which coordinates have been visited or not
         const VISITED: boolean[][] = new Array<boolean[]>(this.height);
 
         for (let i: number = 0; i < this.height; i++) {
@@ -148,9 +158,11 @@ export class GameMap {
             }
         }
 
+        // Queue the starting position
         QUEUE.enqueue([start, 0]);
         VISITED[start.y][start.x] = true;
 
+        // Create tuple of all neighbouring coordinates relative to one cell
         const NEIGHBOURS: [Vector2, Vector2, Vector2, Vector2] = [
             Vector2.I_UNIT,
             Vector2.J_UNIT,
@@ -159,24 +171,31 @@ export class GameMap {
         ];
 
         while (!QUEUE.isEmpty()) {
+            // Get cell & distance
             const [COORDINATES, DISTANCE]: [Vector2, number] = QUEUE.dequeue()!;
             assert (COORDINATES != null && DISTANCE != null);
 
+            // Handle the cell
             if (handleCondition(COORDINATES)) {
                 return true;
             }
 
+            // Track new distance and exit if the distance is too far
             const NEW_DISTANCE: number = DISTANCE + 1;
             if (NEW_DISTANCE > maxDistance) {
                 continue;
             }
 
+            // Iterate through all neighbours
             for (let i: number = 0; i < NEIGHBOURS.length; i++) {
+                // Get neighbouring cells
                 const NEIGHBOUR: Vector2 = COORDINATES.add(NEIGHBOURS[i]);
 
+                // Exit if the neighbouring cell has been visited or is out of bounds
                 if (!this.inBounds(NEIGHBOUR)) continue;
                 if (VISITED[NEIGHBOUR.y][NEIGHBOUR.x]) continue;
 
+                // Queue the neighbour coordinates
                 VISITED[NEIGHBOUR.y][NEIGHBOUR.x] = true;
                 QUEUE.enqueue([NEIGHBOUR, NEW_DISTANCE]);
             }
@@ -240,8 +259,10 @@ export class GameMap {
      * @returns An array of 2D vectors containing all of the coordinates of all facilities that are of the specified type.
      */
     public getAllOfType(facilityType: FacilityType): Vector2[] {
+        // Create new ArrayList storing all coordinates with specified facility type
         const LIST: ArrayList<Vector2> = new ArrayList<Vector2>();
 
+        // Iterate through all occupied cells and add to list if matches facility type
         for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
             const COORDINATES: Vector2 = this._OCCUPIED_CELLS.get(i);
             if (this.getCell(COORDINATES).facilityType == facilityType) {
@@ -258,8 +279,10 @@ export class GameMap {
      * @returns An array of 2D vectors containing all of the coordinates of all facilities that are of the specified sector.
      */
     public getAllOfSector(facilitySector: FacilitySector): Vector2[] {
+        // Create new ArrayList storing all coordinates with specified facility sector
         const LIST: ArrayList<Vector2> = new ArrayList<Vector2>();
 
+        // Iterate through all occupied cells and add to list if matches facility type
         for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
             const COORDINATES: Vector2 = this._OCCUPIED_CELLS.get(i);
             if (this.getCell(COORDINATES).facilitySector == facilitySector) {
@@ -277,8 +300,10 @@ export class GameMap {
      * @returns True if the facility was built, false otherwise.
      */
     public build<T extends FacilityClass>(FacilityClass: T, coordinates: Vector2): boolean {
+        // Get the cell
         const CELL: Cell = this._CELLS[coordinates.y][coordinates.x];
 
+        // Build the facility if possible
         if (CELL.canBuild(FacilityClass.FACILITY_SECTOR)) {
             CELL.facility = new FacilityClass(this.GAME);;
             this._OCCUPIED_CELLS.add(coordinates);
@@ -291,6 +316,7 @@ export class GameMap {
 
     /** Distributes all of the power from all power plants. */
     public redistributePower(): void {
+        // Reset all of the power
         for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
             const FACILITY: Facility | null = this.getCell(this._OCCUPIED_CELLS.get(i)).facility;
             assert (FACILITY != null);
@@ -298,6 +324,7 @@ export class GameMap {
             FACILITY.powerAvailable = 0;
         }
 
+        // Find all power plants and distribute their power
         for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
             const COORDINATES: Vector2 = this._OCCUPIED_CELLS.get(i);
             const FACILITY: Facility | null = this.getCell(COORDINATES).facility;
@@ -315,10 +342,14 @@ export class GameMap {
      * @returns True if the facility was removed, false otherwise.
      */
     public destroy(coordinates: Vector2): boolean {
+        // Get the Cell
         const CELL: Cell = this._CELLS[coordinates.y][coordinates.x];
+
+        // Destory facility on cell
         if (CELL.canDestroy()) {
             CELL.facility = null;
             
+            // Remove the facility from occupied cell
             for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
                 if (this._OCCUPIED_CELLS.get(i).equals(coordinates)) {
                     this._OCCUPIED_CELLS.delete(i);
@@ -340,6 +371,7 @@ export class GameMap {
      * @param camera The camera to determine the view point.
      */
     public draw(canvas: Canvas, camera: Camera): void {
+        // Get the bounds on the game map by taking the corners of the screen
         const TOP_LEFT_COORDS: Vector2 = camera.pixelsToUnits(new Vector2(0, 0));
         const TOP_RIGHT_COORDS: Vector2 = camera.pixelsToUnits(new Vector2(canvas.width, 0));
         const BOTTOM_LEFT_COORDS: Vector2 = camera.pixelsToUnits(new Vector2(0, canvas.height));
@@ -373,7 +405,7 @@ export class GameMap {
             BOTTOM_RIGHT_COORDS.y
         ));
 
-        // draw vertical lines
+        // Draw vertical lines for roads
         for (let i: number = Math.max(0, MIN_X); i <= Math.min(MAX_X, this.width); i++) {
             canvas.drawLine(
                 camera.unitsToPixels(new Vector2(i, 0)),
@@ -383,7 +415,7 @@ export class GameMap {
             );
         }
 
-        // draw horizontal lines
+        // Draw horizontal lines for roads
         for (let i: number = Math.max(0, MIN_Y); i <= Math.min(MAX_Y, this.height); i++) {
             canvas.drawLine(
                 camera.unitsToPixels(new Vector2(0, i)),
@@ -393,7 +425,7 @@ export class GameMap {
             );
         }
 
-        // draw vertical lines
+        // Draw vertical lines for road dash lines
         for (let i: number = Math.max(0, MIN_X); i <= (Math.min(MAX_X, this.width)); i++) {
             canvas.drawLine(
                 camera.unitsToPixels(new Vector2(i, 0)),
@@ -403,7 +435,7 @@ export class GameMap {
             );
         }
 
-        // draw horizontal lines
+        // Draw horizontal lines for road dash lines
         for (let i: number = Math.max(0, MIN_Y); i <= (Math.min(MAX_Y, this.height)); i++) {
             canvas.drawLine(
                 camera.unitsToPixels(new Vector2(0, i)),
@@ -412,7 +444,8 @@ export class GameMap {
                 GameMap._ROAD_DASH_WIDTH * camera.pixelsPerUnit
             );
         }
-
+        
+        // Draw the ground of each cell
         for (let i: number = Math.max(0, MIN_Y); i <= (Math.min(MAX_Y, this.height - 1)); i++) {
             const CELL_ROW: Cell[] = this._CELLS[i];
             for (let j: number = Math.max(0, MIN_X); j <= (Math.min(MAX_X, this.width - 1)); j++) {
@@ -433,6 +466,7 @@ export class GameMap {
             );
         }
 
+        // Draw the facilities on each cell
         for (let i: number = Math.max(0, MIN_Y); i <= (Math.min(MAX_Y, this.height - 1)); i++) {
             const CELL_ROW: Cell[] = this._CELLS[i];
             for (let j: number = Math.max(0, MIN_X); j <= (Math.min(MAX_X, this.width - 1)); j++) {
@@ -443,6 +477,7 @@ export class GameMap {
 
     /** Updates the game map and all its cells & facilities. */
     public tick(): void {
+        // Update every cell
         for (let i: number = 0; i < this._CELLS.length; i++) {
             const CELL_ROW: Cell[] = this._CELLS[i];
             for (let j: number = 0; j < CELL_ROW.length; j++) {

@@ -69,59 +69,11 @@ export class PowerPlant extends EssentialServicesFacility {
         
     }
     
-    /** Uses BFS to distribute power to the closest facilities. */
+    /** 
+     * Uses BFS to distribute power to the closest facilities. 
+     * @param coordinates The coordinates of the facility to start at
+     */
     public distributePower(coordinates: Vector2): void {
-        // const QUEUE: Queue<Vector2> = new Queue<Vector2>();
-        // let powerAvailable: number = PowerPlant._POWER_PRODUCED;
-
-        // const VISITED: boolean[][] = new Array<boolean[]>(this.GAME.MAP.height);
-        // for (let i: number = 0; i < this.GAME.MAP.height; i++) {
-        //     VISITED[i] = new Array<boolean>(this.GAME.MAP.width);
-        //     for (let j: number = 0; j < this.GAME.MAP.width; j++) {
-        //         VISITED[i][j] = false;
-        //     }
-        // }
-
-        // const NEIGHBOURS: [Vector2, Vector2, Vector2, Vector2] = [
-        //      Vector2.I_UNIT,
-        //      Vector2.J_UNIT,
-        //      Vector2.I_UNIT.multiply(-1),
-        //      Vector2.J_UNIT.multiply(-1)
-        // ];
-
-        // QUEUE.enqueue(coordinates);
-        // VISITED[coordinates.y][coordinates.x] = true;
-
-        // while (!QUEUE.isEmpty()) {
-        //     const COORDINATES: Vector2 = QUEUE.dequeue()!;
-        //     assert (COORDINATES != null);
-
-        //     for (let i: number = 0; i < NEIGHBOURS.length; i++) {
-        //         let NEIGHBOUR: Vector2 = COORDINATES.add(NEIGHBOURS[i]);
-                
-        //         if (!this.GAME.MAP.inBounds(NEIGHBOUR)) continue;
-        //         if (VISITED[NEIGHBOUR.y][NEIGHBOUR.x]) continue;
-
-        //         VISITED[NEIGHBOUR.y][NEIGHBOUR.x] = true;
-                
-        //         const FACILITY: Facility | null = this.GAME.MAP.getCell(NEIGHBOUR).facility;
-
-        //         if (FACILITY == null) {
-        //             QUEUE.enqueue(NEIGHBOUR);
-        //         } else {
-        //             const USED_POWER: number = (FACILITY.constructor as typeof Facility).POWER_COST - FACILITY.powerAvailable;
-        //             if (USED_POWER < powerAvailable) {
-        //                 FACILITY.powerAvailable = (FACILITY.constructor as typeof Facility).POWER_COST;
-        //                 powerAvailable -= USED_POWER;
-        //                 QUEUE.enqueue(NEIGHBOUR);
-        //             } else {
-        //                 FACILITY.powerAvailable = powerAvailable;
-        //                 return;
-        //             }
-        //         }
-        //     }
-        // }
-
         let powerAvailable: number = PowerPlant._POWER_PRODUCED;
 
         this.GAME.MAP.BFS(

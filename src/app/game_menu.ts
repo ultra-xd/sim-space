@@ -155,20 +155,27 @@ export class GameMenu {
             this.game.gameState = GameState.DESTROY;
         };
 
+        // Handle event listener of continue button in pause menu, which continues game
         GameMenu.PAUSED_CONTINUE_BUTTON.onclick = () => {
+            // Change game state to standard viewing
             this.game.gameState = GameState.STANDARD;
         }
 
+        // Handle event listener of menu buttons, which returns user back to start menu
         GameMenu.PAUSED_MENU_BUTTON.onclick = () => {
+            // Change app state back to start menu
             App.changeAppState(AppState.START_MENU);
         }
 
         GameMenu.END_MENU_BUTTON.onclick = () => {
+            // Change app state back to start menu
             App.changeAppState(AppState.START_MENU);
         }
 
         // Create all buttons for construction in the building button dropdown
         this.createFacilityButtons();
+
+        // Reset UI back to standard viewing
         GameMenu.switchUI(GameState.STANDARD);
     }
     
@@ -177,15 +184,12 @@ export class GameMenu {
      * @param facility The facility whose info is displayed.
      */
     public static showFacilityInfo(facility: Facility): void {
+        // Showing information of facility
         GameMenu.FACILITY_NAME_PARAGRAPH.innerText = (facility.constructor as typeof Facility).NAME;
-
         GameMenu.FACILITY_AGE_SPAN.innerText = String(facility.age);
-
         GameMenu.FACILITY_POWER_AVAILABLE_SPAN.innerText = String(facility.powerAvailable);
-
         GameMenu.FACILITY_POWER_COST_SPAN.innerText = String((facility.constructor as typeof Facility).POWER_COST);
-
-        GameMenu.FACILITY_TAX_REVENUE_SPAN.innerText = Intl.NumberFormat(
+        GameMenu.FACILITY_TAX_REVENUE_SPAN.innerText = Intl.NumberFormat( // Format as money
             "en-US",
             {
                 style: "currency",
@@ -193,7 +197,7 @@ export class GameMenu {
             }
         ).format(facility.taxRevenue);
 
-        GameMenu.FACILITY_MAINTENANCE_COST_SPAN.innerText = Intl.NumberFormat(
+        GameMenu.FACILITY_MAINTENANCE_COST_SPAN.innerText = Intl.NumberFormat( // Format as money
             "en-US",
             {
                 style: "currency",
@@ -203,26 +207,31 @@ export class GameMenu {
 
         GameMenu.FACILITY_POLLUTION_SPAN.innerText = String(facility.pollution);
 
+        // Show sprite of facility, in isometric view
         GameMenu.FACILITY_INFO_SPRITE.src = facility.getSprite(true).src;
 
         let additionalInfoText: string = "";
 
+        // Show populations of facility if residential
         if (facility.FACILITY_SECTOR == FacilitySector.RESIDENTIAL) {
             additionalInfoText += `Population: ${(facility as ResidentialFacility).population}\n`;
             additionalInfoText += `Happy Population: ${(facility as ResidentialFacility).happyPopulation}\n`;
             additionalInfoText += `Content Population: ${(facility as ResidentialFacility).contentPopulation}\n`;
         }
 
+        // Show power produced if power plant
         if (facility.FACILITY_TYPE == FacilityType.POWER) {
             additionalInfoText += `Power Produced: ${PowerPlant.POWER_PRODUCED}\n`;
         }
 
+        // Show pollution reduction if environment
         if (facility.FACILITY_TYPE == FacilityType.ENVIRONMENT) {
             additionalInfoText += `Pollution Reduced: ${EnvironmentalFacility.MAX_POLLUTION_REDUCTION}\n`;
         }
 
         GameMenu.FACILITY_ADDITIONAL_INFO.innerText = additionalInfoText;
 
+        // Show info box
         if (!GameMenu.FACILITY_INFO_DIV.classList.contains("show")) {
             GameMenu.FACILITY_INFO_DIV.classList.add("show");
         }
@@ -286,6 +295,7 @@ export class GameMenu {
         TITLE.appendChild(TITLE_TEXT);
         BUTTON.appendChild(TITLE);
 
+        // Show cost of facility to build
         const COST: HTMLParagraphElement = document.createElement("p");
         const COST_TEXT: Text = document.createTextNode(Intl.NumberFormat(
             "en-US",
@@ -305,8 +315,8 @@ export class GameMenu {
             GameMenu.CONSTRUCTION_BUILD_BUTTON.classList.remove("active");
 
             // Set the game state to build and set the selected facility
-            this.game.gameState = GameState.BUILD;
             this.game.setSelectedFacility(FacilityClass);
+            this.game.gameState = GameState.BUILD;
         });
 
         return BUTTON;
@@ -368,14 +378,15 @@ export class GameMenu {
 
     /** Handles all that appear in the bottom right corner of the screen. */
     public static NotificationManager = class {
-        private static readonly NOTIFICATION_QUEUE: Queue<string> = new Queue<string>();
-        private static readonly NOTIFICATION_LENGTH: number = 3;
-        private static readonly COOLDOWN_LENGTH: number = 1;
+        private static readonly NOTIFICATION_QUEUE: Queue<string> = new Queue<string>(); // Create queue to store all notifications
+        private static readonly NOTIFICATION_LENGTH: number = 3; // Store length that notifications are shown on screen in seconds
+        private static readonly COOLDOWN_LENGTH: number = 1; // Store length between each notification
         private static tickCycle: number = 0;
 
-        private static showing: boolean = false;
-        private static inCycle: boolean = false;
+        private static showing: boolean = false; // Store if a notification is being display on screen
+        private static inCycle: boolean = false; // Store if notifications are being cycled in the queue
 
+        // Store elements displaying the notification
         private static readonly NOTIFICATION_DIV: HTMLDivElement = document.getElementById("notification-box") as HTMLDivElement;
         private static readonly NOTIFICATION_PARAGRAPH: HTMLParagraphElement = document.getElementById("notification-text") as HTMLParagraphElement;
         
@@ -384,6 +395,7 @@ export class GameMenu {
          * @param message The message to display to the screen.
          */
         public static createNotification(message: string): void {
+            // Enqueuethe message into the notification queue
             GameMenu.NotificationManager.NOTIFICATION_QUEUE.enqueue(message);
         }
 
@@ -392,6 +404,7 @@ export class GameMenu {
             if (GameMenu.NotificationManager.inCycle) {
                 GameMenu.NotificationManager.tickCycle++;
 
+                // Hide notification if it is showing and it should be hidden
                 if (
                     GameMenu.NotificationManager.showing &&
                     GameMenu.NotificationManager.tickCycle / App.TPS >= GameMenu.NotificationManager.NOTIFICATION_LENGTH
@@ -399,11 +412,13 @@ export class GameMenu {
                     GameMenu.NotificationManager.hideNotification();
                 }
 
+                // Reset notification cycle if at end of queue
                 if (GameMenu.NotificationManager.tickCycle / App.TPS >= GameMenu.NotificationManager.NOTIFICATION_LENGTH + GameMenu.NotificationManager.COOLDOWN_LENGTH) {
                     GameMenu.NotificationManager.inCycle = false;
                     GameMenu.NotificationManager.tickCycle = 0;
                 }
             } else {
+                // Show new notification if it can
                 if (!GameMenu.NotificationManager.NOTIFICATION_QUEUE.isEmpty()) {
                     GameMenu.NotificationManager.showNotification();
                 }
@@ -412,14 +427,18 @@ export class GameMenu {
 
         /** Updates the notification message shows the notification box on screen. */
         public static showNotification(): void {
+            // Get the oldest notification message
             const NOTIFICATION_MESSAGE: string | null = GameMenu.NotificationManager.NOTIFICATION_QUEUE.dequeue();
             assert (NOTIFICATION_MESSAGE != null);
 
+            // Update cycle information
             GameMenu.NotificationManager.showing = true;
             GameMenu.NotificationManager.inCycle = true;
 
+            // Update notification text
             GameMenu.NotificationManager.NOTIFICATION_PARAGRAPH.innerText = NOTIFICATION_MESSAGE;
 
+            // Show notification box
             if (!GameMenu.NotificationManager.NOTIFICATION_DIV.classList.contains("show")) {
                 GameMenu.NotificationManager.NOTIFICATION_DIV.classList.add("show");
             }
@@ -427,8 +446,10 @@ export class GameMenu {
 
         /** Hides the notification box from the screen. */
         public static hideNotification(): void {
+            // Update cycle information
             GameMenu.NotificationManager.showing = false;
 
+            // Hide notification box
             if (GameMenu.NotificationManager.NOTIFICATION_DIV.classList.contains("show")) {
                 GameMenu.NotificationManager.NOTIFICATION_DIV.classList.remove("show");
             }

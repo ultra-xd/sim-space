@@ -1,6 +1,8 @@
 import { Vector2 } from "../data_structures/vector.js";
 import { assert } from "../util/util.js";
 
+type ImageMap = Map<string, HTMLImageElement>;
+
 /** Class to store canvas and handle its methods */
 export class Canvas {
     private readonly CANVAS_ELEMENT: HTMLCanvasElement;
@@ -11,7 +13,10 @@ export class Canvas {
      * @param canvasId The ID of the HTML element of the canvas.
      */
     public constructor(canvasId: string) {
+        // Get HTML element of canvas
         this.CANVAS_ELEMENT = document.getElementById(canvasId) as HTMLCanvasElement;
+
+        // Get rendering context of canvas
         this.CANVAS_CTX = this.CANVAS_ELEMENT.getContext("2d") as CanvasRenderingContext2D;
     }
 
@@ -44,13 +49,16 @@ export class Canvas {
         colour: string,
         width: number
     ): void {
+        // Draw line
         this.CANVAS_CTX.beginPath();
         this.CANVAS_CTX.moveTo(start.x, start.y);
         this.CANVAS_CTX.lineTo(end.x, end.y);
 
+        // Adjust line colour and width
         this.CANVAS_CTX.strokeStyle = colour;
         this.CANVAS_CTX.lineWidth = width;
 
+        // Display on canvas
         this.CANVAS_CTX.stroke();
     }
 
@@ -65,18 +73,23 @@ export class Canvas {
         colour: string,
         width: number
     ): void {
-        assert (points.length >= 2, "too little points");
+        // Cannot draw lines if there are less than two points
+        assert (points.length >= 2, "Too little points");
 
+        // Start at first point
         this.CANVAS_CTX.beginPath();
         this.CANVAS_CTX.moveTo(points[0].x, points[0].y);
 
+        // Draw lines to next points
         for (let i: number = 1; i < points.length; i++) {
             this.CANVAS_CTX.lineTo(points[i].x, points[i].y);
         }
 
+        // Set line colour & width
         this.CANVAS_CTX.strokeStyle = colour;
         this.CANVAS_CTX.lineWidth = width;
 
+        // Display on canvas
         this.CANVAS_CTX.stroke();
     }
 
@@ -89,17 +102,25 @@ export class Canvas {
         points: Vector2[],
         colour: string,
     ): void {
+        // Polygons with less than 3 vertices don't exist: check
         assert (points.length >= 3, "too little points");
+
+        // Move to first vertex
         this.CANVAS_CTX.beginPath();
         this.CANVAS_CTX.moveTo(points[0].x, points[0].y);
 
+        // Draw line
         for (let i: number = 1; i < points.length; i++) {
             this.CANVAS_CTX.lineTo(points[i].x, points[i].y);
         }
 
+        // Close the polygon (return to first point)
         this.CANVAS_CTX.closePath();
+
+        // Adjust colour
         this.CANVAS_CTX.fillStyle = colour;
 
+        // Fill polygon
         this.CANVAS_CTX.fill();
     }
 
@@ -116,6 +137,7 @@ export class Canvas {
         width: number,
         height: number,
     ): void {
+        // Draw image at specified coordinates and size
         this.CANVAS_CTX.drawImage(
             image,
             center.x - width / 2,
@@ -140,9 +162,11 @@ export class Canvas {
         colour: string,
         lineWidth: number
     ): void {
+        // Adjust border width and colour
         this.CANVAS_CTX.strokeStyle = colour;
         this.CANVAS_CTX.lineWidth = lineWidth;
         
+        // Draw rectangle at specified size and coordinates
         this.CANVAS_CTX.strokeRect(
             center.x - width / 2,
             center.y - height / 2,
@@ -164,8 +188,10 @@ export class Canvas {
         height: number,
         colour: string
     ): void {
+        // Adjust colour
         this.CANVAS_CTX.fillStyle = colour;
 
+        // Fill in rectangle at specified coordinates and size
         this.CANVAS_CTX.fillRect(
             center.x - width / 2,
             center.y - height / 2,
@@ -191,7 +217,8 @@ export class Canvas {
 
     /** Class to manage all images drawn on canvas. */
     public static readonly ImageLoader = class {
-        private static IMAGES: {[src: string]: HTMLImageElement} = {};
+        // Stores the sources of the images and their respective HTML image element
+        private static IMAGES: ImageMap = new Map<string, HTMLImageElement>();
 
         /**
          * Gets an image based off of its source.
@@ -199,9 +226,13 @@ export class Canvas {
          * @returns The HTMLImageElement corresponding to the source.
          */
         public static getImage(src: string): HTMLImageElement {
+            // Load the image first, if not already loaded
             this.loadImage(src);
-            
-            return Canvas.ImageLoader.IMAGES[src];
+
+            // Get and return image
+            const IMAGE: HTMLImageElement | undefined = Canvas.ImageLoader.IMAGES.get(src);
+            assert (IMAGE != null, "Image doesn't exist");
+            return IMAGE;
         }
 
         /**
@@ -209,13 +240,15 @@ export class Canvas {
          * @param src The source of the image
          */
         public static loadImage(src: string): void {
-            if (Canvas.ImageLoader.IMAGES[src]) {
+            // Don't load a new image if it already exists
+            if (Canvas.ImageLoader.IMAGES.get(src)) {
                 return;
             }
 
+            // Create and store the image
             const IMAGE: HTMLImageElement = new Image();
             IMAGE.src = src;
-            Canvas.ImageLoader.IMAGES[src] = IMAGE;
+            Canvas.ImageLoader.IMAGES.set(src, IMAGE);
         }
 
         /**
@@ -223,6 +256,7 @@ export class Canvas {
          * @param srcs An array containing all the sources of the image.
          */
         public static loadImages(srcs: string[]): void {
+            // Load all images in array
             for (let i: number = 0; i < srcs.length; i++) {
                 Canvas.ImageLoader.loadImage(srcs[i]);
             }
