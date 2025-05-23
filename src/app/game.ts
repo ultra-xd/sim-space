@@ -34,7 +34,7 @@ export class Game {
     // Create game map, menu and camera
     private readonly _MAP: GameMap = new GameMap(this, Game.MAP_WIDTH, Game.MAP_HEIGHT);
     private readonly _CAMERA: Camera = new Camera(this);
-    private readonly GAME_MENU: GameMenu = new GameMenu(this);
+    private readonly _GAME_MENU: GameMenu = new GameMenu(this);
 
     // Set base stats of the game
     private _population: number = 0;
@@ -42,7 +42,6 @@ export class Game {
     private _contentedPopulation: number = 0;
     private _money: number = 5_000_000_000;
     private _ticks: number = 0;
-    private _pollution: number = 0;
 
     // Set variables for selecting a cell to build, destroy, get info, etc.
     private _highlightedCell: Vector2 | null = null;
@@ -57,7 +56,7 @@ export class Game {
     private _gameState: GameState = GameState.STANDARD;
 
     // destroying the city yipppiiiieeee
-    private static readonly DEFAULT_GAME_END_PROBABILITY: number = 0.01;
+    private static readonly DEFAULT_GAME_END_PROBABILITY: number = 1;
     private gameEndProbability: number = Game.DEFAULT_GAME_END_PROBABILITY;
     private isGameEnding: boolean = false;
     private static readonly GAME_ENDING_ANIMATION_LENGTH: number = 2;
@@ -68,8 +67,8 @@ export class Game {
 
     /** Creates a new Game. */
     public constructor() {
-        this.GAME_MENU.setup();
-        this.GAME_MENU.updateStatsDisplay();
+        this._GAME_MENU.setup();
+        this._GAME_MENU.updateStatsDisplay();
     }
 
     /** Updates the game once, according to the ticks per second */
@@ -229,7 +228,7 @@ export class Game {
 
         // Update stats display every time month ends
         if (this.monthEnded()) {
-            this.GAME_MENU.updateStatsDisplay();
+            this._GAME_MENU.updateStatsDisplay();
             GameMenu.showFacilityInfo();
             if (!this.isGameEnding && !this._MAP.containsType(FacilityType.DEFENSE)) {
                 const COMPARE: number = this.gameEndProbability * 100;
@@ -297,7 +296,7 @@ export class Game {
      */
     public set money(money: number) {
         this._money = money;
-        this.GAME_MENU.updateStatsDisplay();
+        this._GAME_MENU.updateStatsDisplay();
     }
     
     /** Amount of money the player has. */
@@ -321,9 +320,27 @@ export class Game {
 
     public set population(population: number) {
         this._population = population;
-        this.GAME_MENU.updateStatsDisplay();
+        this._GAME_MENU.updateStatsDisplay();
     }
-    
+
+    public get happyPopulation(): number {
+        return this._happyPopulation;
+    }
+
+    public set happyPopulation(happyPopulation: number) {
+        this._happyPopulation = happyPopulation;
+        this._GAME_MENU.updateStatsDisplay();
+    }
+
+    public set contentedPopulation(contentedPopulation: number) {
+        this._contentedPopulation = contentedPopulation;
+        this._GAME_MENU.updateStatsDisplay();
+    }
+
+    public get contentedPopulation(): number {
+        return this._contentedPopulation;
+    }
+
     /**
      * The number of ticks that have passed since the start of the game.`
      */
@@ -336,7 +353,7 @@ export class Game {
      * Calculated as: (3 x Happy Population + Contented Population) - Pollution
      */
     public get score(): number {
-        return (3 * this._happyPopulation + this._contentedPopulation) - this._pollution;
+        return (3 * this._happyPopulation + this._contentedPopulation) - this.MAP.pollution;
     }
 
     /** The month number. */
@@ -358,7 +375,10 @@ export class Game {
         return this._gameState;
     }
 
-    
+    public get GAME_MENU(): GameMenu {
+        return this._GAME_MENU;
+    }
+
     /**
      * The cell currently highlighted by the mouse.
      */

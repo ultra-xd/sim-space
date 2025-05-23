@@ -218,7 +218,7 @@ export class GameMenu {
             }
         ).format(this._facilityDisplayed.maintenanceCost);
 
-        GameMenu.FACILITY_POLLUTION_SPAN.innerText = String(this._facilityDisplayed.pollution);
+        GameMenu.FACILITY_POLLUTION_SPAN.innerText = this._facilityDisplayed.pollution.toFixed(0);
 
         // Show sprite of facility, in isometric view
         GameMenu.FACILITY_INFO_SPRITE.src = this._facilityDisplayed.getSprite(true).src;
@@ -227,9 +227,17 @@ export class GameMenu {
 
         // Show populations of facility if residential
         if (this._facilityDisplayed.FACILITY_SECTOR == FacilitySector.RESIDENTIAL) {
-            additionalInfoText += `Population: ${(this._facilityDisplayed as ResidentialFacility).population}\n`;
-            additionalInfoText += `Happy Population: ${(this._facilityDisplayed as ResidentialFacility).happyPopulation}\n`;
-            additionalInfoText += `Content Population: ${(this._facilityDisplayed as ResidentialFacility).contentPopulation}\n`;
+            additionalInfoText += `Population: ${
+                (this._facilityDisplayed as ResidentialFacility).population.toFixed(0)
+            }\n`;
+
+            additionalInfoText += `Happy Population: ${
+                (this._facilityDisplayed as ResidentialFacility).happyPopulation.toFixed(0)
+            }\n`;
+
+            additionalInfoText += `Content Population: ${
+                (this._facilityDisplayed as ResidentialFacility).contentPopulation.toFixed(0)
+            }\n`;
         }
 
         // Show power produced if power plant
@@ -375,8 +383,8 @@ export class GameMenu {
             }
         ).format(this.game.money);
         GameMenu.STATS_DATE_PARAGRAPH.innerText = `Month ${this.game.month}`;
-        GameMenu.STATS_POPULATION_SPAN.innerText = String(this.game.population);
-        GameMenu.STATS_SCORE_SPAN.innerText = String(this.game.score);
+        GameMenu.STATS_POPULATION_SPAN.innerText = this.game.population.toFixed(0);
+        GameMenu.STATS_SCORE_SPAN.innerText = this.game.score.toFixed(0);
     }
 
     /** Hides all HTML elements on the game menu. */

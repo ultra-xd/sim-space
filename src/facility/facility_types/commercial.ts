@@ -1,4 +1,5 @@
 import { Facility, FacilitySector, FacilityType } from "../facility.js";
+import { Cell } from "../../map/cell.js";
 import { Vector2 } from "../../data_structures/vector.js";
 
 export abstract class CommercialFacility extends Facility {
@@ -7,66 +8,39 @@ export abstract class CommercialFacility extends Facility {
     protected static readonly _BASE_MAINTENANCE_COST : number;
     protected static readonly _RESIDENTIAL_FACILITY_RADIUS : number = 6;
 
-    public facilityCheck(origin : Vector2) : { residenceWithinSixUnits : boolean, residenceFound : boolean, distanceToNearestResidence : number } {
-        let residenceWithinSixUnits : boolean;
-        let residenceFound : boolean;
-        let distanceToNearestResidence : number = -1;
-
-        //If residential facility is not found within game bounds mark none found
-        //Else, check if the residence is within 6 units
-        if (!this.GAME.MAP.BFS(origin,this.GAME.MAP.width + this.GAME.MAP.height,(coordinates : Vector2) : boolean => {
-            const CELL = this.GAME.MAP.getCell(coordinates);
-                return CELL.facilitySector == FacilitySector.RESIDENTIAL
-            })
-        ) {
-            residenceFound = false;
-            residenceWithinSixUnits = false;
-        }
-        else {
-            residenceFound = true;
-            //If not within rad of 6
-            if (!this.GAME.MAP.BFS(origin,CommercialFacility._RESIDENTIAL_FACILITY_RADIUS,(coordinates : Vector2, distance) : boolean => {
-                const CELL = this.GAME.MAP.getCell(coordinates);
-                if (CELL.facilitySector == FacilitySector.RESIDENTIAL) {
-                    distanceToNearestResidence = distance as number;
-                    return true;
+    public facilityCheck(coordinates: Vector2): number {
+        let distanceToNearestResidence: number = Infinity;
+        //If not within rad of 6
+        this.GAME.MAP.BFS(
+            coordinates,
+            this.GAME.MAP.width + this.GAME.MAP.height,
+            (coords: Vector2): boolean => {
+                const DISTANCE: number = Math.abs(coords.x - coordinates.x) + Math.abs(coords.y - coordinates.y);
+                const CELL: Cell = this.GAME.MAP.getCell(coords);
+                if (
+                    CELL.facilitySector == FacilitySector.RESIDENTIAL &&
+                    DISTANCE < distanceToNearestResidence
+                ) {
+                    distanceToNearestResidence = DISTANCE;
                 }
                 return false;
-            })
-            ) {
-                residenceWithinSixUnits = false;
-            } else {
-                residenceWithinSixUnits = true;
             }
-        }
-        return {
-            residenceWithinSixUnits, residenceFound, distanceToNearestResidence
-        };
+        )
+        return distanceToNearestResidence;
     }
-    public override tick(): void {
-        if (this.GAME.monthEnded()) {
-            let residenceFound : boolean = this.facilityCheck(Vector2.I_UNIT).residenceFound;
-            let residenceWithinSixUnits : boolean = this.facilityCheck(Vector2.I_UNIT).residenceWithinSixUnits;
-            let radiustoNearestResident : number = this.facilityCheck(Vector2.I_UNIT).distanceToNearestResidence;
 
-            this._age++;
+    public updateRevenueAndCost(coordinates: Vector2): void {
+        const DISTANCE: number = this.facilityCheck(coordinates);
 
-            //Oh this is just tax revenue btw
-            if (!residenceFound) {
-                this._taxRevenue = 0;
-                this._maintenanceCost = 0;
-            }
-            //FARTHER ffs than r>6
-            else if(!residenceWithinSixUnits) {
-                this._taxRevenue = 6/radiustoNearestResident * CommercialFacility._BASE_TAX_REVENUE;
-                this._maintenanceCost = 6/radiustoNearestResident * CommercialFacility._BASE_MAINTENANCE_COST;
-            }
-            else {
-                this._taxRevenue = CommercialFacility._BASE_TAX_REVENUE;
-                this._maintenanceCost = CommercialFacility._BASE_MAINTENANCE_COST;
-            }
-            this.GAME.money += this._taxRevenue
-            this.GAME.money -= this._maintenanceCost;
+        if (DISTANCE == Infinity) {
+            this._taxRevenue = 0;
+            this._maintenanceCost = 0;
+        } else if (DISTANCE > 6) {
+            this._taxRevenue = 6 / DISTANCE * (this.constructor as typeof CommercialFacility)._BASE_TAX_REVENUE;
+            this._maintenanceCost = 6 / DISTANCE * (this.constructor as typeof CommercialFacility)._BASE_MAINTENANCE_COST;
+        } else {
+            this._taxRevenue = (this.constructor as typeof CommercialFacility)._BASE_TAX_REVENUE;
+            this._maintenanceCost = (this.constructor as typeof CommercialFacility)._BASE_MAINTENANCE_COST;
         }
     }
 }

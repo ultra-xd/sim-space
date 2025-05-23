@@ -8,6 +8,10 @@ import { Queue } from "../data_structures/queue.js";
 import { Camera } from "./camera.js";
 import { ArrayList } from "../data_structures/arraylist.js";
 import { assert } from "../util/util.js";
+import { CommercialFacility } from "../facility/facility_types/commercial.js";
+import { EnvironmentalFacility, Factory } from "../facility/facility_types/industrial.js";
+import { LuxuryHome } from "../facility/facility_types/residential.js";
+import { GameMenu } from "../app/game_menu.js";
 
 /**
  * Represents the game map, which is a grid of cells.
@@ -22,6 +26,8 @@ export class GameMap {
     // The width of the road and the road lines in the game map, in units
     private static readonly _ROAD_WIDTH: number = 0.3;
     private static readonly _ROAD_DASH_WIDTH: number = 0.005;
+
+    private _pollution: number = 0;
 
     /**
      * Creates a new game map with the specified width and height.
@@ -244,6 +250,10 @@ export class GameMap {
         return this._OCCUPIED_CELLS;
     }
 
+    public get pollution(): number {
+        return this._pollution;
+    }
+
     /**
      * Gets the cell at specified coordinates.
      * @param coordinates The coordinates of the cell.
@@ -307,33 +317,11 @@ export class GameMap {
         if (CELL.canBuild(FacilityClass.FACILITY_SECTOR)) {
             CELL.facility = new FacilityClass(this.GAME);;
             this._OCCUPIED_CELLS.add(coordinates);
-            this.redistributePower();
+            this.updateMap();
             return true;
         }
 
         return false;
-    }
-
-    /** Distributes all of the power from all power plants. */
-    public redistributePower(): void {
-        // Reset all of the power
-        for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
-            const FACILITY: Facility | null = this.getCell(this._OCCUPIED_CELLS.get(i)).facility;
-            assert (FACILITY != null);
-
-            FACILITY.powerAvailable = 0;
-        }
-
-        // Find all power plants and distribute their power
-        for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
-            const COORDINATES: Vector2 = this._OCCUPIED_CELLS.get(i);
-            const FACILITY: Facility | null = this.getCell(COORDINATES).facility;
-            assert (FACILITY != null);
-
-            if (FACILITY.FACILITY_TYPE == FacilityType.POWER) {
-                (FACILITY as PowerPlant).distributePower(COORDINATES);
-            }
-        }
     }
 
     /**
@@ -347,6 +335,9 @@ export class GameMap {
 
         // Destory facility on cell
         if (CELL.canDestroy()) {
+            assert (CELL.facility != null);
+
+            CELL.facility.resetAfterDestroy();
             CELL.facility = null;
             
             // Remove the facility from occupied cell
@@ -357,12 +348,65 @@ export class GameMap {
                 }
             }
 
-            this.redistributePower();
+            this.updateMap();
 
             return true;
         }
 
         return false;
+    }
+
+    private updateMap(): void {
+        // Reset all of the power
+        let cellPollution: number = 0;
+        for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
+            const FACILITY: Facility | null = this.getCell(this._OCCUPIED_CELLS.get(i)).facility;
+            assert (FACILITY != null);
+
+            FACILITY.powerAvailable = 0;
+            
+            // Get the total pollution level of each cell
+            cellPollution += FACILITY.pollution;
+        }
+
+        // Set pollution level of each cell
+        for (let x: number = 0; x < this.width; x++) {
+            for (let y: number = 0; y < this.height; y++) {
+                this.getCell(new Vector2(x, y)).pollution = cellPollution / (this.width * this.height);
+            }
+        }
+
+        let totalPollution: number = cellPollution;
+
+        for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
+            const COORDINATES: Vector2 = this._OCCUPIED_CELLS.get(i);
+            const FACILITY: Facility | null = this.getCell(COORDINATES).facility;
+            assert (FACILITY != null);
+
+            if (FACILITY.FACILITY_TYPE == FacilityType.POWER) {
+                (FACILITY as PowerPlant).distributePower(COORDINATES);
+            }
+
+            if (FACILITY.FACILITY_SECTOR == FacilitySector.COMMERCIAL) {
+                (FACILITY as CommercialFacility).updateRevenueAndCost(COORDINATES);
+            }
+
+            if (FACILITY.FACILITY_TYPE == FacilityType.FACTORY) {
+                (FACILITY as Factory).checkForWarehouse(COORDINATES);
+            }
+
+            if (FACILITY.FACILITY_TYPE == FacilityType.LUXURY_HOME) {
+                (FACILITY as LuxuryHome).adjustMaxPopulation(COORDINATES);
+            }
+
+            if (FACILITY.FACILITY_TYPE == FacilityType.ENVIRONMENT) {
+                totalPollution -= (FACILITY as EnvironmentalFacility).reducePollution(COORDINATES);
+            }
+        }
+
+        this._pollution = totalPollution;
+        this.GAME.GAME_MENU.updateStatsDisplay();
+        GameMenu.showFacilityInfo();
     }
 
     /**

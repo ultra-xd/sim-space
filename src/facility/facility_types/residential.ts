@@ -1,6 +1,7 @@
 import { Vector2 } from "../../data_structures/vector.js";
 import { Facility, FacilityType, FacilitySector } from "../facility.js";
 import { GameMap } from "../../map/map.js";
+import { Game } from "../../app/game.js";
 
 export abstract class ResidentialFacility extends Facility {
     protected static readonly _FACILITY_SECTOR = FacilitySector.RESIDENTIAL;
@@ -15,63 +16,58 @@ export abstract class ResidentialFacility extends Facility {
     protected static readonly _POWER_COST: number;
     protected static readonly _GROWTH_RATE: number = 0.1;
     protected _population: number = 0;
-    protected _taxRevenue: number;
-    protected _maintenanceCost: number;
-    protected _pollution: number;
-
-
+    protected _taxRevenue: number = 0;
+    protected _maintenanceCost: number = (this.constructor as typeof ResidentialFacility)._BASE_MAINTENANCE_COST;
+    protected _pollution: number = 0;
     protected updateTaxRevenue() : void {
-        this._taxRevenue = Math.floor(this.population/1000) * ResidentialFacility._TAX_REVENUE_PER_UNIT;
+        this._taxRevenue = Math.round(
+            (this._population / 1000) * 
+            (this.constructor as typeof ResidentialFacility)._TAX_REVENUE_PER_UNIT *
+            100
+        ) / 100;
     }
     protected updateMaintenanceCost() : void {
-        this._taxRevenue = ResidentialFacility._BASE_MAINTENANCE_COST + Math.floor(this.population/1000) * ResidentialFacility._MAINTENANCE_COST_PER_UNIT;
+        this._maintenanceCost = Math.round(
+            (this.constructor as typeof ResidentialFacility)._BASE_MAINTENANCE_COST + 
+            (this.population / 1000) * 
+            (this.constructor as typeof ResidentialFacility)._MAINTENANCE_COST_PER_UNIT *
+            100
+        ) / 100;
     }
     protected updatePollution() : void {
-        this._pollution = Math.floor(this.population/1000) * ResidentialFacility._POLLUTION_PER_UNIT;
+        this._pollution = (Math.floor(
+            this._population / 1000) * 
+            (this.constructor as typeof ResidentialFacility)._POLLUTION_PER_UNIT
+        );
     }
     public override tick(): void {
+        super.tick();
+
         if (this.GAME.monthEnded()) {
-            if (this._population >= ResidentialFacility._MAX_POPULATION) {
-                this._population = ResidentialFacility._MAX_POPULATION;
-            }
-            else {
-            this._population = ResidentialFacility._MAX_POPULATION * (ResidentialFacility._GROWTH_RATE*this._age);
-
-            }
-            //nvm above is only to get the pop, now this is the actual revenue shit
-
-            //Increase age of the facility
-            this._age++;
+            this.population = Math.min(
+                (
+                    (this.constructor as typeof ResidentialFacility)._MAX_POPULATION * 
+                    (this.constructor as typeof ResidentialFacility)._GROWTH_RATE * 
+                    this._age
+                ), (this.constructor as typeof ResidentialFacility)._MAX_POPULATION
+            );
 
             //Idk anymore just update the shit and then push it out there
             this.updateTaxRevenue();
             this.updateMaintenanceCost();
             this.updatePollution();
-            //tax revenue adds to money in game through setter
-            this.GAME.money += this._taxRevenue
-            //Set money to subtract mainternance cost
-            this.GAME.money -= this._maintenanceCost;
         }
-        else {
-            this._population = ResidentialFacility._MAX_POPULATION * (ResidentialFacility._GROWTH_RATE*this._age);
-
-        }
-        //nvm above is only to get the pop, now this is the actual revenue shit
-
-        //Increase age of the facility
-        this._age++;
-
-        //Idk anymore just update the shit and then push it out there
-        this.updateTaxRevenue();
-        this.updateMaintenanceCost();
-        this.updatePollution();
-        //tax revenue adds to money in game through setter
-        this.GAME.money += this._taxRevenue
-        //Set money to subtract mainternance cost
-        this.GAME.money -= this._maintenanceCost;
     }
     public get population(): number {
         return this._population;
+    }
+
+    public set population(population: number) {
+        const DIFFERENCE: number = population - this._population;
+        this._population = population;
+        this.GAME.population += DIFFERENCE;
+        this.GAME.happyPopulation += DIFFERENCE * (this.constructor as typeof ResidentialFacility)._HAPPINESS_RATIO;
+        this.GAME.contentedPopulation += DIFFERENCE - (DIFFERENCE * (this.constructor as typeof ResidentialFacility)._HAPPINESS_RATIO);
     }
 
     public get happyPopulation(): number {
@@ -81,6 +77,12 @@ export abstract class ResidentialFacility extends Facility {
         return this._population - (this._population * (this.constructor as typeof ResidentialFacility)._HAPPINESS_RATIO);
     }
 
+    public override resetAfterDestroy(): void {
+        super.resetAfterDestroy();
+        this.GAME.population -= this.population;
+        this.GAME.happyPopulation -= this.happyPopulation;
+        this.GAME.contentedPopulation -= this.contentPopulation;
+    }
 }
 
 export class LuxuryHome extends ResidentialFacility {
@@ -94,10 +96,12 @@ export class LuxuryHome extends ResidentialFacility {
     protected static readonly _MAINTENANCE_COST_PER_UNIT: number = 1000000;
     protected static readonly _BASE_MAINTENANCE_COST: number = 10000000;
     protected static readonly _POLLUTION_PER_UNIT: number = 500;
-    protected static readonly _BUILD_COST: number= 1000000000;
+    protected static readonly _BUILD_COST: number = 1000000000;
     protected static readonly _POWER_COST: number = 100;
+
+    private unideal: boolean = false;
     
-    public facilityCheck(coordinates: Vector2): boolean {
+    private facilityCheck(coordinates: Vector2): boolean {
         return (
             this.GAME.MAP.BFS(
                 coordinates,
@@ -115,41 +119,18 @@ export class LuxuryHome extends ResidentialFacility {
             )
         );
     }
-    
+
+    public adjustMaxPopulation(coordinates: Vector2): void {
+        this.unideal = !this.facilityCheck(coordinates);
+    }
+
     public override tick(): void {
-        if (this.GAME.monthEnded()) {
-            let placeholdFacilityCheck : boolean = true;
-        if (placeholdFacilityCheck) {
-            //if it passes the vibe check, then the growth rate will go up to the real max ppl
-            if (this._population >= ResidentialFacility._MAX_POPULATION) {
-                this._population = ResidentialFacility._MAX_POPULATION;
-            }
-            else {
-                this._population = ResidentialFacility._MAX_POPULATION * (ResidentialFacility._GROWTH_RATE*this._age);
-            }
-        }
-        //if does not pass vibe check, max pop is capped at 5000
-        else {
-            if (this._population >= LuxuryHome._MAX_UNIDEAL_POPULATION) {
-                this._population = LuxuryHome._MAX_UNIDEAL_POPULATION;
-            }
-            else {
-                this._population = LuxuryHome._MAX_UNIDEAL_POPULATION * (ResidentialFacility._GROWTH_RATE*this._age);
-            }
-        }
-        //nvm above is only to get the pop, now this is the actual revenue shit
+        super.tick();
 
-        //Increase age of the facility
-        this._age++;
+        const MAX: number = this.unideal ? LuxuryHome._MAX_UNIDEAL_POPULATION: LuxuryHome._MAX_POPULATION
 
-        //Idk anymore just update the shit and then push it out there
-        this.updateTaxRevenue();
-        this.updateMaintenanceCost();
-        this.updatePollution();
-        //tax revenue adds to money in game through setter
-        this.GAME.money += this._taxRevenue
-        //Set money to subtract mainternance cost
-        this.GAME.money -= this._maintenanceCost;
+        if (this._population > MAX) {
+            this.population = MAX;
         }
     }
 }
@@ -179,7 +160,7 @@ export class AffordableHome extends ResidentialFacility {
     protected static readonly _MAINTENANCE_COST_PER_UNIT: number = 2000;
     protected static readonly _BASE_MAINTENANCE_COST: number = 8000;
     protected static readonly _POLLUTION_PER_UNIT: number = 10;
-    protected static readonly _BUILD_COST: number= 50000000;
+    protected static readonly _BUILD_COST: number = 50000000;
     protected static readonly _POWER_COST: number = 25;
 
     protected override updatePollution(): void {
@@ -187,7 +168,7 @@ export class AffordableHome extends ResidentialFacility {
             //MARKED AS IMPORTANT FOR SELF
             // What? This makes no fucking sense, the ppu is 10, but there should be another that's 
             //for the optimized capacity or some shit. Ask tmr too damn lazy rn.
-            this._pollution = Math.floor(this.population/1000) * ResidentialFacility._POLLUTION_PER_UNIT;
+            this._pollution = Math.floor(this.population/1000) * AffordableHome._POLLUTION_PER_UNIT;
 
         }
     }

@@ -60,11 +60,6 @@ export abstract class Facility {
 
     public constructor(protected readonly GAME: Game) {
         this.GAME.money -= (this.constructor as typeof Facility)._BUILD_COST;
-        for (let y = 0; y < this.GAME.MAP.height; y++) {
-            for (let x = 0; x < this.GAME.MAP.width; x++) {
-                this.GAME.MAP.getCell(new Vector2(x,y)).pollution += this.pollution;
-            }
-        }
     }
 
     public static get FACILITY_SECTOR(): FacilitySector {
@@ -105,7 +100,7 @@ export abstract class Facility {
         return this._maintenanceCost;
     }
     public get taxRevenue(): number {
-        return this._taxRevenue;
+        return this._powerAvailable == (this.constructor as typeof Facility)._POWER_COST ? this._taxRevenue: 0;
     }
     public static get POWER_COST(): number {
         return this._POWER_COST;
@@ -133,14 +128,19 @@ export abstract class Facility {
             //Increase age of the facility
             this._age++;
             //tax revenue adds to money in game through setter
-            this.GAME.money += this._taxRevenue
+            this.GAME.money += this.taxRevenue;
+
             //Set money to subtract mainternance cost
-            this.GAME.money -= this._maintenanceCost;
+            this.GAME.money -= this.maintenanceCost;
             //Pollution handled in cell
         }
     }
 
     public static canBuy(money: number): boolean {
         return money >= this._BUILD_COST;
+    }
+
+    public resetAfterDestroy(): void {
+        this.GAME.money += (this.constructor as typeof Facility)._BUILD_COST / 2;
     }
 }

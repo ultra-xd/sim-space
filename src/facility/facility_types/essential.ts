@@ -1,8 +1,5 @@
 import { Facility, FacilitySector, FacilityType } from "../facility.js";
-import { Queue } from "../../data_structures/queue.js";
-import { Vector2 } from "../../data_structures/vector.js";
-import { assert } from "../../util/util.js";
-import { Canvas } from "../../app/canvas.js";
+import { Vector2 } from "../../data_structures/vector.js";;
 
 export abstract class EssentialServicesFacility extends Facility {
     protected static readonly _FACILITY_SECTOR = FacilitySector.ESSENTIAL;
@@ -65,10 +62,6 @@ export class PowerPlant extends EssentialServicesFacility {
 
     private static readonly _POWER_PRODUCED: number = 100;
 
-    public override tick(): void {
-        
-    }
-    
     /** 
      * Uses BFS to distribute power to the closest facilities. 
      * @param coordinates The coordinates of the facility to start at
