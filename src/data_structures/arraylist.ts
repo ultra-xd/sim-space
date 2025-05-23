@@ -68,21 +68,21 @@ export class ArrayList<T> implements IArrayList<T> {
             throw new Error("index out of bounds");
         }
 
-        // Save & delete element
+        // save & delete element
         let e: T = this.array[index];
         delete this.array[index];
 
-        // Shift all elements
+        // shift all elements
         for (let i: number = index + 1; i < this.n; i++) {
             this.array[i - 1] = this.array[i];
         }
 
         delete this.array[this.n - 1]
 
-        // Update size of array
+        // update size of array
         this.n--;
 
-        // Resize array to double length if ArrayList is a quarter of array size
+        // resize array to double length if arraylist is a quarter of array size
         if (this.n <= this.max / 4) {
             this.resize(Math.ceil(this.max / 2));
         }
@@ -96,20 +96,20 @@ export class ArrayList<T> implements IArrayList<T> {
      * @param index Index in array at which the element should be inserted.
      */
     public insert(arg: T, index: number): void {
-        // Exit if index is out of bounds
+        // return undefined if index is out of bounds
         if (index < 0 || index >= this.n) return;
 
-        // Resize array to double length when too long
+        // resize array to double length when too long
         if (this.n == this.max) {
             this.resize(this.max * 2);
         }
 
-        // Shift all elements after inserted element right
+        // shift all elements after inserted element right
         for (let i: number = this.n; i > index; i--) {
             this.array[i] = this.array[i - 1];
         }
 
-        // Insert element & update size
+        // insert element & update size
         this.array[index] = arg;
         this.n++;
     }
@@ -120,7 +120,7 @@ export class ArrayList<T> implements IArrayList<T> {
      * @returns Element at hte specified index.
      */
     public get(index: number): T {
-        // Return undefined if index is out of bounds
+        // return undefined if index is out of bounds
         if (index < 0 || index >= this.n) {
             throw new Error("index out of bounds");
         }
@@ -147,11 +147,11 @@ export class ArrayList<T> implements IArrayList<T> {
      * @param size New size of array.
      */
     private resize(size: number) {
-        // Create new array
+        // create new array
         let newArray: T[] = new Array(size);
         this.max = size;
 
-        // Copy all elements into new array
+        // copy all elements into new array
         for (let i: number = 0; i < this.n; i++) {
             newArray[i] = this.array[i];
         }
@@ -211,10 +211,10 @@ export class ArrayList<T> implements IArrayList<T> {
      * @returns A new array that is a subarray of the array from begin (inclusive) to end (exclusive).
      */
     public slice(begin: number, end: number): ArrayList<T> {
-        // Create new array of size of subarray
+        // create new array of size of subarray
         let arr: ArrayList<T> = new ArrayList(end - begin);
 
-        // Deep copy all elements of array into new array
+        // deep copy all elements of array into new array
         for (let i: number = begin; i < end; i++) {
             arr.add(this.array[i]);
         }
@@ -239,7 +239,7 @@ export class ArrayList<T> implements IArrayList<T> {
     public getArray(): T[] {
         let newArr: T[] = new Array<T>(this.n);
 
-        // Copy all elements of old array into new array
+        // copy all elements of old array into new array
         for (let i: number = 0; i < this.n; i++) {
             newArr[i] = this.array[i];
         }
