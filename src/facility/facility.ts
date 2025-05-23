@@ -143,7 +143,6 @@ export abstract class Facility {
      * @param powerAvailable The amount of power availabl
      */
     public set powerAvailable(powerAvailable: number) {
-        console.log(powerAvailable);
         this._powerAvailable = powerAvailable;
     }
 
