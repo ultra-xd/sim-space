@@ -47,8 +47,8 @@ export class Queue<T> implements IQueue<T> {
     }
     
     /**
-     * removes first element of queue
-     * @returns first element of queue
+     * Removes first element of queue.
+     * @returns First element of queue.
      */
     public dequeue(): T | null {
         if (this.n == 0) return null;

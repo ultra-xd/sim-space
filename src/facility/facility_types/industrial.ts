@@ -1,8 +1,6 @@
 import { Vector2 } from "../../data_structures/vector.js";
 import { Cell } from "../../map/cell.js";
 import { Facility, FacilitySector, FacilityType } from "../facility.js";
-import { Game } from "../../app/game.js";
-import { GameMap } from "../../map/map.js";
 
 /**
  * Abstract base class to be used as a base by industrial facilities
@@ -15,24 +13,28 @@ export abstract class IndustrialFacility extends Facility {
  * Represents a Factory's maintenance, tax revenue, and checks for nearby warehouses that will double its revenue
  */
 export class Factory extends IndustrialFacility {
-
     protected static readonly _FACILITY_TYPE = FacilityType.FACTORY;
     protected static readonly _NAME: string = "Factory";
-    protected static readonly _BUILD_COST: number = 50000000;
-    private static readonly MAX_MAINTENANCE_COST: number = 500000;
-    protected _maintenanceCost : number = 0;
-    protected static readonly _POWER_COST: number = 50;
+    
+    protected _maintenanceCost: number = 0;
     protected _pollution: number = 20000;
     protected _taxRevenue: number = 0;
-    private static readonly MAX_TAX_REVENUE : number = 5000000;
-    private static readonly _WAREHOUSE_CHECK_RADIUS : number = 5;
-    private nearWarehouse: boolean = false;
-    private static readonly _GROWTH_RATE: number = 0.2;
+
+    protected static readonly _POWER_COST: number = 50;
+    protected static readonly _BUILD_COST: number = 50000000;
+
+    private static readonly MAX_MAINTENANCE_COST: number = 500000;
+    private static readonly MAX_TAX_REVENUE: number = 5000000;
+    private static readonly _WAREHOUSE_CHECK_RADIUS: number = 5;
+
+    private nearWarehouse: boolean = false; // Stores whether facility is near warehouse
+    private static readonly _GROWTH_RATE: number = 0.2; // How fast maintenance and tax revenue increase / month
 
     /**
      * Called every game tick to update state if a month has ended
      */
     public override tick(): void {
+        // Update maintenance and tax revenue every month
         if (this.GAME.monthEnded()) {
             this.updateMaintenanceCost();
             this.updateTaxRevenue();
@@ -41,32 +43,32 @@ export class Factory extends IndustrialFacility {
         super.tick();
     }
 
-    /**
-     * Increases maintenance cost based on age and growth rate
-     */
+    /** Increases maintenance cost based on age and growth rate */
     private updateMaintenanceCost(): void {
         this._maintenanceCost = Math.min(
             Factory.MAX_MAINTENANCE_COST * (Factory._GROWTH_RATE * this._age),
             Factory.MAX_MAINTENANCE_COST
-        ) * (this.nearWarehouse ? 2 : 1);
+        ) * (this.nearWarehouse ? 2: 1);
     }
 
-    /**
-     * Increases tax revenue based on age and growth rate
-     */
-    private updateTaxRevenue() : void {
+    /** Increases tax revenue based on age and growth rate */
+    private updateTaxRevenue(): void {
         this._taxRevenue = Math.min(
             Factory.MAX_TAX_REVENUE * (Factory._GROWTH_RATE * this._age),
             Factory.MAX_TAX_REVENUE
-        ) * (this.nearWarehouse ? 2 : 1);
+        ) * (this.nearWarehouse ? 2: 1); // Double income if near warehouse
     }
 
-    public checkForWarehouse(origin: Vector2) : void {
-        //if found, augment tax revenue
+    /**
+     * Checks if there is a warehouse near the facility at required distance.
+     * @param coordinates The coordinates of the facility.
+     */
+    public checkForWarehouse(coordinates: Vector2): void {
+        // If found, augment tax revenue
         this.nearWarehouse = this.GAME.MAP.BFS(
-            origin,
+            coordinates,
             Factory._WAREHOUSE_CHECK_RADIUS,
-            (coordinates : Vector2) : boolean => {
+            (coordinates: Vector2): boolean => {
                 const CELL: Cell = this.GAME.MAP.getCell(coordinates);
                 return CELL.facilityType == FacilityType.WAREHOUSE;
             }

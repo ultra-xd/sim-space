@@ -1,179 +1,56 @@
 import { Facility, FacilitySector, FacilityType } from "../facility.js";
 import { Vector2 } from "../../data_structures/vector.js";;
 
-/**
- * Abstract class for essential services facilities to use as a base
- */
+/** Abstract class for essential services facilities to use as a base */
 export abstract class EssentialServicesFacility extends Facility {
-    /**
-     * Sector of the facility
-     */
     protected static readonly _FACILITY_SECTOR = FacilitySector.ESSENTIAL;
-
-    /**
-     * Tax revenue generated
-     */
     protected _taxRevenue: number = 0;
-
-    /**
-     * Pollution generated
-     */
     protected _pollution: number = 0;
 }
 
-
-/**
- * Represents an Emergency Service building and its facility type, name, build cost, maintenance cost, and power cost
- */
+/** Represents an Emergency Service building */
 export class EmergencyBuilding extends EssentialServicesFacility {
-    /**
-     * Type of facility (emergency)
-     */
     protected static readonly _FACILITY_TYPE: FacilityType = FacilityType.EMERGENCY;
-
-    /**
-     * Facility Name
-     */
     protected static readonly _NAME: string = "Emergency Service";
-
-    /**
-     * The cost to build 
-     */
     protected static readonly _BUILD_COST: number = 100000000;
-
-    /**
-     * The current maintenance cost
-     */
     protected _maintenanceCost: number = 1000000;
-
-    /**
-     * Power consumption of the building
-     */
     protected static readonly _POWER_COST: number = 10;
 }
 
-/**
- * Represents an Education Centre's facility type, name, build cost, maintenance cost, and power cost
- */
+/** Represents an Education Centre's facility */
 export class EducationCentre extends EssentialServicesFacility {
-    /**
-     * The specific facility type (educationing)
-     */
     protected static readonly _FACILITY_TYPE: FacilityType = FacilityType.EDUCATION;
-
-    /**
-     * The name of the facility
-     */
     protected static readonly _NAME: string = "Education Centre";
-
-    /**
-     * The cost to build this facility
-     */
     protected static readonly _BUILD_COST: number = 500000000;
-
-    /**
-     * The current maintenance cost
-     */
     protected _maintenanceCost: number = 50000000;
-
-    /**
-     * The power consumption of the center
-     */
     protected static readonly _POWER_COST: number = 15;
 }
 
-/**
- * Represents a Medical Centre's facility type, name, build cost, maintenance cost, and power cost
- */
+/** Represents a Medical Centre's facility */
 export class MedicalCentre extends EssentialServicesFacility {
-    /**
-     * The specific facility type
-     */
     protected static readonly _FACILITY_TYPE: FacilityType = FacilityType.MEDICAL;
-
-    /**
-     * The name of the facility
-     */
     protected static readonly _NAME: string = "Medical Centre";
-
-    /**
-     * The cost to build the medical centre
-     */
     protected static readonly _BUILD_COST: number = 1000000000;
-
-    /**
-     * The current maintenance cost of the medical centre
-     */
     protected _maintenanceCost: number = 150000000;
-
-    /**
-     * The amount of power the medical centre consumes
-     */
     protected static readonly _POWER_COST: number = 20;
 }
 
-/**
- * Represents a Government building's facility type, name, build cost, maintenance cost, and power cost
- */
+/** Represents a Government building's facility */
 export class Government extends EssentialServicesFacility {
-    /**
-     * The specific facility type (governmenting)
-     */
     protected static readonly _FACILITY_TYPE: FacilityType = FacilityType.GOVERNMENT;
-
-    /**
-     * The name of the facility
-     */
     protected static readonly _NAME: string = "Government";
-
-    /**
-     * The cost to build the building
-     */
     protected static readonly _BUILD_COST: number = 100000000;
-
-    /**
-     * The current maintenance cost of the building
-     */
     protected _maintenanceCost: number = 1000000;
-
-    /**
-     * The amount of power the building consumes
-     */
     protected static readonly _POWER_COST: number = 10;
 }
 
-/**
- * Represents a Power plant facility and its components
- */
+/** Represents a Power plant facility and its components */
 export class PowerPlant extends EssentialServicesFacility {
-    /**
-     * The facility's type
-     */
     protected static readonly _FACILITY_TYPE: FacilityType = FacilityType.POWER;
-
-    /**
-     * The name of the facility
-     */
     protected static readonly _NAME: string = "Power Plant";
-
-    /**
-     * The cost to build the power plant
-     */
     protected static readonly _BUILD_COST: number = 500000000;
-
-    /**
-     * The current maintenance cost of the power plant
-     */
     protected _maintenanceCost: number = 2000000;
-
-    /**
-     * The power cost for operation of the plant
-     */
     protected static readonly _POWER_COST: number = 0;
-
-    /**
-     * The amount of power produced by the plant
-     */
     private static readonly _POWER_PRODUCED: number = 100;
 
     /** 
@@ -181,22 +58,27 @@ export class PowerPlant extends EssentialServicesFacility {
      * @param coordinates The coordinates of the facility to start at
      */
     public distributePower(coordinates: Vector2): void {
+        // Store amount of power that can be distributed
         let powerAvailable: number = PowerPlant._POWER_PRODUCED;
 
+        // Search through map, starting at coordinates
         this.GAME.MAP.BFS(
             coordinates,
             this.GAME.MAP.width + this.GAME.MAP.height,
             (coords: Vector2): boolean => {
+                // Don't distribute power to self
                 if (coordinates.equals(coords)) return false;
 
                 const FACILITY: Facility | null = this.GAME.MAP.getCell(coords).facility;
                 if (FACILITY != null) {
+                    // Get the amount of power needed
                     const USED_POWER: number = (FACILITY.constructor as typeof Facility).POWER_COST - FACILITY.powerAvailable;
 
+                    // Give as much power as needed
                     if (USED_POWER < powerAvailable) {
                         FACILITY.powerAvailable = (FACILITY.constructor as typeof Facility).POWER_COST;
                         powerAvailable -= USED_POWER;
-                    } else {
+                    } else { // if not enough power, stop searching and give as much as possible
                         FACILITY.powerAvailable = powerAvailable;
                         return true;
                     }
@@ -207,10 +89,7 @@ export class PowerPlant extends EssentialServicesFacility {
         )
     }
 
-    /**
-     * Gets the total power produced
-     * @returns The power produced
-     */
+    /** The total power produced */
     public static get POWER_PRODUCED(): number {
         return PowerPlant._POWER_PRODUCED;
     }

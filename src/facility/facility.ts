@@ -1,11 +1,7 @@
 import { Game } from "../app/game.js";
-import { GameMenu } from "../app/game_menu.js";
 import { Canvas } from "../app/canvas.js";
-import { Vector2 } from "../data_structures/vector.js";
 
-/**
- * stores the categories of all possible facility sectors 
- */
+/** Stores the categories of all possible facility sectors */
 export enum FacilitySector {
     INDUSTRIAL,
     COMMERCIAL,
@@ -15,7 +11,8 @@ export enum FacilitySector {
 }
 
 /**
- * String enum to store the type of all possible facility sectors and a corresponding string used to assist access to its sprite
+ * String enum to store the type of all possible facility sectors and a 
+ * corresponding string used to assist access to its sprite
  */
 export enum FacilityType {
     EMERGENCY = "emergency",
@@ -35,9 +32,7 @@ export enum FacilityType {
     DEFENSE = "defense"
 }
 
-/**
- * Represents a the structure/blueprint of each facility
- */
+/** Represents class of facility to pass around in function arguments. */
 export type FacilityClass = {
     new (GAME: Game): Facility;
     getSprite: (isometric: boolean) => HTMLImageElement; 
@@ -57,51 +52,43 @@ export abstract class Facility {
     protected static readonly _NAME: string;
     protected static readonly _POWER_COST: number;
     protected static readonly _BUILD_COST: number;
-    protected abstract _maintenanceCost: number;
-    protected abstract _pollution: number;
-    protected abstract _taxRevenue: number;
+
+    protected abstract _maintenanceCost: number; // cost per month
+    protected abstract _pollution: number; // pollution in total
+    protected abstract _taxRevenue: number; // tax revenue per month
+
     protected _age: number = 0; // The number of months the facility has existed
-    protected _powerAvailable : number = 0;
+    protected _powerAvailable: number = 0; // The amount of power the facility receives
 
     /**
-     * Deducts the build cost from the game's money on instantiation and applies the facility's pollution to every cell on the map
+     * Deducts the build cost from the game's money on instantiation
      * @param GAME The game instance the facility belongs to
      */
     public constructor(protected readonly GAME: Game) {
         this.GAME.money -= (this.constructor as typeof Facility)._BUILD_COST;
     }
 
-    /**
-     * Static getter for the facility's sector
-     */
+    /** Static getter for the facility's sector */
     public static get FACILITY_SECTOR(): FacilitySector {
         return this._FACILITY_SECTOR;
     }
 
-    /**
-     * Instance getter for the facility's sector
-     */
+    /** Instance getter for the facility's sector */
     public get FACILITY_SECTOR(): FacilitySector {
         return (this.constructor as typeof Facility)._FACILITY_SECTOR;
     }
 
-    /**
-     * Static getter for the facility's type
-     */
+    /** Static getter for the facility's type */
     public static get FACILITY_TYPE(): FacilityType {
         return this._FACILITY_TYPE;
     }
 
-    /**
-     * Instance getter for the facility's type
-     */
+    /** Instance getter for the facility's type */
     public get FACILITY_TYPE(): FacilityType {
         return (this.constructor as typeof Facility)._FACILITY_TYPE;
     }
 
-    /**
-     * Static getter for the facility's name
-     */
+    /** Static getter for the facility's name */
     public static get NAME(): string {
         return this._NAME;
     }
@@ -126,37 +113,27 @@ export abstract class Facility {
         return Canvas.ImageLoader.getImage(directory);
     }
 
-    /**
-     * Static getter for the facility's build cost
-     */
+    /** Static getter for the facility's build cost */
     public static get BUILD_COST(): number {
         return this._BUILD_COST;
     }
 
-    /**
-     * Getter for the facility's maintenance cost
-     */
+    /** Getter for the facility's maintenance cost */
     public get maintenanceCost(): number {
         return this._maintenanceCost;
     }
 
-    /**
-     * Getter for the facility's tax revenue
-     */
+    /** Getter for the facility's tax revenue */
     public get taxRevenue(): number {
         return this._powerAvailable == (this.constructor as typeof Facility)._POWER_COST ? this._taxRevenue: 0;
     }
 
-    /**
-     * Static getter for the facility's power cost
-     */
+    /** Static getter for the facility's power cost */
     public static get POWER_COST(): number {
         return this._POWER_COST;
     }
 
-    /**
-     * Getter for the amount of power available to this facility
-     */
+    /** Getter for the amount of power available to this facility */
     public get powerAvailable(): number {
         return this._powerAvailable;
     }
@@ -170,16 +147,12 @@ export abstract class Facility {
         this._powerAvailable = powerAvailable;
     }
 
-    /**
-     * Getter for the amount of pollution
-     */
+    /** Getter for the amount of pollution */
     public get pollution(): number {
         return this._pollution;
     }
 
-    /**
-     * Getter for the facility's age
-     */
+    /** Getter for the facility's age */
     public get age(): number {
         return this._age;
     }
@@ -189,15 +162,11 @@ export abstract class Facility {
      * Increments age and updates the game's money by applying revenue and maintenance
      */
     public tick(): void {
-        //NOTE TO SELF, TICK RUNS LIKE 60 TIMES A SECOND. CHECK IF MONTH ENDED, AND DON'T RUN IT EVERY TICK
         if (this.GAME.monthEnded()) {
+            // increase age, tax revenue & maintenance cost
             this._age++;
-            //tax revenue adds to money in game through setter
             this.GAME.money += this.taxRevenue;
-
-            //Set money to subtract mainternance cost
             this.GAME.money -= this.maintenanceCost;
-            //Pollution handled in cell
         }
     }
 
@@ -210,6 +179,7 @@ export abstract class Facility {
         return money >= this._BUILD_COST;
     }
 
+    /** Resets game stats after building is destroyed */
     public resetAfterDestroy(): void {
         this.GAME.money += (this.constructor as typeof Facility)._BUILD_COST / 2;
     }

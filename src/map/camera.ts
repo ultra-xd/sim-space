@@ -1,6 +1,6 @@
 import { Vector2 } from "../data_structures/vector.js";
 import { Game } from "../app/game.js";
-import { assert, ease } from "../util/util.js";
+import { ease } from "../util/util.js";
 import { App } from "../app/app.js";
 
 /** Handles conversion of units and pixels and the viewport of the map. */
@@ -123,7 +123,6 @@ export class Camera {
         /* Calculate the difference between the center of the screen and the pixel coordinates
         of the coordinates of the map. Adjust based on whether the viewport is isometric or not */
         if (this.isometric) {
-            //
             const ISOMETRIC_DIFFERENCE_PIXELS = DIFFERENCE_UNITS.multiply(this._pixelsPerUnits);
             differencePixels = new Vector2(
                 Math.sqrt(3) / 2 * (ISOMETRIC_DIFFERENCE_PIXELS.x - ISOMETRIC_DIFFERENCE_PIXELS.y),
@@ -133,7 +132,7 @@ export class Camera {
             differencePixels = DIFFERENCE_UNITS.multiply(this._pixelsPerUnits);
         }
 
-        differencePixels.y *= -1; // Account for canvas  coordinates starting from top left corner
+        differencePixels.y *= -1; // Account for canvas coordinates starting from top left corner
 
         return CENTER_PIXELS.add(differencePixels);
     }

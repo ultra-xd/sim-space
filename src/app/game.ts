@@ -196,6 +196,12 @@ export class Game {
                 this._CAMERA.adjustZoom(-0.05);
             }
 
+            if (this._highlightedCell != null) {
+                GameMenu.updatePollutionDisplay(
+                    this._MAP.getCell(this._highlightedCell).pollution
+                );
+            }
+
             if (this.isGameEnding) {
                 // Animate the game's ending
                 this.gameEndingAnimationTicks++;

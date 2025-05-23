@@ -50,6 +50,8 @@ export class GameMenu {
 
     public static readonly STATS_SCORE_SPAN: HTMLSpanElement = document.getElementById("stats-score-display") as HTMLSpanElement;
 
+    public static readonly STATS_POLLUTION_AT_CELL_SPAN: HTMLSpanElement = document.getElementById("stats-pollution-display") as HTMLSpanElement;
+
     public static readonly STATS_DIV: HTMLDivElement = document.getElementById("stats-display") as HTMLDivElement;
 
     public static readonly CONSTRUCTION_DELETE_BUTTON: HTMLButtonElement = document.getElementById("construction-delete") as HTMLButtonElement;
@@ -385,6 +387,10 @@ export class GameMenu {
         GameMenu.STATS_DATE_PARAGRAPH.innerText = `Month ${this.game.month}`;
         GameMenu.STATS_POPULATION_SPAN.innerText = this.game.population.toFixed(0);
         GameMenu.STATS_SCORE_SPAN.innerText = this.game.score.toFixed(0);
+    }
+
+    public static updatePollutionDisplay(pollution: number): void {
+        GameMenu.STATS_POLLUTION_AT_CELL_SPAN.innerText = pollution.toFixed(2);
     }
 
     /** Hides all HTML elements on the game menu. */

@@ -356,56 +356,68 @@ export class GameMap {
         return false;
     }
 
+    /** Updates all properties in which there are dependencies on facility intersections */
     private updateMap(): void {
-        // Reset all of the power
         let cellPollution: number = 0;
 
+        // Loop through all facilities
         for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
             const FACILITY: Facility | null = this.getCell(this._OCCUPIED_CELLS.get(i)).facility;
             assert (FACILITY != null);
 
+            // Set facility power to 0
             FACILITY.powerAvailable = 0;
             
             // Get the total pollution level of each cell
             cellPollution += FACILITY.pollution;
         }
 
-        // Set pollution level of each cell
+        // Spread pollution throughout entire map
         for (let x: number = 0; x < this.width; x++) {
             for (let y: number = 0; y < this.height; y++) {
                 this.getCell(new Vector2(x, y)).pollution = cellPollution / (this.width * this.height);
             }
         }
 
+        // Get total pollution
         let totalPollution: number = cellPollution;
 
+        // Loop through all facilities
         for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
             const COORDINATES: Vector2 = this._OCCUPIED_CELLS.get(i);
             const FACILITY: Facility | null = this.getCell(COORDINATES).facility;
             assert (FACILITY != null);
 
+            // Distribute power if it is a power plant
             if (FACILITY.FACILITY_TYPE == FacilityType.POWER) {
                 (FACILITY as PowerPlant).distributePower(COORDINATES);
             }
 
+            // Update the revenue and maintenance cost of commercial facility based on distance
             if (FACILITY.FACILITY_SECTOR == FacilitySector.COMMERCIAL) {
                 (FACILITY as CommercialFacility).updateRevenueAndCost(COORDINATES);
             }
 
+            // Update factory cost if there exists a warehouse nearby
             if (FACILITY.FACILITY_TYPE == FacilityType.FACTORY) {
                 (FACILITY as Factory).checkForWarehouse(COORDINATES);
             }
 
+            // Update luxury home max population if there exists a store and restaurant next to it
             if (FACILITY.FACILITY_TYPE == FacilityType.LUXURY_HOME) {
                 (FACILITY as LuxuryHome).adjustMaxPopulation(COORDINATES);
             }
 
+            // Mitigate pollution around environmental facility
             if (FACILITY.FACILITY_TYPE == FacilityType.ENVIRONMENT) {
                 totalPollution -= (FACILITY as EnvironmentalFacility).reducePollution(COORDINATES);
             }
         }
 
+        // get total pollution
         this._pollution = totalPollution;
+
+        // Update game UI
         this.GAME.GAME_MENU.updateStatsDisplay();
         GameMenu.showFacilityInfo();
     }

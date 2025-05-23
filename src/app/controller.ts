@@ -35,11 +35,13 @@ export class Controller {
      * @param CANVAS The canvas for which the mouse events are tracked.
      */
     public constructor(private readonly CANVAS: Canvas) {
+        // Set all mouse events in mouse event maps to be false
         for (let i: number = 0; i < Object.keys(MouseEvent).length; i++) {
             this.MOUSE_EVENTS.set(i, false);
             this.MOUSE_CLICK_EVENTS.set(i, false);
         }
 
+        // Set all key events in key event map to be false
         for (let keyEvent of Object.keys(KeyEvent)) {
             this.KEY_EVENTS.set(keyEvent.toLowerCase(), false);
             this.KEY_PRESS_EVENTS.set(keyEvent.toLowerCase(), false);
@@ -156,10 +158,14 @@ export class Controller {
 
     /** Updates all mouse and key events. */
     public tick(): void {
+        // Update previous mouse position
         this._previousMousePosition = this._currentMousePosition;
+
+        // Reset scroll wheel events
         this.MOUSE_EVENTS.set(MouseEvent.MOUSE_SCROLL_DOWN, false);
         this.MOUSE_EVENTS.set(MouseEvent.MOUSE_SCROLL_UP, false);
 
+        // Reset click and key press events
         for (let i: number = 0; i < Object.keys(MouseEvent).length; i++) {
             this.MOUSE_CLICK_EVENTS.set(i, false);
         }

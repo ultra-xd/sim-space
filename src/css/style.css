@@ -97,7 +97,7 @@ div#stats-display {
     top: 1%;
     left: 1%;
     width: 20%;
-    height: 13%;
+    height: 15%;
 }
 
 div#facility-info {
@@ -157,6 +157,10 @@ span#stats-population-display {
 
 span#stats-score-display {
     color: rgb(231, 197, 0);
+}
+
+span#stats-pollution-display {
+    color: rgb(128, 128, 128);
 }
 
 p.cost-display {

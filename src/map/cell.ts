@@ -1,18 +1,16 @@
 import { Facility, FacilitySector, FacilityType } from "../facility/facility.js";
 import { Game } from "../app/game.js";
 import { Vector2 } from "../data_structures/vector.js";
-import { ArrayList } from "../data_structures/arraylist.js";
 import { Canvas } from "../app/canvas.js";
 import { Camera } from "./camera.js";
 import { GameMap } from "./map.js";
 import { GameMenu } from "../app/game_menu.js";
 import { assert } from "../util/util.js";
-import { ResidentialFacility } from "../facility/facility_types/residential.js";
 
 /** Represents a cell in the game map. */
 export class Cell {
     private _coordinates: Vector2;
-    private _pollution: number;
+    private _pollution: number = 0;
 
     // Set variables for maximum distance between certain facilities
     private static readonly _MAX_DISTANCE_RESIDENCE_STORE: number = 5;
@@ -84,8 +82,6 @@ export class Cell {
         if (this._facility != null) {
             this._facility.tick();
         }
-
-        this._pollution = this._facility ? this._facility.pollution : 0;
     }
 
     /** The pollution level of the cell. */
@@ -114,6 +110,7 @@ export class Cell {
      */
     public drawGround(canvas: Canvas, camera: Camera): void {
         if (camera.isIsometric()) {
+            // Draw isometric view of ground
             canvas.drawImage(
                 Canvas.ImageLoader.getImage(`res/assets/map/grass_isometric.png`),
                 camera.unitsToPixels(this.coordinates.add(new Vector2(0.5, 0.5))),
@@ -121,6 +118,7 @@ export class Cell {
                 camera.isometricUnitHeight * (1 - GameMap.ROAD_WIDTH)
             );
         } else {
+            // Draw top-down view of grass
             canvas.drawImage(
                 Canvas.ImageLoader.getImage(`res/assets/map/grass_straight.png`),
                 camera.unitsToPixels(this.coordinates.add(new Vector2(0.5, 0.5))),
@@ -136,22 +134,24 @@ export class Cell {
      * @param camera The camera to determine the view point.
      */
     public drawFacility(canvas: Canvas, camera: Camera): void {
-        if (this._facility != null) {
-            if (camera.isIsometric()) {
-                canvas.drawImage(
-                    this._facility.getSprite(true),
-                    camera.unitsToPixels(this.coordinates.add(new Vector2(0.7, 0.7))), // adjust so building is centered
-                    camera.isometricUnitWidth / 2,
-                    camera.isometricUnitWidth / 2
-                )
-            } else {
-                canvas.drawImage(
-                    this._facility.getSprite(false),
-                    camera.unitsToPixels(this.coordinates.add(new Vector2(0.5, 0.5))), // adjust so building is centered
-                    camera.pixelsPerUnit * (1 - GameMap.ROAD_WIDTH),
-                    camera.pixelsPerUnit * (1 - GameMap.ROAD_WIDTH)
-                )
-            }
+        if (this._facility == null) return; // Draw nothing if no facility exists
+
+        if (camera.isIsometric()) {
+            // Draw isometric view of building
+            canvas.drawImage(
+                this._facility.getSprite(true),
+                camera.unitsToPixels(this.coordinates.add(new Vector2(0.7, 0.7))), // adjust so building is centered
+                camera.isometricUnitWidth / 2,
+                camera.isometricUnitWidth / 2
+            )
+        } else {
+            // Draw top down view of building
+            canvas.drawImage(
+                this._facility.getSprite(false),
+                camera.unitsToPixels(this.coordinates.add(new Vector2(0.5, 0.5))), // adjust so building is centered
+                camera.pixelsPerUnit * (1 - GameMap.ROAD_WIDTH),
+                camera.pixelsPerUnit * (1 - GameMap.ROAD_WIDTH)
+            )
         }
     }
 
@@ -161,6 +161,7 @@ export class Cell {
      * @returns True if the facility can be built, false otherwise.
      */
     public canBuild(facilitySector: FacilitySector) : boolean {
+        // Don't build if cell is already occupied
         if (!this.isEmpty()) {
             GameMenu.NotificationManager.createNotification(
                 "This cell is already occupied by a facility."
@@ -168,7 +169,12 @@ export class Cell {
             return false;
         }
 
+        /* Before a residential facility is built there must already be ALL of the 5 different
+        Essential Service facilities within 8 units of where the residential facility is to be 
+        built on the grid. They also need to be within 5 units of a store, and 3 units of a
+        restaurant. */
         if (facilitySector == FacilitySector.RESIDENTIAL) {
+            // Check if all essential service facilities exist
             if (!this._GAME.MAP.containsTypes([
                 FacilityType.EMERGENCY,
                 FacilityType.EDUCATION,
@@ -182,6 +188,7 @@ export class Cell {
                 return false;
             }
 
+            // Check if store exists within 5 units
             if (!this._GAME.MAP.BFS(
                     this.coordinates,
                     Cell._MAX_DISTANCE_RESIDENCE_STORE,
@@ -199,6 +206,7 @@ export class Cell {
                 return false;
             }
 
+            // Check if restaurant exists within 3 units
             else if (!this._GAME.MAP.BFS(
                     this.coordinates,
                     Cell._MAX_DISTANCE_RESIDENCE_RESTAURANT,
@@ -218,7 +226,9 @@ export class Cell {
             return true;
         }
 
+        // Industrial facilities must be built 6 units within a power plant.
         else if (facilitySector == FacilitySector.INDUSTRIAL) {
+            // Check if power plant exists within 6 units
             if (!this._GAME.MAP.BFS(
                 this.coordinates,
                 Cell._MAX_DISTANCE_INDUSTRIAL_POWER,
@@ -245,6 +255,7 @@ export class Cell {
      * @returns True if the facility can be destroyed, false otherwise.
      */
     public canDestroy(): boolean {
+        // Don't delete if cell is empty
         if (this.isEmpty()) {
             GameMenu.NotificationManager.createNotification(
                 "There is nothing in this space."
@@ -252,11 +263,15 @@ export class Cell {
             return false;
         }
 
+        // Get facility type and sector of facility on building
         const FACILITY_SECTOR: FacilitySector | null = this.facilitySector;
         const FACILITY_TYPE: FacilityType | null = this.facilityType;
         assert (FACILITY_SECTOR != null && FACILITY_TYPE != null);
 
         if (FACILITY_SECTOR == FacilitySector.ESSENTIAL) {
+            /* Cannot delete if facility is essential and there is a residential
+            facility since residential facilities can only be built if there exists
+            all 5 essential facilities*/
             if (
                 !this._GAME.MAP.containsMultipleOfType(FACILITY_TYPE) &&
                 this._GAME.MAP.containsSector(FacilitySector.RESIDENTIAL)
@@ -268,8 +283,9 @@ export class Cell {
             }
         }
 
-        else if (FACILITY_TYPE == FacilityType.STORE) {
-            if (!this.facilitySectorDeleteCheck(
+        // Cannot delete store if there is a residential facility dependent on it
+        if (FACILITY_TYPE == FacilityType.STORE) {
+            if (!this.facilityDeleteCheck(
                 FacilitySector.RESIDENTIAL,
                 FacilityType.STORE,
                 Cell._MAX_DISTANCE_RESIDENCE_STORE
@@ -281,8 +297,9 @@ export class Cell {
             }
         }
 
-        else if (FACILITY_TYPE == FacilityType.RESTAURANT) {
-            if (!this.facilitySectorDeleteCheck(
+        // Cannot delete restaurant if there is a residential facility dependent on it
+        if (FACILITY_TYPE == FacilityType.RESTAURANT) {
+            if (!this.facilityDeleteCheck(
                 FacilitySector.RESIDENTIAL,
                 FacilityType.RESTAURANT,
                 Cell._MAX_DISTANCE_RESIDENCE_RESTAURANT
@@ -294,8 +311,9 @@ export class Cell {
             }
         }
 
-        else if (FACILITY_TYPE == FacilityType.POWER) {
-            if (!this.facilityTypeDeleteCheck(
+        // Cannot delete power plant if an industrial facility is dependent on it
+        if (FACILITY_TYPE == FacilityType.POWER) {
+            if (!this.facilityDeleteCheck(
                 FacilitySector.INDUSTRIAL,
                 FacilityType.POWER,
                 Cell._MAX_DISTANCE_INDUSTRIAL_POWER
@@ -319,7 +337,7 @@ export class Cell {
      * @param distance The maximum distance between the two facilities.
      * @returns True if can be deleted, false otherwise.
      */
-    private facilitySectorDeleteCheck(
+    private facilityDeleteCheck(
         facilitySector: FacilitySector, 
         facilityType: FacilityType,
         distance: number
@@ -336,33 +354,7 @@ export class Cell {
 
         return this.distanceCheck(SECTOR_CELLS, TYPE_CELLS, distance);
     }
-
-    /**
-     * Determines if a facility of the specified type can be deleted,
-     * dependent on its distance to another facility sector.
-     * @param facilitySector The specified facility sector.
-     * @param facilityType The specified facility type.
-     * @param distance The maximum distance between the two facilities.
-     * @returns True if can be deleted, false otherwise.
-     */
-    private facilityTypeDeleteCheck(
-        facilitySector: FacilitySector, 
-        facilityType: FacilityType,
-        distance: number
-    ): boolean {
-        const SECTOR_CELLS: Vector2[] = this._GAME.MAP.getAllOfSector(facilitySector).filter(
-            (coordinates: Vector2): boolean => {
-                return !coordinates.equals(this._coordinates);
-            }
-        );
-
-        const TYPE_CELLS: Vector2[] = this._GAME.MAP.getAllOfType(facilityType);
-
-        if (SECTOR_CELLS.length == 0 && TYPE_CELLS.length != 0) return false;
-
-        return this.distanceCheck(TYPE_CELLS, SECTOR_CELLS, distance);
-    }
-
+    
     /**
      * Checks if all coordinates in one array are less than or equal to a 
      * distance from another coordinate array.
