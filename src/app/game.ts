@@ -56,7 +56,7 @@ export class Game {
     private _gameState: GameState = GameState.STANDARD;
 
     // destroying the city yipppiiiieeee
-    private static readonly DEFAULT_GAME_END_PROBABILITY: number = 1;
+    private static readonly DEFAULT_GAME_END_PROBABILITY: number = 0.01;
     private gameEndProbability: number = Game.DEFAULT_GAME_END_PROBABILITY;
     private isGameEnding: boolean = false;
     private static readonly GAME_ENDING_ANIMATION_LENGTH: number = 2;
