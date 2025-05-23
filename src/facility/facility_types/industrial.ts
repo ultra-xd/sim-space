@@ -2,15 +2,14 @@ import { Vector2 } from "../../data_structures/vector.js";
 import { Cell } from "../../map/cell.js";
 import { Facility, FacilitySector, FacilityType } from "../facility.js";
 
-/**
- * Abstract base class to be used as a base by industrial facilities
- */
+/** Abstract base class to be used as a base by industrial facilities */
 export abstract class IndustrialFacility extends Facility {
     protected static readonly _FACILITY_SECTOR = FacilitySector.INDUSTRIAL;
 }
 
 /**
- * Represents a Factory's maintenance, tax revenue, and checks for nearby warehouses that will double its revenue
+ * Represents a Factory
+ * Checks for nearby warehouses that will double its revenue
  */
 export class Factory extends IndustrialFacility {
     protected static readonly _FACILITY_TYPE = FacilityType.FACTORY;
@@ -25,14 +24,12 @@ export class Factory extends IndustrialFacility {
 
     private static readonly MAX_MAINTENANCE_COST: number = 500000;
     private static readonly MAX_TAX_REVENUE: number = 5000000;
-    private static readonly _WAREHOUSE_CHECK_RADIUS: number = 5;
+    private static readonly _WAREHOUSE_CHECK_RADIUS: number = 5; // How far to check for a warehouse
 
     private nearWarehouse: boolean = false; // Stores whether facility is near warehouse
     private static readonly _GROWTH_RATE: number = 0.2; // How fast maintenance and tax revenue increase / month
 
-    /**
-     * Called every game tick to update state if a month has ended
-     */
+    /** Called every game tick to update state if a month has ended */
     public override tick(): void {
         // Update maintenance and tax revenue every month
         if (this.GAME.monthEnded()) {
@@ -81,14 +78,7 @@ export class Factory extends IndustrialFacility {
  * Provides support functionality to nearby factories
  */
 export class Warehouse extends IndustrialFacility {
-    /**
-     * The facility type
-     */
     protected static readonly _FACILITY_TYPE = FacilityType.WAREHOUSE;
-
-    /**
-     * The name of the facility
-     */
     protected static readonly _NAME = "Warehouse";
 
     protected static readonly _BUILD_COST: number = 10_000_000;
@@ -111,11 +101,16 @@ export class EnvironmentalFacility extends IndustrialFacility {
 
     protected _pollution: number = 0;
 
+    /**
+     * Reduces the pollution around the facility, up to a maximum amount and up to a maximum distance.
+     * @param coordinates The coordinates of the facility.
+     * @returns The pollution reduced.
+     */
     public reducePollution(coordinates: Vector2): number {
-        //God save the queen (not), and maybe Joe Biden from prostate cancer too. He didn't save the pope tho wtf man?
-        // im keeping this comment LMAOOO
+        // Store the amount of pollution that can be reduced
         let pollutionReductionAvailable: number = EnvironmentalFacility.MAX_POLLUTION_REDUCTION;
 
+        // Search up to a radius, starting from the facility
         this.GAME.MAP.BFS(
             coordinates,
             EnvironmentalFacility._POLLUTION_REDUCTION_RADIUS,
@@ -123,10 +118,11 @@ export class EnvironmentalFacility extends IndustrialFacility {
                 const CELL: Cell = this.GAME.MAP.getCell(coords);
                 const POLLUTION: number = CELL.pollution;
 
+                // Reduce the pollution to 0 if possible
                 if (pollutionReductionAvailable > POLLUTION) {
                     pollutionReductionAvailable -= POLLUTION;
                     CELL.pollution = 0;
-                } else {
+                } else { // if not, reduce as much as possible and stop searching
                     CELL.pollution -= pollutionReductionAvailable;
                     pollutionReductionAvailable = 0;
                     return true;
@@ -139,6 +135,7 @@ export class EnvironmentalFacility extends IndustrialFacility {
         return EnvironmentalFacility.MAX_POLLUTION_REDUCTION - pollutionReductionAvailable;
     }
 
+    /** The maximum amount of pollution that can be reduced. */
     public static get MAX_POLLUTION_REDUCTION(): number {
         return this._MAX_POLLUTION_REDUCTION;
     }

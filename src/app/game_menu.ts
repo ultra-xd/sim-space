@@ -88,6 +88,10 @@ export class GameMenu {
 
     /** Sets up the game menu UI, including event listeners, creating buttons, etc. */
     public setup(): void {
+        // Reset status of dropdowns, etc.
+        GameMenu.CONSTRUCTION_BUILDINGS_DISPLAY_DIV.classList.remove("show");
+        GameMenu.FACILITY_INFO_DIV.classList.remove("show");
+
         // Handle event listener for building button dropdown
         GameMenu.CONSTRUCTION_BUILD_BUTTON.onclick = () => {
             // Toggle the display of the building button dropdown if not shown, otherwise hide it

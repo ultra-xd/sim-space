@@ -8,9 +8,7 @@ import { GameMenu } from "./game_menu.js";
 import { assert, randomInteger } from "../util/util.js";
 import { KeyEvent, MouseEvent } from "./controller.js";
 
-/**
- * Enum representing the different game states.
- */
+/** Enum representing the different game states. */
 export enum GameState {
     STANDARD,
     BUILD,
@@ -19,9 +17,7 @@ export enum GameState {
     END
 }
 
-/**
- * Game class managing all game logic, buildings, map, etc.
- */
+/** Game class managing all game logic, buildings, map, etc. */
 export class Game {
 
     // Specify map dimensions
