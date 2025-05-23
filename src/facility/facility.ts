@@ -39,36 +39,12 @@ export enum FacilityType {
  * Represents a the structure/blueprint of each facility
  */
 export type FacilityClass = {
-    /**
-     * Constructor for instantiation
-     * @param GAME Game instance the facility belongs to
-     * @returns Returns a facility instanec
-     */
     new (GAME: Game): Facility;
-    /**
-     * Gets the sprite of a facility
-     * @param isometric If true, will return an isometric version of the sprite instead of 2D
-     * @returns HTMLImageElement of the facility 
-     */
     getSprite: (isometric: boolean) => HTMLImageElement; 
-    /**
-     * Name of the facility
-     */
     NAME: string;
-    /**
-     * Cost to build the facility
-     */
     BUILD_COST: number;
-    /**
-     * The sector and type of the facility
-     */
     FACILITY_SECTOR: FacilitySector;
     FACILITY_TYPE: FacilityType;
-    /**
-     * Checks if player can afford the facility (brokie check)
-     * @param money The amount of money the player has
-     * @returns returns whether the player can afford the facility
-     */
     canBuy(money: number): boolean;
 };
 
@@ -76,54 +52,15 @@ export type FacilityClass = {
  * Abstract base class representing a facility and its components
  */
 export abstract class Facility {
-    /**
-     * The facility's sector
-     */
     protected static readonly _FACILITY_SECTOR: FacilitySector;
-
-    /**
-     * The specific facility type
-     */
     protected static readonly _FACILITY_TYPE: FacilityType;
-
-    /**
-     * The facility's display name
-     */
     protected static readonly _NAME: string;
-
-    /**
-     * The amount of power the facility consumes
-     */
     protected static readonly _POWER_COST: number;
-
-    /**
-     * The cost to construct the facility
-     */
     protected static readonly _BUILD_COST: number;
-
-    /**
-     * The recurring maintenance cost of the facility
-     */
     protected abstract _maintenanceCost: number;
-
-    /**
-     * The amount of pollution the facility generates
-     */
     protected abstract _pollution: number;
-
-    /**
-     * The amount of tax revenue the facility produces
-     */
     protected abstract _taxRevenue: number;
-
-    /**
-     * The number of months the facility has existed
-     */
-    protected _age: number = 0;
-
-    /**
-     * The amount of power available to the facility
-     */
+    protected _age: number = 0; // The number of months the facility has existed
     protected _powerAvailable : number = 0;
 
     /**
@@ -229,6 +166,7 @@ export abstract class Facility {
      * @param powerAvailable The amount of power availabl
      */
     public set powerAvailable(powerAvailable: number) {
+        console.log(powerAvailable);
         this._powerAvailable = powerAvailable;
     }
 

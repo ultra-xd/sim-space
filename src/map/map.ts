@@ -148,7 +148,7 @@ export class GameMap {
     public BFS(
         start: Vector2, 
         maxDistance: number, 
-        handleCondition: (coordinates: Vector2, distance?: number) => boolean,
+        handleCondition: (coordinates: Vector2) => boolean,
     ): boolean {
         // Create queue to store all cells
         const QUEUE: Queue<[Vector2, number]> = new Queue<[Vector2, number]>();
@@ -359,6 +359,7 @@ export class GameMap {
     private updateMap(): void {
         // Reset all of the power
         let cellPollution: number = 0;
+
         for (let i: number = 0; i < this._OCCUPIED_CELLS.length; i++) {
             const FACILITY: Facility | null = this.getCell(this._OCCUPIED_CELLS.get(i)).facility;
             assert (FACILITY != null);

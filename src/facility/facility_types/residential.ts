@@ -28,7 +28,7 @@ export abstract class ResidentialFacility extends Facility {
     protected _taxRevenue: number = 0;
     protected _maintenanceCost: number = (this.constructor as typeof ResidentialFacility)._BASE_MAINTENANCE_COST;
     protected _pollution: number = 0;
-    
+
     protected updateTaxRevenue() : void {
         this._taxRevenue = Math.round(
             (this._population / 1000) * 
@@ -214,7 +214,7 @@ export class AffordableHome extends ResidentialFacility {
     /** if population is at max, will make the pollution 10 units per 1000 people */
     protected override updatePollution(): void {
         if (this._population === AffordableHome._MAX_POPULATION) {
-            this._pollution = Math.floor(this.population/1000) * 10;
+            this._pollution = Math.floor(this.population / 1000) * 10;
         }
     }
 }

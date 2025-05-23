@@ -176,15 +176,6 @@ export class PowerPlant extends EssentialServicesFacility {
      */
     private static readonly _POWER_PRODUCED: number = 100;
 
-    /**
-     * Update the facility's finances and increment age using the tick method from facility.ts 
-     * And also distribute power to the closest facilities
-     */
-    public override tick(): void {
-        super.tick();
-        this.distributePower(Vector2.I_UNIT);
-    }
-
     /** 
      * Uses BFS to distribute power to the closest facilities
      * @param coordinates The coordinates of the facility to start at
@@ -201,6 +192,7 @@ export class PowerPlant extends EssentialServicesFacility {
                 const FACILITY: Facility | null = this.GAME.MAP.getCell(coords).facility;
                 if (FACILITY != null) {
                     const USED_POWER: number = (FACILITY.constructor as typeof Facility).POWER_COST - FACILITY.powerAvailable;
+
                     if (USED_POWER < powerAvailable) {
                         FACILITY.powerAvailable = (FACILITY.constructor as typeof Facility).POWER_COST;
                         powerAvailable -= USED_POWER;

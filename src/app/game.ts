@@ -230,6 +230,7 @@ export class Game {
         if (this.monthEnded()) {
             this._GAME_MENU.updateStatsDisplay();
             GameMenu.showFacilityInfo();
+            
             if (!this.isGameEnding && !this._MAP.containsType(FacilityType.DEFENSE)) {
                 const COMPARE: number = this.gameEndProbability * 100;
                 let RANDOM: number = randomInteger(1, 100);
